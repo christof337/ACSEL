@@ -29,6 +29,12 @@ int main() {
    	// INITIALISATIONS
 
    	fillArrayWithZeros(b,TAILLE_MATRICE);
+
+      // initialisation de la matrice
+      for ( int i = 0 ; i < TAILLE_MATRICE ; i++ ) {
+         x[i] = i; // initialisation par défaut 
+      }
+      // écriture de la matrice dans un fichier
   
    	return 0;
 }

@@ -18,9 +18,10 @@ START_TEST(test_remplissage_exponentionel_matrice) {
 
 	for ( int i = 0 ; i < SIZE ; i++ ) {
 		for ( int j = 0 ; j < SIZE ; j++ ) {
-			ck_assert_double_eq(matrixTest[i][j], exp(pow((-0.05*(i-j)),2.0)));
+			ck_assert(matrixTest[i][j] == exp(-0.05 * pow((i-j), 2.0)));
 		}
 	}
+	//ck_assert(true == false );
 }
 END_TEST
 

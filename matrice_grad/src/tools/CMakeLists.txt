@@ -33,6 +33,6 @@ install(TARGETS tools
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib)
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/arrayUtils.h DESTINATION include)
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/arrayUtils.h ${CMAKE_CURRENT_SOURCE_DIR}/matrixUtils.h DESTINATION include)
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/matrixUtils.h DESTINATION include)
+# install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/matrixUtils.h DESTINATION include)

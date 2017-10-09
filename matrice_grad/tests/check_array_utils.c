@@ -50,6 +50,7 @@ START_TEST(test_fill_array_linearly) {
 	for ( int i = 0 ; i < SIZE ; i++ ) {
 		ck_assert_int_eq(arrayTest[i], i);
 	}
+	//ck_assert(true == false );
 }
 END_TEST
 

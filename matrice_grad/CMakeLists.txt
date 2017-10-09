@@ -35,7 +35,7 @@ ck_check_include_file("stdlib.h" HAVE_STDLIB_H)
 
 ###############################################################################
 # Check defines
-# (Nothing to check for matrice_grad
+# (Nothing to check for matrice_grad)
 
 ###############################################################################
 # Check struct members
