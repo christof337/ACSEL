@@ -1,0 +1,26 @@
+# Output executables
+main
+check_array_utils
+
+# Libs
+*.a
+
+# CMake files
+*.cmake
+
+# CMake directories
+cmake
+CMakeFiles
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Various config files
+CMakeCache.txt
+config.h
+
+# Various directories
+Testing
+.libs
+.deps
