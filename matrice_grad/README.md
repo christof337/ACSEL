@@ -1,12 +1,3 @@
-## Description
-
-
-
-## Accéder à un projet
-* Sélectionnez le projet qui vous intéresse dans l'arborescence.
-* Référez-vous au README associé audit projet pour connaître les modalités d'installation et d'exécution.
-
-
 # Matrix gradient - shifting precision
 
 "Matrice_grad" est un programme visant à simuler une descente de gradient sur une matrice.
