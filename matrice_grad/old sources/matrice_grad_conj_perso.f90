@@ -63,7 +63,7 @@ program yolo
 	!inversion par minimisation d'energie
 	! methode de gradient a x = b , il faut retrouver x
 	!
-	! initialisaiton
+	! initialisation
 
 	xx(1:N)=0
 

@@ -1,5 +1,5 @@
 # Output executables
-main
+#main
 check_array_utils
 
 # Makefiles ( have to be generated with cmake )
