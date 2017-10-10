@@ -15,7 +15,7 @@ If you just want to run the program, you can run src/main as a basic binary file
 * [CMake](https://cmake.org/)
 * [MPFR](http://www.mpfr.org/)
 For the tests :
-* [check](https://libcheck.github.io/check/)
+* [check](https://github.com/libcheck/check/releases) 11.0.0
 
 ### Installing
 
