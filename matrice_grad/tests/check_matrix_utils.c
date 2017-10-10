@@ -13,15 +13,14 @@
 // const int SIZE = 10;
 double matrixTest[SIZE][SIZE];
 
-START_TEST(test_remplissage_exponentionel_matrice) {
-	remplissageExponentielMatrice(SIZE, SIZE, matrixTest);
+START_TEST(test_fill_matrix_exponentially) {
+	fillMatrixExponentially(SIZE, SIZE, matrixTest);
 
 	for ( int i = 0 ; i < SIZE ; i++ ) {
 		for ( int j = 0 ; j < SIZE ; j++ ) {
 			ck_assert(matrixTest[i][j] == exp(-0.05 * pow((i-j), 2.0)));
 		}
 	}
-	//ck_assert(true == false );
 }
 END_TEST
 
@@ -35,7 +34,7 @@ Suite * matrix_utils_suite(void) {
 	/* Core test case */
 	tc_core = tcase_create("Core");
 
-	tcase_add_test(tc_core, test_remplissage_exponentionel_matrice);
+	tcase_add_test(tc_core, test_fill_matrix_exponentially);
 	suite_add_tcase(s, tc_core);
 
 	return s;

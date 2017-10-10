@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
+#include <gsl/gsl_errno.h>
 
 int errorHandling () {
 
@@ -14,4 +15,7 @@ int errorHandling () {
 
    return 0;
 }
-	
+
+void printGslError (int status) {
+	printf ("error: %s\n", gsl_strerror(status));
+}

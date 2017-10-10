@@ -1,12 +1,14 @@
 #ifndef ARRAY_UTILS_H
 #define ARRAY_UTILS_H
 
-void fillArrayWithZeros(int array[], int size) ;
+void fillArrayWithZeros(double array[], int size) ;
 
-void fillArrayWith(int array[], int size, int fillWith);
+void fillArrayWith(double array[], int size, double fillWith);
 
-void fillArrayLinearly(int array[], int size);
+void fillArrayLinearly(double array[], int size);
 
-void printArray(int array[], int size);
+double * vectorMult(const int size, double array1[size], double array2[size]);
+
+void printArray(double array[], int size);
 
 #endif /* ARRAY_UTILS_H */
