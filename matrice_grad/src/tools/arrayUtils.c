@@ -58,7 +58,19 @@ double * vectorMult(double * array1, const int size1, double * array2, const int
  * size1 and size2 must be equal.
  * the output of this function must be freed afterwards.
  */
-double * vectorLessVector(double * vector1, const int size1, double * vector2, const int size2) {
+double * vectorPlusVector(double * vector1, const int size1, double * vector2, const int size2) {
+	double * result = createArray(size1);
+	for ( int i = 0 ; i < size1 ; ++i ) {
+		result[i] = vector1[i] + vector2[i];
+	}
+	return result;
+}
+
+/**
+ * size1 and size2 must be equal.
+ * the output of this function must be freed afterwards.
+ */
+double * vectorMinusVector(double * vector1, const int size1, double * vector2, const int size2) {
 	double * result = createArray(size1);
 	for ( int i = 0 ; i < size1 ; ++i ) {
 		result[i] = vector1[i] - vector2[i];

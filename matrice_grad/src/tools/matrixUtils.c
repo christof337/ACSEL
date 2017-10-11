@@ -129,8 +129,9 @@ double ** fillMatrixExponentially(double ** array, const int m, const int n) {
 void printMatrix(double ** array, const int m, const int n) {
 	printf("\t");
 	for (int j = 0; j < n ; ++j) {
-		printf("j=%d\t",j);
+		printf("j=%d%5s\t",j,"");
 	}
+	printf("\n");
 	for (int i = 0; i < m; ++i) {
 		printf("i=%d\t",i);
 		for (int j = 0; j < n; ++j) {

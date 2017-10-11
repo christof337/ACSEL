@@ -24,19 +24,14 @@ int main() {
    double * gkTmp;      // gk temporaire
    double ** a;         // a
    double * x;          // x
-   double * xx;
    double * dk;         // dk : ? 
    double * adk;        // adk : ? 
+   double * solgc;
    
    // ALLOCATIONS
    x = createArray(M_SIZE); 
-   xx = createArray(M_SIZE);   // xx : /!\ nom non explicite
    a = createMatrix(M_SIZE, M_SIZE);
-   // int agk[M_SIZE];                  // agk : ?
-   // int dk[M_SIZE];                   // dk : ? 
-   // int adk[M_SIZE];                  
-   // int solgc[M_SIZE]; 
-
+   solgc = createArray(M_SIZE);
 
 	// INITIALISATIONS
    // initialisation de a
@@ -48,14 +43,13 @@ int main() {
    // on multiplie a et x ( B = AX )
    b = customMatrixMultVector(a, x, M_SIZE);
 
-   xx = fillArrayWithZeros(xx, M_SIZE);
+   solgc = fillArrayWithZeros(solgc, M_SIZE);
 
    // on se propose de réaliser une inversion par minimisation d'énergie (descente de gradient)
    // gradient conjugué
    // GK = A * XX - B
-   gkTmp = customMatrixMultVector(a,xx,M_SIZE);
-   gk = vectorLessVector(gkTmp, M_SIZE, b, M_SIZE);
-   free(gkTmp);
+   gkTmp = customMatrixMultVector(a,solgc,M_SIZE);
+   gk = vectorMinusVector(gkTmp, M_SIZE, b, M_SIZE);
 
    // DK = GK
    dk = vectorCopy(gk, M_SIZE);
@@ -65,53 +59,63 @@ int main() {
       // ADK = A * DK
       adk = customMatrixMultVector(a, dk, M_SIZE);
       // GKGK = GK * GK
-      double gkGkTmp = innerDotProduct(gk, M_SIZE); // gkgk
+      double gkGkTmp1 = innerDotProduct(gk, M_SIZE); // gkgk
       // ADKDK = ADK * DK
       double adkDkTmp = dotProduct(adk, M_SIZE, dk, M_SIZE); // adkdk
       // AlphaK = GKGK / ADKDK ==> AlphaK = (GK*GK)/(ADK*DK)
-      double alphak = gkGkTmp / adkDkTmp;
+      double alphak = gkGkTmp1 / adkDkTmp;
 
       // XX = XX - AlphaK * DK
       double * dkAlphakTmp = vectorMultDouble(dk, M_SIZE, alphak);
-      double * xxTmp = xx;
-      xx = vectorLessVector(xxTmp, M_SIZE, dkAlphakTmp, M_SIZE);
-      free(dkAlphakTmp);
-      free(xxTmp);
+      double * solgcTmp = solgc;
+      solgc = vectorMinusVector(solgcTmp, M_SIZE, dkAlphakTmp, M_SIZE);
 
       // GK = GK - AlphaK * ADK
       double * adkAlphakTmp = vectorMultDouble(adk, M_SIZE, alphak);
       double * gkTmp = gk;
-      gk = vectorLessVector(gkTmp, M_SIZE, adkAlphakTmp, M_SIZE);
+      gk = vectorMinusVector(gkTmp, M_SIZE, adkAlphakTmp, M_SIZE);
+
+      // gkgk2 = sqrt of (square sum of gk elements)
+      double gkgk2 = sumSquare(gk,M_SIZE);
+      gkgk2 = sqrt(gkgk2);
+      // GKGK = GK*GK
+      double gkGkTmp2 = innerDotProduct(gk, M_SIZE); // pertinent car changements réalisés sur gk depuis gkgkTmp1
+      double betak = gkGkTmp2 / gkGkTmp1;
+      // DK = GK + BetaK*DK
+      double * dkBetaKTmp = vectorMultDouble(dk, M_SIZE, betak);
+      double * dkTmp = dk;
+      dk = vectorPlusVector(dkTmp, M_SIZE, dkBetaKTmp, M_SIZE);
+
+      printf("\ngkgk (gkGkTmp1) = %f",gkGkTmp1);
+      printf("\ngkgk2 (gkGkTmp2) = %f",gkGkTmp2);
+
+      // libérations mémoire
+      free(dkAlphakTmp);
+      free(solgcTmp);
       free(adkAlphakTmp);
       free(gkTmp);
-
-      // gkgk2 = square sum of elements
-      double gkgk2 = sumSquare(gk,M_SIZE);
-
+      free(dkBetaKTmp);
+      free(dkTmp);
    }
 
-   // écriture de la matrice a dans un fichier matrix.dat
 
-   printf("\nx :\n");
-   printArray(x, M_SIZE);
-   printf("\nxx :\n");
-   printArray(xx, M_SIZE);
-   printf("\nb :\n");
-   printArray(b, M_SIZE);
-   printf("\nGK :\n");
-   printArray(gk, M_SIZE);
-   printf("\nDK :\n");
-   printArray(dk, M_SIZE);
-   printf("\nADK :\n");
-   printArray(adk, M_SIZE);
+   printf("\n\nArray solgc :");
+   printArray(solgc,M_SIZE);
+
+   // écriture de la matrice a dans un fichier matrix.dat
+   // écriture de i, x(i) et solgc(i) dans un fichier solggc.dat
+
    // désallocation des tableaux
    free(x);
-   free(xx);
    free(b);
    free(gk);
    free(dk);
    free(adk);
+   free(solgc);
+   free(gkTmp);
    freeMatrix(a, M_SIZE, M_SIZE);
+
+   printf("\nFIN PROGRAMME NORMAL\n");
 
    return 0;
 }

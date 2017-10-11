@@ -11,7 +11,9 @@ double * fillArrayLinearly(double * array, const int size);
 
 double * vectorMult(double * array1, const int size1, double * array2, const int size2);
 
-double * vectorLessVector(double * vector1, const int size1, double * vector2, const int size2);
+double * vectorPlusVector(double * vector1, const int size1, double * vector2, const int size2);
+
+double * vectorMinusVector(double * vector1, const int size1, double * vector2, const int size2);
 
 double * vectorCopy(double * vector, const int size);
 
