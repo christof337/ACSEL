@@ -32,15 +32,15 @@ START_TEST(test_create_matrix) {
 	double ** matrix = createMatrix(m,n);
 
 	// write
-	for ( int i = 0 ; i < m ; i++ ) {
-		for ( int j = 0 ; j < n ; j++ ) {
+	for ( int i = 0 ; i < m ; ++i ) {
+		for ( int j = 0 ; j < n ; ++j ) {
 			matrix[i][j] = (i-1)/(j+1);
 		}
 	}
 
 	// read
-	for ( int i = 0 ; i < m ; i++ ) {
-		for ( int j = 0 ; j < n ; j++ ) {			
+	for ( int i = 0 ; i < m ; ++i ) {
+		for ( int j = 0 ; j < n ; ++j ) {			
 			ck_assert(matrix[i][j] == (i-1)/(j+1));
 		}
 	}
@@ -52,8 +52,8 @@ END_TEST
 START_TEST(test_fill_matrix_exponentially) {
 	fillMatrixExponentially(matrixTest, DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS);
 
-	for ( int i = 0 ; i < DEFAULT_NB_ROWS ; i++ ) {
-		for ( int j = 0 ; j < DEFAULT_NB_COLUMNS ; j++ ) {
+	for ( int i = 0 ; i < DEFAULT_NB_ROWS ; ++i ) {
+		for ( int j = 0 ; j < DEFAULT_NB_COLUMNS ; ++j ) {
 			ck_assert(matrixTest[i][j] == exp(-0.05 * pow((i-j), 2.0)));
 		}
 	}
@@ -73,9 +73,9 @@ START_TEST(test_matrix_mult) {
 
 	double sum = 0;
 
-	for ( int i = 0 ; i < DEFAULT_NB_ROWS ; i++ ) {
-		for ( int j = 0 ; j < DEFAULT_NB_COLUMNS ; j++ ) {
-	        for (int k = 0; k < p ; k++) {
+	for ( int i = 0 ; i < DEFAULT_NB_ROWS ; ++i ) {
+		for ( int j = 0 ; j < DEFAULT_NB_COLUMNS ; ++j ) {
+	        for (int k = 0; k < p ; ++k) {
 	         	sum = sum + matrix1[i][k]*matrix2[k][j];
 	        }
 			ck_assert(multipliedMatrix[i][j] == sum);
@@ -100,8 +100,8 @@ START_TEST(test_matrix_mult_vector) {
 
 	double sum = 0;
 
-	for ( int i = 0 ; i < DEFAULT_NB_ROWS ; i++ ) {
-		for ( int j = 0 ; j < DEFAULT_NB_COLUMNS ; j++ ) {
+	for ( int i = 0 ; i < DEFAULT_NB_ROWS ; ++i ) {
+		for ( int j = 0 ; j < DEFAULT_NB_COLUMNS ; ++j ) {
 	        sum = sum + matrix[i][j]*vector[j];
 		}
 		ck_assert(multipliedVector[i] == sum);
