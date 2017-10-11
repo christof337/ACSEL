@@ -4,3 +4,7 @@ Repository destiné à héberger les sources des différents projets qui parsèm
 ## Accéder à un projet
 * Sélectionnez le projet qui vous intéresse dans l'arborescence.
 * Référez-vous au README associé audit projet pour connaître les modalités d'installation et d'exécution.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
