@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "matrice_grad.h"
 
@@ -16,11 +17,13 @@ int main() {
 
    const int TAILLE_MATRICE = askTailleMatrice();
 
-
    // DECLARATIONS DES TABLEAUX
-   double a[TAILLE_MATRICE][TAILLE_MATRICE];    // a
-   double x[TAILLE_MATRICE];                    // x
-   double b[TAILLE_MATRICE];                    // b
+   double ** a = createMatrix(TAILLE_MATRICE, TAILLE_MATRICE);    // a
+
+   double * x = createArray(TAILLE_MATRICE);                    // x
+   
+   // ALLOCATIONS
+   double * b = createArray(TAILLE_MATRICE);    // b
    // int xx[TAILLE_MATRICE];                   // xx : /!\ nom non explicite
    // int gk[TAILLE_MATRICE];                   // gk : gradient conjugué?
    // int agk[TAILLE_MATRICE];                  // agk : ?
@@ -28,36 +31,32 @@ int main() {
    // int adk[TAILLE_MATRICE];                  // adk : ? 
    // int solgc[TAILLE_MATRICE]; 
 
-   // ALLOCATIONS
-
 
 	// INITIALISATIONS
-
    // initialisation de b à 0
-	fillArrayWithZeros(b,TAILLE_MATRICE);
+	b = fillArrayWithZeros(b, TAILLE_MATRICE);
 
    // initialisation de a
-   fillMatrixExponentially(TAILLE_MATRICE, TAILLE_MATRICE, a);
+   a = fillMatrixExponentially(a, TAILLE_MATRICE, TAILLE_MATRICE);
 
    // initialisation de x linéairement
-   fillArrayLinearly(x, TAILLE_MATRICE);
+   x = fillArrayLinearly(x, TAILLE_MATRICE);
 
-   //    b=matmul(a,x)  !cible
+   // on multiplie a et x ( B = AX )
+   b = matrixMultVector(a, TAILLE_MATRICE, TAILLE_MATRICE, x, TAILLE_MATRICE);
+
+   printArray(b, TAILLE_MATRICE);
+
+   // on se propose de réaliser une inversion par minimisation d'énergie (descente de gradient)
 
 
 
    // écriture de la matrice a dans un fichier matrix.dat
 
    // désallocation des tableaux
-   // gsl_matrix_free(a);
-   // free(x);
-   // free(b);
-   // gsl_vector_free(xx);
-   // gsl_vector_free(gk);
-   // gsl_vector_free(agk);
-   // gsl_vector_free(dk);
-   // gsl_vector_free(adk);
-   // gsl_vector_free(solgc);
+   free(x);
+   free(b);
+   freeMatrix(a, TAILLE_MATRICE, TAILLE_MATRICE);
 
    return 0;
 }

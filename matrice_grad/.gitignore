@@ -2,6 +2,9 @@
 #main
 check_array_utils
 
+# Log files
+*.log
+
 # Makefiles ( have to be generated with cmake )
 Makefile
 

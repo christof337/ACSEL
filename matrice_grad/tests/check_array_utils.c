@@ -12,7 +12,7 @@
 double * arrayTest;
 
 double * initArray() {
-	static double array[SIZE];
+	double * array = createArray(SIZE);
     for ( int i = 0 ; i < SIZE ; i++ ) {
     	// on initialise à i par défaut
     	array[i] = i ; 
@@ -21,7 +21,7 @@ double * initArray() {
 }
 
 double * initArrayDesc() {
-	static double array[SIZE];
+	double * array = createArray(SIZE);
     for ( int i = 0 ; i < SIZE ; i++ ) {
     	// on initialise à i par défaut
     	array[i] = SIZE - i ; 
@@ -36,12 +36,12 @@ void setup(void)
 
 void teardown(void)
 {
-    // free(arrayTest);
+    free(arrayTest);
 }
 
 START_TEST(test_fill_array_with_zeros) {
 
-	fillArrayWithZeros(arrayTest, SIZE);
+	arrayTest = fillArrayWithZeros(arrayTest, SIZE);
 
 	for ( int i = 0 ; i < SIZE ; i++ ) {
 		ck_assert_double_eq(arrayTest[i], 0);
@@ -50,7 +50,7 @@ START_TEST(test_fill_array_with_zeros) {
 END_TEST
 
 START_TEST(test_fill_array_with) {
-	fillArrayWith(arrayTest, SIZE, 5);
+	arrayTest = fillArrayWith(arrayTest, SIZE, 5);
 
 	for ( int i = 0 ; i < SIZE ; i++ ) {
 		ck_assert_double_eq(arrayTest[i], 5);
@@ -60,7 +60,7 @@ END_TEST
 
 START_TEST(test_fill_array_linearly) {
 
-	fillArrayLinearly(arrayTest, SIZE);
+	arrayTest = fillArrayLinearly(arrayTest, SIZE);
 
 	for ( int i = 0 ; i < SIZE ; i++ ) {
 		ck_assert_double_eq(arrayTest[i], i);
@@ -75,16 +75,16 @@ START_TEST(test_vector_mult) {
 
 	// initializations
 	secondArrayTest = initArrayDesc();
-	multipliedMatrix = vectorMult(SIZE, arrayTest, secondArrayTest);
+	multipliedMatrix = vectorMult(arrayTest, SIZE, secondArrayTest, SIZE);
 
 	for ( int i = 0 ; i < SIZE ; i++ ) {
 		ck_assert_double_eq(multipliedMatrix[i], arrayTest[i]*secondArrayTest[i]);
 	}
+
+	free(secondArrayTest);
+	free(multipliedMatrix);
 }
 END_TEST
-
-
-double * vectorMult(int size, double array1[size], double array2[size]);
 
 Suite * array_utils_suite(void) {
 	Suite *s;
@@ -102,6 +102,7 @@ Suite * array_utils_suite(void) {
 	tcase_add_test(tc_core, test_fill_array_with);
 	tcase_add_test(tc_core, test_fill_array_linearly);
 	tcase_add_test(tc_core, test_vector_mult);
+	
 	suite_add_tcase(s, tc_core);
 
 	return s;

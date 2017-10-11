@@ -7,45 +7,55 @@
  * Testé exhaustivement dans check_array_utils.c (lancer `make test` pour voir la sortie)
  */
 
-
-/**
-* Précondition : size <= size(array)
-*/
-void fillArrayWithZeros(double array[], int size) {
-	fillArrayWith(array, size, 0);
+double * createArray(const int n) {
+    double * values = malloc(n * sizeof(double));
+    if(values == NULL) {
+  		fprintf(stderr, "Error - unable to allocate required memory\n");
+  	}
+    return values;
 }
 
 /**
 * Précondition : size <= size(array)
 */
-void fillArrayWith(double array[], int size, double fillWith) {   
+double * fillArrayWithZeros(double * array, const int size) {
+	return fillArrayWith(array, size, 0);
+}
+
+/**
+* Précondition : size <= size(array)
+*/
+double * fillArrayWith(double * array, const int size, double fillWith) {   
 	for ( int i = 0 ; i < size ; i++ ) {
 		array[i] = fillWith ;
 	}
+	return array;
 }
 
-void fillArrayLinearly(double array[], int size) {
+double * fillArrayLinearly(double * array, const int size) {
 	for ( int i = 0 ; i < size ; i++ ) {
 		array[i] = i ;
 	}
+	return array;
 }
 
-double * vectorMult(const int size, double array1[size], double array2[size]) {
-	static double * multipliedMatrix;
+/**
+ * size1 and size2 must be equals.
+ */
+double * vectorMult(double * array1, const int size1, double * array2, const int size2) {
+	double * multipliedVector = createArray(size1);
 
-	multipliedMatrix = malloc(size * sizeof(double));
-
-	for ( int i = 0 ; i < size ; i++ ) {
-		multipliedMatrix[i] = array1[i] * array2[i];
+	for ( int i = 0 ; i < size1 ; i++ ) {
+		multipliedVector[i] = array1[i] * array2[i];
 	}
 
-	return multipliedMatrix;
+	return multipliedVector;
 }
 
 /**
 * Précondition : size <= size(array)
 */
-void printArray(double array[], int size) {
+void printArray(double * array, const int size) {
 	for ( int i = 0 ; i < size ; i++ ) {
 		printf("[%d] : %f\n",i,array[i]);
 	}
