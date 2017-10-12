@@ -44,7 +44,7 @@ START_TEST(test_fill_array_with_zeros) {
 	arrayTest = fillArrayWithZeros(arrayTest, SIZE);
 
 	for ( int i = 0 ; i < SIZE ; ++i ) {
-		ck_assert_double_eq(arrayTest[i], 0);
+		ck_assert(arrayTest[i] == 0);
 	}
 }
 END_TEST
@@ -53,7 +53,7 @@ START_TEST(test_fill_array_with) {
 	arrayTest = fillArrayWith(arrayTest, SIZE, 5);
 
 	for ( int i = 0 ; i < SIZE ; ++i ) {
-		ck_assert_double_eq(arrayTest[i], 5);
+		ck_assert(arrayTest[i] == 5);
 	}
 }
 END_TEST
@@ -63,7 +63,7 @@ START_TEST(test_fill_array_linearly) {
 	arrayTest = fillArrayLinearly(arrayTest, SIZE);
 
 	for ( int i = 0 ; i < SIZE ; ++i ) {
-		ck_assert_double_eq(arrayTest[i], i+1);
+		ck_assert(arrayTest[i] == i+1);
 	}
 }
 END_TEST
@@ -78,7 +78,7 @@ START_TEST(test_vector_mult) {
 	multipliedMatrix = vectorMult(arrayTest, SIZE, secondArrayTest, SIZE);
 
 	for ( int i = 0 ; i < SIZE ; ++i ) {
-		ck_assert_double_eq(multipliedMatrix[i], arrayTest[i]*secondArrayTest[i]);
+		ck_assert(multipliedMatrix[i] == arrayTest[i]*secondArrayTest[i]);
 	}
 
 	free(secondArrayTest);

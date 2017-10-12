@@ -126,6 +126,6 @@ double sumSquare(double * vector, const int size) {
 */
 void printArray(double * array, const int size) {
 	for ( int i = 0 ; i < size ; ++i ) {
-		printf("[%d] : %f\n",i,array[i]);
+		printf("[%d] : %G \n",i,array[i]);
 	}
 }

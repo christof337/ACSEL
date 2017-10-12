@@ -27,11 +27,13 @@ int main() {
    double * dk;         // dk : ? 
    double * adk;        // adk : ? 
    double * solgc;
+   double * gkgk2save;
    
    // ALLOCATIONS
    x = createArray(M_SIZE); 
    a = createMatrix(M_SIZE, M_SIZE);
    solgc = createArray(M_SIZE);
+   gkgk2save = createArray(NB_GRAD);
 
 	// INITIALISATIONS
    // initialisation de a
@@ -43,6 +45,7 @@ int main() {
    // on multiplie a et x ( B = AX )
    b = customMatrixMultVector(a, x, M_SIZE);
 
+
    solgc = fillArrayWithZeros(solgc, M_SIZE);
 
    // on se propose de réaliser une inversion par minimisation d'énergie (descente de gradient)
@@ -50,6 +53,7 @@ int main() {
    // GK = A * XX - B
    gkTmp = customMatrixMultVector(a,solgc,M_SIZE);
    gk = vectorMinusVector(gkTmp, M_SIZE, b, M_SIZE);
+
 
    // DK = GK
    dk = vectorCopy(gk, M_SIZE);
@@ -60,6 +64,7 @@ int main() {
       adk = customMatrixMultVector(a, dk, M_SIZE);
       // GKGK = GK * GK
       double gkGkTmp1 = innerDotProduct(gk, M_SIZE); // gkgk
+
       // ADKDK = ADK * DK
       double adkDkTmp = dotProduct(adk, M_SIZE, dk, M_SIZE); // adkdk
       // AlphaK = GKGK / ADKDK ==> AlphaK = (GK*GK)/(ADK*DK)
@@ -84,10 +89,10 @@ int main() {
       // DK = GK + BetaK*DK
       double * dkBetaKTmp = vectorMultDouble(dk, M_SIZE, betak);
       double * dkTmp = dk;
-      dk = vectorPlusVector(dkTmp, M_SIZE, dkBetaKTmp, M_SIZE);
+      dk = vectorPlusVector(gk, M_SIZE, dkBetaKTmp, M_SIZE);
 
-      printf("\ngkgk (gkGkTmp1) = %f",gkGkTmp1);
-      printf("\ngkgk2 (gkGkTmp2) = %f",gkGkTmp2);
+      // sauvegarde
+      gkgk2save[iter] = gkgk2;
 
       // libérations mémoire
       free(dkAlphakTmp);
@@ -98,12 +103,9 @@ int main() {
       free(dkTmp);
    }
 
-
-   printf("\n\nArray solgc :");
-   printArray(solgc,M_SIZE);
-
    // écriture de la matrice a dans un fichier matrix.dat
    // écriture de i, x(i) et solgc(i) dans un fichier solggc.dat
+   // écriture de gkgk2 dans un fichier
 
    // désallocation des tableaux
    free(x);
