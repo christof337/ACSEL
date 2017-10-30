@@ -12,6 +12,7 @@
 // l'objectif est de faire varier la précision pour observer le comportement de réduction du gradient 
 
 int main() {
+   int state = 0;
 
 	// DECLARATIONS
    const int NB_GRAD = 30; // nombre d'itérations du gradient
@@ -103,9 +104,26 @@ int main() {
       free(dkTmp);
    }
 
-   // écriture de la matrice a dans un fichier matrix.dat
+   // écriture de la matrice a dans un fichier
+   int error = writeMatrixInFile(a, M_SIZE, M_SIZE);
+   if ( error != 0 ) {
+      // error
+      state = error;
+   }
+
    // écriture de i, x(i) et solgc(i) dans un fichier solggc.dat
-   // écriture de gkgk2 dans un fichier
+   error = writeDataInFile(x,solgc,M_SIZE);
+   if ( error != 0 ) {
+      // error
+      state = error;
+   }
+
+   // écriture de gkgk2 dans un fichier gkgk.dat
+   error = writeArrayInFile(gkgk2save,NB_GRAD);
+   if ( error != 0 ) {
+      // error
+      state = error;
+   }
 
    // désallocation des tableaux
    free(x);
@@ -117,7 +135,11 @@ int main() {
    free(gkTmp);
    freeMatrix(a, M_SIZE, M_SIZE);
 
-   printf("\nFIN PROGRAMME NORMAL\n");
+   if ( state == 0 ) {
+      printf("\nFIN PROGRAMME NORMAL\n");
+   } else {
+      printFinalStatement();
+   }
 
-   return 0;
+   return state;
 }

@@ -3,6 +3,8 @@
 
 int errorHandling () ;
 
-void printGslError (int status) ;
+void printError(int errnum);
+
+void printFinalStatement();
 
 #endif // ERROR_HANDLING_H

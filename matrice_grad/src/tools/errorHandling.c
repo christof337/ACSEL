@@ -14,3 +14,7 @@ int errorHandling () {
 	return 0;
 }
 
+void printError(int errnum) {
+	perror("\nError : ");
+	fprintf(stderr, "\nError : %s\n", strerror( errnum ));
+}
