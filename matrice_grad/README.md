@@ -14,6 +14,7 @@ If you just want to run the program, you can run src/main as a basic binary file
 * [GSL Library](https://www.gnu.org/software/gsl/) (part of GNU)
 * [CMake](https://cmake.org/)
 * [MPFR](http://www.mpfr.org/)
+* GMP
 For the tests :
 * [check](https://github.com/libcheck/check/releases) 11.0.0
 
@@ -25,6 +26,8 @@ Initialize the config files
 ```
 cmake .
 ```
+
+> You might need to set the `MPFR_LIB_PATH` and `GMP_LIB_PATH` in [`src/CMakeLists.txt`](https://github.com/christof337/ACSEL/blob/master/matrice_grad/src/CMakeLists.txt) to the absolute path of your MPFR and GMP libs (`/usr/local/lib` by default)
 
 Build the project
 
