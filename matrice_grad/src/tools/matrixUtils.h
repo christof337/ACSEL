@@ -1,20 +1,22 @@
 #ifndef MATRIX_UTILS_H
 #define MATRIX_UTILS_H
 
-double ** createMatrix(const int m, const int n);
+#include <mpfr.h>
 
-void freeMatrix(double ** matrix, const int m, const int n);
+void createMatrix(mpfr_t *** matrix, const int m, const int n, mpfr_prec_t precision);
 
-double ** matrixMult(double ** array1, const int m1, const int n1, 
-	double ** array2, const int m2, const int n2);
+void freeMatrix(mpfr_t ** matrix, const int m, const int n);
 
-double * matrixMultVector(double ** matrix, const int m, const int n, 
-	double * vector, const int sizeVector);
+int matrixMult(mpfr_t ** res, mpfr_t ** array1, const int m1, const int n1, 
+	mpfr_t ** array2, const int m2, const int n2);
 
-double ** fillMatrixRandomly(double ** array, const int m, const int n);
+int matrixMultVector(mpfr_t * res, mpfr_t ** matrix, const int m, const int n, 
+	mpfr_t * vector, const int sizeVector);
 
-double ** fillMatrixExponentially(double ** array, const int m, const int n);
+int fillMatrixRandomly(mpfr_t ** array, const int m, const int n);
 
-void printMatrix(double ** matrix, const int m, const int n);
+int fillMatrixExponentially(mpfr_t ** array, const int m, const int n);
+
+void printMatrix(mpfr_t ** matrix, const int m, const int n);
 
 #endif /* MATRIX_UTILS_H */

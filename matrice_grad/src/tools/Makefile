@@ -207,6 +207,33 @@ arrayUtils.c.s:
 	cd /home/kito/Dev/Repositories/ACSEL/matrice_grad && $(MAKE) -f src/tools/CMakeFiles/tools.dir/build.make src/tools/CMakeFiles/tools.dir/arrayUtils.c.s
 .PHONY : arrayUtils.c.s
 
+customMath.o: customMath.c.o
+
+.PHONY : customMath.o
+
+# target to build an object file
+customMath.c.o:
+	cd /home/kito/Dev/Repositories/ACSEL/matrice_grad && $(MAKE) -f src/tools/CMakeFiles/tools.dir/build.make src/tools/CMakeFiles/tools.dir/customMath.c.o
+.PHONY : customMath.c.o
+
+customMath.i: customMath.c.i
+
+.PHONY : customMath.i
+
+# target to preprocess a source file
+customMath.c.i:
+	cd /home/kito/Dev/Repositories/ACSEL/matrice_grad && $(MAKE) -f src/tools/CMakeFiles/tools.dir/build.make src/tools/CMakeFiles/tools.dir/customMath.c.i
+.PHONY : customMath.c.i
+
+customMath.s: customMath.c.s
+
+.PHONY : customMath.s
+
+# target to generate assembly for a file
+customMath.c.s:
+	cd /home/kito/Dev/Repositories/ACSEL/matrice_grad && $(MAKE) -f src/tools/CMakeFiles/tools.dir/build.make src/tools/CMakeFiles/tools.dir/customMath.c.s
+.PHONY : customMath.c.s
+
 errorHandling.o: errorHandling.c.o
 
 .PHONY : errorHandling.o
@@ -305,6 +332,9 @@ help:
 	@echo "... arrayUtils.o"
 	@echo "... arrayUtils.i"
 	@echo "... arrayUtils.s"
+	@echo "... customMath.o"
+	@echo "... customMath.i"
+	@echo "... customMath.s"
 	@echo "... errorHandling.o"
 	@echo "... errorHandling.i"
 	@echo "... errorHandling.s"

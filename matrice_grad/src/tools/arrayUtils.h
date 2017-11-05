@@ -1,30 +1,34 @@
 #ifndef ARRAY_UTILS_H
 #define ARRAY_UTILS_H
 
-double * createArray(const int n);
+#include <mpfr.h>
 
-double * fillArrayWithZeros(double * array, const int size) ;
+void createArray(mpfr_t ** result, const int n, mpfr_prec_t precision);
 
-double * fillArrayWith(double * array, const int size, double fillWith);
+int fillArrayWithZeros(mpfr_t * array, const int size) ;
 
-double * fillArrayLinearly(double * array, const int size);
+int fillArrayWith(mpfr_t * array, const int size, mpfr_t fillWith);
 
-double * vectorMult(double * array1, const int size1, double * array2, const int size2);
+int fillArrayLinearly(mpfr_t * array, const int size);
 
-double * vectorPlusVector(double * vector1, const int size1, double * vector2, const int size2);
+int vectorMult(mpfr_t * res, mpfr_t * array1, const int size1, mpfr_t * array2, const int size2);
 
-double * vectorMinusVector(double * vector1, const int size1, double * vector2, const int size2);
+int vectorPlusVector(mpfr_t * res, mpfr_t * vector1, const int size1, mpfr_t * vector2, const int size2);
 
-double * vectorCopy(double * vector, const int size);
+int vectorMinusVector(mpfr_t * res, mpfr_t * vector1, const int size1, mpfr_t * vector2, const int size2);
 
-double innerDotProduct(double * vector, const int size);
+int vectorCopy(mpfr_t * res, mpfr_t * vector, const int size);
 
-double dotProduct(double * vector1, const int size1, double * vector2, const int size2);
+int innerDotProduct(mpfr_t res, mpfr_t * vector, const int size);
 
-double * vectorMultDouble(double * vector, const int size, double value);
+int dotProduct(mpfr_t res, mpfr_t * vector1, const int size1, mpfr_t * vector2, const int size2);
 
-double sumSquare(double * vector, const int size);
+int vectorMultValue(mpfr_t * res, mpfr_t * vector, const int size, mpfr_t value);
 
-void printArray(double * array, const int size);
+int sumSquare(mpfr_t res, mpfr_t * vector, const int size);
+
+void printArray(mpfr_t * array, const int size);
+
+void freeArray(mpfr_t * array, const int size);
 
 #endif /* ARRAY_UTILS_H */

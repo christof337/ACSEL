@@ -1,88 +1,121 @@
 #include <stdlib.h>
 #include <check.h>
 #include "../src/tools/arrayUtils.h"
+#include "../src/tools/customMath.h"
+
+#define RM m_getRoundingMode()
 
 #define SIZE 10
+
+#define DEFAULT_PRECISION 32
 
 /**
  * Test de l'utilitaire "arrayUtils.c"
  * Exécuter avec `make test` 
  */
 
-double * arrayTest;
+mpfr_t * arrayTest;
 
-double * initArray() {
-	double * array = createArray(SIZE);
+int initArray(mpfr_t ** array) {
+	int err = 0;
+	createArray(array, SIZE, DEFAULT_PRECISION);
     for ( int i = 0 ; i < SIZE ; ++i ) {
     	// on initialise à i par défaut
-    	array[i] = i ; 
+    	// array[i] = i
+    	err += mpfr_set_si((*array)[i],i,RM); 
     }
-    return array;
+    return err;
 }
 
-double * initArrayDesc() {
-	double * array = createArray(SIZE);
+int initArrayDesc(mpfr_t ** array) {
+	int err = 0;
+	createArray(array, SIZE, DEFAULT_PRECISION);
     for ( int i = 0 ; i < SIZE ; ++i ) {
-    	// on initialise à i par défaut
-    	array[i] = SIZE - i ; 
+    	// on initialise à SIZE - i par défaut
+    	// array[i] = SIZE - i
+    	err += mpfr_set_si((*array)[i],SIZE-i,RM); 
     }
-    return array;
+    return err;
 }
 
 void setup(void)
 {
-	arrayTest = initArray();
+	initArray(&arrayTest);
 }
 
 void teardown(void)
 {
-    free(arrayTest);
+    freeArray(arrayTest, SIZE);
 }
 
 START_TEST(test_fill_array_with_zeros) {
+	mpfr_t zero;
+	m_init2(zero,DEFAULT_PRECISION);
+	mpfr_set_d(zero,0.0,RM);
 
-	arrayTest = fillArrayWithZeros(arrayTest, SIZE);
+	fillArrayWithZeros(arrayTest, SIZE);
 
 	for ( int i = 0 ; i < SIZE ; ++i ) {
-		ck_assert(arrayTest[i] == 0);
+		ck_assert( mpfr_cmp(arrayTest[i],zero) == 0 );
 	}
+
+	m_clear(zero);
 }
 END_TEST
 
 START_TEST(test_fill_array_with) {
-	arrayTest = fillArrayWith(arrayTest, SIZE, 5);
+	mpfr_t someNumber;
+	m_init2(someNumber,DEFAULT_PRECISION);
+	mpfr_set_d(someNumber,5.0,RM);
+
+	fillArrayWith(arrayTest, SIZE, someNumber);
 
 	for ( int i = 0 ; i < SIZE ; ++i ) {
-		ck_assert(arrayTest[i] == 5);
+		ck_assert( mpfr_cmp(arrayTest[i],someNumber) == 0 );
 	}
+
+	m_clear(someNumber);
 }
 END_TEST
 
 START_TEST(test_fill_array_linearly) {
+	mpfr_t cmp;
+	m_init2(cmp,DEFAULT_PRECISION);
 
-	arrayTest = fillArrayLinearly(arrayTest, SIZE);
+	fillArrayLinearly(arrayTest, SIZE);
 
-	for ( int i = 0 ; i < SIZE ; ++i ) {
-		ck_assert(arrayTest[i] == i+1);
+	for ( long int i = 0 ; i < SIZE ; ++i ) {
+		mpfr_set_si(cmp,i+1,RM);
+
+		ck_assert( mpfr_cmp(arrayTest[i],cmp) == 0 );
 	}
+
+	m_clear(cmp);
 }
 END_TEST
 
 START_TEST(test_vector_mult) {
 	// declarations
-	double * secondArrayTest;
-	double * multipliedMatrix;
+	mpfr_t * secondArrayTest;
+	mpfr_t * multipliedMatrix;
+	createArray(&multipliedMatrix,SIZE,DEFAULT_PRECISION);
+
+	mpfr_t t;
+	m_init2(t,DEFAULT_PRECISION);
 
 	// initializations
-	secondArrayTest = initArrayDesc();
-	multipliedMatrix = vectorMult(arrayTest, SIZE, secondArrayTest, SIZE);
+	initArrayDesc(&secondArrayTest);
+
+	vectorMult(multipliedMatrix, arrayTest, SIZE, secondArrayTest, SIZE);
 
 	for ( int i = 0 ; i < SIZE ; ++i ) {
-		ck_assert(multipliedMatrix[i] == arrayTest[i]*secondArrayTest[i]);
+		m_mul(t,arrayTest[i],secondArrayTest[i],RM);
+		ck_assert(mpfr_cmp(multipliedMatrix[i],t)==0);
 	}
 
-	free(secondArrayTest);
-	free(multipliedMatrix);
+	freeArray(secondArrayTest, SIZE);
+	freeArray(multipliedMatrix, SIZE);
+	m_clear(t);
 }
 END_TEST
 
@@ -115,6 +148,8 @@ int main ( void ) {
 
 	s = array_utils_suite();
 	sr = srunner_create(s);
+
+	srunner_set_log (sr, "check_array_utils_test.log");
 
 	srunner_run_all(sr, CK_NORMAL);
 	number_failed = srunner_ntests_failed(sr);

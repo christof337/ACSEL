@@ -1,16 +1,18 @@
 #ifndef MATRICE_GRAD_H
 #define MATRICE_GRAD_H
 
+#include <mpfr.h>
+
 int askTailleMatrice();
 
-double * customMatrixMultVector(double ** matrix, double * vector, const int size);
+int customMatrixMultVector(mpfr_t * result, mpfr_t ** matrix, mpfr_t * vector, const int size) ;
 
-int writeMatrixInFile(double ** matrix, const int n, const int m);
+int writeMatrixInFile(mpfr_t ** matrix, const int n, const int m, mpfr_prec_t precision) ;
 
-int writeDataInFile(double * x, double * solgc, const int size);
+int writeDataInFile(mpfr_t * x, mpfr_t * solgc, const int size, mpfr_prec_t precision);
 
-int writeArrayInFile(double * array, const int size);
+int writeGkArrayInFile(mpfr_t * array, const int size, mpfr_prec_t precision) ;
 
-void printFinalStatement();
+void printFinalErrorStatement();
 
 #endif /* MATRICE_GRAD_H */
