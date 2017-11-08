@@ -9,16 +9,19 @@ set(GMP_LIB_PATH
 set(LIB_SOURCES
   main.c
   matrice_grad.c
+  parameters.c
 )
 
 set(MAIN_SOURCES
   main.c
   matrice_grad.c
+  parameters.c
 )
 
 set(HEADERS 
   ${CONFIG_HEADER}
   matrice_grad.h
+  parameters.h
 )
 
 

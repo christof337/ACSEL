@@ -5,4 +5,6 @@ int errorHandling () ;
 
 void printError(int errnum);
 
+void printErrorMessage(char * message);
+
 #endif // ERROR_HANDLING_H

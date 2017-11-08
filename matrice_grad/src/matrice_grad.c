@@ -120,6 +120,7 @@ int writeDataInFile(mpfr_t * x, mpfr_t * solgc, const int size, mpfr_prec_t prec
 int writeGkArrayInFile(mpfr_t * array, const int size, mpfr_prec_t precision) {
 	char fileName[19];
 	//sprintf(fileName,"%s%ld%s",GK_FILE_NAME,precision,GK_EXTENSION);
+	//TODO : spécifier les paramètres actuels de l'application dans le nom du fichier
 	sprintf(fileName,"%s%s",GK_FILE_NAME,GK_EXTENSION);
 
 	if(precision == 2) {
@@ -129,6 +130,7 @@ int writeGkArrayInFile(mpfr_t * array, const int size, mpfr_prec_t precision) {
        fprintf(pf,"i\t%12s\tprec\n",GK_LABEL);
 	   fclose(pf);
 	}
+
 
 	return writeArray(array,size,fileName,GK_LABEL);
 }

@@ -6,6 +6,7 @@
 
 #include "matrice_grad.h"
 
+#include "parameters.h"
 #include "tools/arrayUtils.h"
 #include "tools/matrixUtils.h"
 #include "tools/customMath.h"
@@ -14,7 +15,11 @@
 // ce code est inspiré du programme "matrice_grad".
 // l'objectif est de faire varier la précision pour observer le comportement de réduction du gradient 
 
-int main() {
+int main( int argc, char *argv[] )  {
+   // int hasInitializeParams = initParams(argv[0]);
+
+   // printParam(getParamFromParamEnum(MATRIX_SIZE));
+
    int state = 0;
 
 	// DECLARATIONS

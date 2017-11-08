@@ -4,6 +4,7 @@ set(LIB_SOURCES
   inputOutput.c
   matrixUtils.c
   customMath.c
+  utils.c
 )
 
 set(MAIN_SOURCES
@@ -12,6 +13,7 @@ set(MAIN_SOURCES
   inputOutput.c
   matrixUtils.c
   customMath.c
+  utils.c
 )
 
 set(HEADERS 
@@ -21,6 +23,7 @@ set(HEADERS
   inputOutput.h
   matrixUtils.h
   customMath.h
+  utils.h
 )
 
 add_library(tools STATIC ${LIB_SOURCES} ${HEADERS})

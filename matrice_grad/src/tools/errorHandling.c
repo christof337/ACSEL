@@ -18,3 +18,7 @@ void printError(int errnum) {
 	perror("\nError : ");
 	fprintf(stderr, "\nError : %s\n", strerror( errnum ));
 }
+
+void printErrorMessage(char * message) {
+	fprintf(stderr,message);
+}
