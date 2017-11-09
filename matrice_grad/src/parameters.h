@@ -1,6 +1,8 @@
 #ifndef PARAMETERS_H
 #define PARAMETERS_H
 
+#include <mpfr.h>
+
 enum matrixTypeEnum {
 	EXPONENTIAL,
 	HILBERT
@@ -31,6 +33,8 @@ struct Param {
    union defaultValueUnion defaultValue;
    char description[200];
    int error;
+   unsigned int isDefault:1;
+   union defaultValueUnion currentValue;
 };
 
 enum paramsEnum { MATRIX_SIZE, NB_ITER, MAX_PREC, ROUNDING_MODE, MATRIX_TYPE};
@@ -41,8 +45,19 @@ void printParam(struct Param param);
 
 void printLine(); 
 
+void printHelp(char * appName);
+
 void printRoundingModeHelp();
 
 struct Param getParamFromParamEnum(enum paramsEnum pe);
+
+enum roundingModeEnum stringToRoundingModeEnum(char * string, const int size) ;
+
+mpfr_rnd_t roundingModeEnumToMpfrRndT(enum roundingModeEnum e) ;
+
+struct Param getParamFromParamEnum(enum paramsEnum pe) ;
+
+
+int handleParams( int argc, char *argv[] ) ;
 
 #endif /* PARAMETERS_H */

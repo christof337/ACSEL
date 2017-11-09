@@ -34,7 +34,7 @@
 int askTailleMatrice() {
 	int tailleMatrice = 0;
 	do {
-		printf("Taille Matrice ?\n");
+		printf("\nTaille Matrice ?\n");
 		tailleMatrice = askForInt();
 	}while ( tailleMatrice <= 0 );
 }

@@ -138,6 +138,7 @@ int writeArray(mpfr_t * array, const int size,const char * fileName, const char 
          mpfr_out_str(pf,10,12,array[i],RM);
          fprintf(pf,"\t%ld\n",prec);
       }
+      fprintf(pf,"\n"); // adding a chariot in order to have a nice view in gnuplot :) <3
 
       fclose(pf);
    }

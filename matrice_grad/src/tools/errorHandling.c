@@ -19,6 +19,22 @@ void printError(int errnum) {
 	fprintf(stderr, "\nError : %s\n", strerror( errnum ));
 }
 
+void printCustomError(enum ERRORS err, char * param) {
+	fprintf(stderr,"\nError : ");
+	switch(err) {
+		case ERROR_NO_EQUAL_SIGN_IN_PARAMETER:
+			fprintf(stderr,"The parameter `%s` does not contain `=`.",param);
+			break;
+		case ERROR_WHILE_HANDLING_INPUT_PARAMETERS:
+			fprintf(stderr,"Wrong parameter given. Type `%s help` in order to know which parameter use.",param);
+			break;
+		default:
+			fprintf(stderr,"Something bad happened.");
+			break;
+	}
+	fprintf(stderr,"\n");
+}
+
 void printErrorMessage(char * message) {
-	fprintf(stderr,message);
+	fprintf(stderr,"%s",message);
 }
