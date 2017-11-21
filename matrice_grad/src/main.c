@@ -11,6 +11,7 @@
 #include "tools/matrixUtils.h"
 #include "tools/customMath.h"
 #include "tools/errorHandling.h"
+#include "tools/timer.h"
 
 #define PRECISION_MIN MPFR_PREC_MIN // 2
 
@@ -43,6 +44,9 @@ int main( int argc, char *argv[] )  {
          const int RANGE_PRECISION = getParamFromParamEnum(MAX_PREC).currentValue.li; // précision maximum utilisée TODO : la passer en paramètre du programme
          
          const mpfr_rnd_t RM = roundingModeEnumToMpfrRndT(getParamFromParamEnum(MAX_PREC).currentValue.rme);
+
+
+         StartTimer();
 
          printf("\nDébut programme...");
          printf("\nParamètres :");
@@ -81,6 +85,7 @@ int main( int argc, char *argv[] )  {
          // DEBUT BOUCLE ( entièrement parralélisable )
          for (int pre = PRECISION_MIN ; pre < RANGE_PRECISION ; ++pre ) {
             printf("\n------\tBoucle precision [%d]\t------",pre);
+            printf("\n[%d]",pre);
 
          	// INITIALISATIONS
             printf("\n\tInitialisation des tableaux");
@@ -233,8 +238,12 @@ int main( int argc, char *argv[] )  {
          //freeArray(solgc, M_SIZE);
          //freeArray(gkTmp, M_SIZE);
          //freeMatrix(a, M_SIZE, M_SIZE);
+         double runtime = GetTimer();
+
+         printf(" \n\nTotal time ellapsed: %f s\n", runtime / 1000);
       }
    }
+
    if ( state == 0 ) {
       printf("\nFIN PROGRAMME NORMAL\n");
    } else if ( state == 1 ) {
