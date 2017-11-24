@@ -69,11 +69,13 @@ int initParams(char * appName) ;
 
 int handleParams( int argc, char *argv[] ) ;
 
-int assignValueToParam(struct Param param, char * strValue);
+int assignValueToParam(struct Param * param, char * strValue);
 
-struct Param getParamFromParamEnum(enum ParamEnum pe);
+struct Param * getParamFromParamEnum(enum ParamEnum pe);
 
 enum ParamEnum getParamEnumFromString(char * paramName);
+
+void paramAdressInit();
 
 // ROUNDING MODE
 enum roundingModeEnum stringToRoundingModeEnum(char * string, const int size) ;

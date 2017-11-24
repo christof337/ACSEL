@@ -17,7 +17,9 @@
 
 #define HELP_CAPTION "HELP"
 
-struct Param P_MATRIX_SIZE, P_NB_ITER, P_MAX_PREC, P_ROUNDING_MODE, P_MATRIX_TYPE;
+struct Param * P_MATRIX_SIZE, * P_NB_ITER, * P_MAX_PREC, * P_ROUNDING_MODE, * P_MATRIX_TYPE;
+
+struct Param _p_m_s, _p_n_i, _p_m_p, _p_r_m, _p_m_t;
 
 char * globalAppName;
 
@@ -29,60 +31,62 @@ char * globalAppName;
  * @return     { description_of_the_return_value }
  */
 int initParams(char * appName) {
+	paramAdressInit();
+
 	char tmp[200];
 
 	// MATRIX_SIZE
-	strcpy( P_MATRIX_SIZE.name, "matrixSize");
-   	strcpy( P_MATRIX_SIZE.shortName, "ms");
-   	P_MATRIX_SIZE.typ_defaultValue = LONGINT;
-   	P_MATRIX_SIZE.defaultValue.li = DEFAULT_MATRIX_SIZE;
-   	strcpy( P_MATRIX_SIZE.description, "Define the size of the processed matrix.");
-   	P_MATRIX_SIZE.error = 0;
-   	P_MATRIX_SIZE.isDefault = 1;
-   	P_MATRIX_SIZE.currentValue.li = DEFAULT_MATRIX_SIZE;
+	strcpy( P_MATRIX_SIZE->name, "matrixSize");
+   	strcpy( P_MATRIX_SIZE->shortName, "ms");
+   	P_MATRIX_SIZE->typ_defaultValue = LONGINT;
+   	P_MATRIX_SIZE->defaultValue.li = DEFAULT_MATRIX_SIZE;
+   	strcpy( P_MATRIX_SIZE->description, "Define the size of the processed matrix.");
+   	P_MATRIX_SIZE->error = 0;
+   	P_MATRIX_SIZE->isDefault = 1;
+   	P_MATRIX_SIZE->currentValue.li = DEFAULT_MATRIX_SIZE;
    	
 	// NB_ITER
-	strcpy( P_NB_ITER.name, "nbIter");
-   	strcpy( P_NB_ITER.shortName, "ni");
-   	P_NB_ITER.typ_defaultValue = LONGINT;
-   	P_NB_ITER.defaultValue.li = DEFAULT_NB_ITER;
-   	strcpy( P_NB_ITER.description, "Define the number of iterations made to minimize the matrix.");
-   	P_NB_ITER.error = 0;
-   	P_NB_ITER.isDefault = 1;
-   	P_NB_ITER.currentValue.li = DEFAULT_NB_ITER;
+	strcpy( P_NB_ITER->name, "nbIter");
+   	strcpy( P_NB_ITER->shortName, "ni");
+   	P_NB_ITER->typ_defaultValue = LONGINT;
+   	P_NB_ITER->defaultValue.li = DEFAULT_NB_ITER;
+   	strcpy( P_NB_ITER->description, "Define the number of iterations made to minimize the matrix.");
+   	P_NB_ITER->error = 0;
+   	P_NB_ITER->isDefault = 1;
+   	P_NB_ITER->currentValue.li = DEFAULT_NB_ITER;
 
 	// MAX_PREC
-	strcpy( P_MAX_PREC.name, "maxPrecision");
-   	strcpy( P_MAX_PREC.shortName, "pre");
-   	P_MAX_PREC.typ_defaultValue = LONGINT;
-   	P_MAX_PREC.defaultValue.li = DEFAULT_MAX_PREC;
-   	strcpy( P_MAX_PREC.description, "Define the maximum precision up until the program will process (from 2 to maxPrecision)");
-   	P_MAX_PREC.error = 0;
-   	P_MAX_PREC.isDefault = 1;
-   	P_MAX_PREC.currentValue.li = DEFAULT_MAX_PREC;
+	strcpy( P_MAX_PREC->name, "maxPrecision");
+   	strcpy( P_MAX_PREC->shortName, "pre");
+   	P_MAX_PREC->typ_defaultValue = LONGINT;
+   	P_MAX_PREC->defaultValue.li = DEFAULT_MAX_PREC;
+   	strcpy( P_MAX_PREC->description, "Define the maximum precision up until the program will process (from 2 to maxPrecision).");
+   	P_MAX_PREC->error = 0;
+   	P_MAX_PREC->isDefault = 1;
+   	P_MAX_PREC->currentValue.li = DEFAULT_MAX_PREC;
 
 	// ROUNDING_MODE
-	strcpy( P_ROUNDING_MODE.name, "roundingMode");
-   	strcpy( P_ROUNDING_MODE.shortName, "rm");
-   	P_ROUNDING_MODE.typ_defaultValue = ROUNDINGMODEENUM;
-   	P_ROUNDING_MODE.defaultValue.rme = DEFAULT_ROUNDING_MODE;
+	strcpy( P_ROUNDING_MODE->name, "roundingMode");
+   	strcpy( P_ROUNDING_MODE->shortName, "rm");
+   	P_ROUNDING_MODE->typ_defaultValue = ROUNDINGMODEENUM;
+   	P_ROUNDING_MODE->defaultValue.rme = DEFAULT_ROUNDING_MODE;
 	sprintf(tmp,"Define the rounding mode used for the computations of the program.");
-   	strcpy( P_ROUNDING_MODE.description, tmp);
-   	P_ROUNDING_MODE.error = 0;
-   	P_ROUNDING_MODE.isDefault = 1;
-   	P_ROUNDING_MODE.currentValue.rme = DEFAULT_ROUNDING_MODE;
+   	strcpy( P_ROUNDING_MODE->description, tmp);
+   	P_ROUNDING_MODE->error = 0;
+   	P_ROUNDING_MODE->isDefault = 1;
+   	P_ROUNDING_MODE->currentValue.rme = DEFAULT_ROUNDING_MODE;
 
 
 	// MATRIX_TYPE
-	strcpy( P_MATRIX_TYPE.name, "matrixType");
-   	strcpy( P_MATRIX_TYPE.shortName, "mt");
-   	P_MATRIX_TYPE.typ_defaultValue = MATRIXTYPEENUM;
-   	P_MATRIX_TYPE.defaultValue.mte = DEFAULT_MATRIX_TYPE;
+	strcpy( P_MATRIX_TYPE->name, "matrixType");
+   	strcpy( P_MATRIX_TYPE->shortName, "mt");
+   	P_MATRIX_TYPE->typ_defaultValue = MATRIXTYPEENUM;
+   	P_MATRIX_TYPE->defaultValue.mte = DEFAULT_MATRIX_TYPE;
    	sprintf(tmp,"Define the way the processed matrix is filled.");
-   	strcpy(P_MATRIX_TYPE.description, tmp);
-   	P_MATRIX_TYPE.error = 0;
-   	P_MATRIX_TYPE.isDefault = 1;
-   	P_MATRIX_TYPE.currentValue.mte = DEFAULT_MATRIX_TYPE;
+   	strcpy(P_MATRIX_TYPE->description, tmp);
+   	P_MATRIX_TYPE->error = 0;
+   	P_MATRIX_TYPE->isDefault = 1;
+   	P_MATRIX_TYPE->currentValue.mte = DEFAULT_MATRIX_TYPE;
 
    	return 0;
 }
@@ -143,12 +147,16 @@ int handleParams( int argc, char *argv[] ) {
 						err = ERROR_WRONG_PARAMETER_GIVEN;
 						printCustomError(err, 2, globalAppName,parameterStr);
 					} else {
-						struct Param param = getParamFromParamEnum(pe);
+						struct Param * param = getParamFromParamEnum(pe);
 						int hasAssigned = assignValueToParam(param,value);
 						if ( hasAssigned == -1 ) {
 							// wrong value
 							err = ERROR_WRONG_VALUE_GIVEN;
-							printCustomError(err, 3, globalAppName, param.name, value);
+							printCustomError(err, 3, globalAppName, param->name, value);
+						} else {
+							// value assigned : everything's fine
+							printf("\n\t Parameter %s has been assigned with the value `%s`!",param->name,value);
+							param->isDefault = 0;
 						}
 					}
 
@@ -168,23 +176,65 @@ int handleParams( int argc, char *argv[] ) {
 	return err;
 }
 
-int assignValueToParam(struct Param param, char * strValue) {
+int assignValueToParam(struct Param * param, char * strValue) {
 	int err = 0;
-	switch(param.typ_defaultValue) {
+	int res;
+	double dou;	
+	long int li;
+	char * valueUp = toUpperCase(strValue, strlen(strValue)+1);
+	switch(param->typ_defaultValue) {
 		case DOUBLE:
-			
+			res = sscanf(strValue,"%lf",&dou);
+			if ( res == EOF ) {
+				// error
+				err = -1;
+			} else {
+				param->currentValue.d = dou;
+			}
 			break;
 		case MATRIXTYPEENUM:
+			if ( strcmp(valueUp,"EXPONENTIAL")==0) {
+				param->currentValue.mte = EXPONENTIAL;
+			} else if ( strcmp(valueUp,"HILBERT") == 0) {
+				param->currentValue.mte = HILBERT;
+			} else {
+				// error
+				err = -1;
+			}
 			break;
-		case LONGINT:
+		case LONGINT:		
+			res = sscanf(strValue,"%ld",&li);
+			if ( res == EOF ) {
+				// error
+				err = -1;
+			} else {
+				param->currentValue.li = li;
+			}
 			break;
 		case ROUNDINGMODEENUM:
+			if ( strcmp(valueUp,"RNDN")==0) {
+				param->currentValue.rme = RNDN;
+			} else if ( strcmp(valueUp,"STOCHASTIC") == 0) {
+				param->currentValue.rme = STOCHASTIC;
+			} else if ( strcmp(valueUp,"RNDZ") == 0) {
+				param->currentValue.rme = RNDZ;
+			} else if ( strcmp(valueUp,"RNDU") == 0) {
+				param->currentValue.rme = RNDU;
+			} else if ( strcmp(valueUp,"RNDD") == 0) {
+				param->currentValue.rme = RNDD;
+			} else if ( strcmp(valueUp,"RNDA") == 0) {
+				param->currentValue.rme = RNDA;
+			} else {
+				// error
+				err = -1;
+			}
 			break;
 		default:
 			//erreur
 			err = -1;
 			break;
 	}
+	free(valueUp);
 	return err;
 }
 
@@ -194,7 +244,7 @@ enum ParamEnum getParamEnumFromString(char * paramName) {
 	char * paramNameUpper = toUpperCase(paramName, strlen(paramName)+1);
 	enum ParamEnum pe = param_min;
 	while ( pe <= param_max && res == PARAM_ENUM_ERROR) {
-		struct Param param = getParamFromParamEnum(pe);
+		struct Param param = *getParamFromParamEnum(pe);
 		char * longNameUp = toUpperCase(param.name, strlen(param.name)+1);
 		char * shortNameUp = toUpperCase(param.shortName, strlen(param.shortName)+1);
 
@@ -279,8 +329,8 @@ mpfr_rnd_t roundingModeEnumToMpfrRndT(enum roundingModeEnum e) {
  *
  * @return     The parameter corresponding of the given parameter enum. An empty parameter with error at -1 if none was found
  */
-struct Param getParamFromParamEnum(enum ParamEnum pe) {
-	struct Param askedParam;
+struct Param * getParamFromParamEnum(enum ParamEnum pe) {
+	struct Param * askedParam;
 	switch(pe) {
 		case MATRIX_SIZE:
 			askedParam = P_MATRIX_SIZE;
@@ -299,10 +349,21 @@ struct Param getParamFromParamEnum(enum ParamEnum pe) {
 			break;
 		case PARAM_ENUM_ERROR:
 		default:
-			askedParam.error = -1;
+			askedParam->error = -1;
 			break;
 	}
 	return askedParam;
+}
+
+/**
+ * @brief      schhht
+ */
+void paramAdressInit() {
+	P_MATRIX_SIZE = &_p_m_s;
+	P_NB_ITER = &_p_n_i;
+	P_MAX_PREC = &_p_m_p;
+	P_ROUNDING_MODE = &_p_r_m;
+	P_MATRIX_TYPE = &_p_m_t;
 }
 
 // ---------------- PRINT ----------------
@@ -316,7 +377,7 @@ void printParam(struct Param param) {
 }
 
 void printParamEnum(enum ParamEnum pe) {
-	printParam(getParamFromParamEnum(pe));
+	printParam(*getParamFromParamEnum(pe));
 }
 
 void printParametersFull() {
@@ -329,7 +390,7 @@ void printParametersFull() {
 void printParametersShort() {
 	printf("\nParameters list : ");
 	for ( int p = param_min ; p <= param_max ; ++p ) {
-		struct Param param = getParamFromParamEnum(p);
+		struct Param param = *getParamFromParamEnum(p);
 		printf("\n\t`%s`(`%s`)",param.name,param.shortName);
 	}
 	printf("\n");
@@ -389,13 +450,13 @@ void printRoundingModeHelp() {
     printf("\t- `RNDD`: round toward minus infinity (roundTowardNegative in IEEE 754-2008),\n");
     printf("\t- `RNDA`: round away from zero.\n");
     printf("\nUsage example :");
-    printf("\n\t`%s %s=RNDN`", globalAppName,P_ROUNDING_MODE.name);
-    printf("\n\t`%s %s=STOCHASTIC`\n", globalAppName, P_ROUNDING_MODE.shortName);
+    printf("\n\t`%s %s=RNDN`", globalAppName,P_ROUNDING_MODE->name);
+    printf("\n\t`%s %s=STOCHASTIC`\n", globalAppName, P_ROUNDING_MODE->shortName);
 }
 
 
 void printDefaultValue( enum type dvtype, union defaultValueUnion dv ) {
-		printf("`");
+	printf("`");
 	switch(dvtype) {
 		case DOUBLE:
  			printf("%F",dv.d);

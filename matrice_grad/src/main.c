@@ -38,13 +38,13 @@ int main( int argc, char *argv[] )  {
       	// DECLARATIONS
          // getting the params from param enum : 
             // enum paramsEnum { MATRIX_SIZE, NB_ITER, MAX_PREC, ROUNDING_MODE, MATRIX_TYPE}; 
-         const int NB_GRAD = getParamFromParamEnum(NB_ITER).currentValue.li; // nombre d'itérations du gradient
+         const int NB_GRAD = getParamFromParamEnum(NB_ITER)->currentValue.li; // nombre d'itérations du gradient
 
-         const int M_SIZE = getParamFromParamEnum(MATRIX_SIZE).currentValue.li;
+         const int M_SIZE = getParamFromParamEnum(MATRIX_SIZE)->currentValue.li;
 
-         const int RANGE_PRECISION = getParamFromParamEnum(MAX_PREC).currentValue.li; // précision maximum utilisée TODO : la passer en paramètre du programme
+         const int RANGE_PRECISION = getParamFromParamEnum(MAX_PREC)->currentValue.li; // précision maximum utilisée TODO : la passer en paramètre du programme
          
-         const mpfr_rnd_t RM = roundingModeEnumToMpfrRndT(getParamFromParamEnum(MAX_PREC).currentValue.rme);
+         const mpfr_rnd_t RM = roundingModeEnumToMpfrRndT(getParamFromParamEnum(MAX_PREC)->currentValue.rme);
 
 
          StartTimer();
