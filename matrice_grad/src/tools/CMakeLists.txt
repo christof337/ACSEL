@@ -24,6 +24,7 @@ set(HEADERS
   matrixUtils.h
   customMath.h
   utils.h
+  timer.h
 )
 
 add_library(tools STATIC ${LIB_SOURCES} ${HEADERS})

@@ -61,3 +61,8 @@ char** str_split(char* a_str, const char a_delim)
 
     return result;
 }
+
+
+void printLine() {
+	printf("\n-----------\n");
+}

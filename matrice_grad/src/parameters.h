@@ -56,27 +56,48 @@ struct Param {
 
 /**
  * @brief      List the different parameters used by this program.
+ * param_min and param_max are used to loop through the enum
  */
-enum paramsEnum { MATRIX_SIZE, NB_ITER, MAX_PREC, ROUNDING_MODE, MATRIX_TYPE};
+enum ParamEnum { param_min, 
+	MATRIX_SIZE = param_min, 
+	NB_ITER, MAX_PREC, ROUNDING_MODE, // add params before this comment
+	MATRIX_TYPE,
+	param_max = MATRIX_TYPE,
+	PARAM_ENUM_ERROR };
 
 int initParams(char * appName) ;
 
-void printParam(struct Param param);
+int handleParams( int argc, char *argv[] ) ;
 
-void printLine(); 
+int assignValueToParam(struct Param param, char * strValue);
 
-void printHelp(char * appName);
+struct Param getParamFromParamEnum(enum ParamEnum pe);
 
-void printRoundingModeHelp();
+enum ParamEnum getParamEnumFromString(char * paramName);
 
-struct Param getParamFromParamEnum(enum paramsEnum pe);
-
+// ROUNDING MODE
 enum roundingModeEnum stringToRoundingModeEnum(char * string, const int size) ;
 
 mpfr_rnd_t roundingModeEnumToMpfrRndT(enum roundingModeEnum e) ;
 
-struct Param getParamFromParamEnum(enum paramsEnum pe) ;
+// DISPLAY
+void printParam(struct Param param);
 
-int handleParams( int argc, char *argv[] ) ;
+void printParametersFull();
+
+void printParametersShort(); 
+
+void printParamEnum(enum ParamEnum pe) ;
+
+void printDefaultValue( enum type dvtype, union defaultValueUnion dv ) ;
+
+// HELP
+
+void printHelp();
+
+void printParamHelp(enum ParamEnum param);
+
+void printRoundingModeHelp();
+
 
 #endif /* PARAMETERS_H */

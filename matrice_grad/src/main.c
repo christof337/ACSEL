@@ -12,6 +12,7 @@
 #include "tools/customMath.h"
 #include "tools/errorHandling.h"
 #include "tools/timer.h"
+#include "tools/utils.h"
 
 #define PRECISION_MIN MPFR_PREC_MIN // 2
 
@@ -30,7 +31,7 @@ int main( int argc, char *argv[] )  {
    }else {
       state = handleParams(argc,argv);
       if ( state != 0 && state != 1 ) {
-         printCustomError(ERROR_WHILE_HANDLING_INPUT_PARAMETERS, appName);
+         printErrorMessage("\nInput error. Abort execution.\n");
       } else if ( state != 1 ) {
          // printParam(getParamFromParamEnum(MATRIX_SIZE));
 
@@ -247,7 +248,7 @@ int main( int argc, char *argv[] )  {
    if ( state == 0 ) {
       printf("\nFIN PROGRAMME NORMAL\n");
    } else if ( state == 1 ) {
-      printf("\nClosing help...\n");
+      printf("\nClosing help...");
       printLine();
    } else {
       printFinalErrorStatement();
