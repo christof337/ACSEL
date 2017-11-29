@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <mpfr.h>
 
 #include "tools/utils.h"
 #include "tools/errorHandling.h"
@@ -320,6 +321,7 @@ mpfr_rnd_t roundingModeEnumToMpfrRndT(enum roundingModeEnum e) {
 		mpfr_rnd = roundingModeEnumToMpfrRndT(DEFAULT_ROUNDING_MODE);
 		break;
 	}
+	return mpfr_rnd;
 }
 
 /**
