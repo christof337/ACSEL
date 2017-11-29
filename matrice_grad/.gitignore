@@ -28,5 +28,6 @@ config.h
 
 # Various directories
 Testing
+output
 .libs
 .deps
