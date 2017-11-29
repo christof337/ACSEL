@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-//#include <mpfr.h> // after stdio.h only
+#include <mpfr.h> // after stdio.h only
 
 #include "matrice_grad.h"
 
