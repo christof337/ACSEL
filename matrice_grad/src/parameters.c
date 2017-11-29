@@ -155,7 +155,7 @@ int handleParams( int argc, char *argv[] ) {
 							printCustomError(err, 3, globalAppName, param->name, value);
 						} else {
 							// value assigned : everything's fine
-							printf("\n\t Parameter %s has been assigned with the value `%s`!",param->name,value);
+							printf("\n\t Parameter %s has been assigned with the value `%s`.",param->name,value);
 							param->isDefault = 0;
 						}
 					}

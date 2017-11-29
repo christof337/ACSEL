@@ -1,6 +1,6 @@
 # Output executables
 #main
-check_array_utils
+# check_array_utils
 
 # Log files
 *.log
@@ -13,6 +13,7 @@ Makefile
 
 # CMake files
 *.cmake
+!FindCheck.cmake
 
 # CMake directories
 CMakeFiles

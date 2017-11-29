@@ -29,6 +29,7 @@ int main( int argc, char *argv[] )  {
       printErrorMessage("Error while initializing application parameters.\n");
       state = -1;
    }else {
+      printf("\nHandling parameters...");
       state = handleParams(argc,argv);
       if ( state != 0 && state != 1 ) {
          printErrorMessage("\nInput error. Abort execution.\n");

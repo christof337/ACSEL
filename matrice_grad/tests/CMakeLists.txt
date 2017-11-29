@@ -5,13 +5,16 @@ set(MPFR_LIB_PATH
 	/usr/local/lib)
 
 set(GMP_LIB_PATH
-	/usr/local/lib)
+        /usr/local/lib)
+        
+set(CHECK_LIB_PATH
+        /usr/local/lib/libcheck.so.0)
 
 # If pkg-config is not installed on the system, then the
 # CHECK_INSTALL_DIR variable must be set to the install
 # location of Check. For example, on Windows, this may
 # be: C:/Program Files/check
-# set(CHECK_INSTALL_DIR "C:/Program Files/check")
+set(CHECK_INSTALL_DIR "/usr/local/lib")
 
 find_package(Check REQUIRED)
 include_directories(${CHECK_INCLUDE_DIRS})
@@ -30,6 +33,7 @@ set(ARRAY_UTILS_TEST_SOURCES
 
 add_executable(check_array_utils ${ARRAY_UTILS_TEST_SOURCES})
 target_link_libraries(check_array_utils tools 
+                                        ${CHECK_LIB_PATH}
 					${CHECK_LIBRARIES}
 					libmpfr.a
                     libgmp.a)
@@ -42,6 +46,7 @@ set(MATRIX_UTILS_TEST_SOURCES
 
 add_executable(check_matrix_utils ${MATRIX_UTILS_TEST_SOURCES})
 target_link_libraries(check_matrix_utils tools 
+                                        ${CHECK_LIB_PATH}
 					${CHECK_LIBRARIES}
 					libmpfr.a
                     libgmp.a)
