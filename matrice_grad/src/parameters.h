@@ -82,6 +82,8 @@ enum roundingModeEnum stringToRoundingModeEnum(char * string, const int size) ;
 
 mpfr_rnd_t roundingModeEnumToMpfrRndT(enum roundingModeEnum e) ;
 
+// mpfr_rnd_t m_getRoundingMode();
+
 // DISPLAY
 void printParam(struct Param param);
 

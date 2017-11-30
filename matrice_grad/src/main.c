@@ -16,12 +16,36 @@
 
 #define PRECISION_MIN MPFR_PREC_MIN // 2
 
+#define DEBUG 1
+
 // compilation : ../make
 // ce code est inspiré du programme "matrice_grad".
 // l'objectif est de faire varier la précision pour observer le comportement de réduction du gradient 
 
 int main( int argc, char *argv[] )  {
-   int state = 0;
+	   int state = 0;
+	if (DEBUG) {
+		// test
+		mpfr_t number;
+		mpfr_prec_t numberPrecision = 8;
+		double value = 1.234375;
+		double desiredValue1 = 1.234;
+		double desiredValue2 = 1.235;
+		mpfr_prec_t desiredPrecision = 5;
+		m_init2(number,numberPrecision);
+		mpfr_set_d(number,value,MPFR_RNDN);
+		printf("\nAffichage du nombre avant opération (objectif %f) : ",value);
+		m_print(number);
+
+		stochasticRounding(&number,desiredPrecision);
+
+		printf("\nAffichage du nombre APRES opération (objectif %f ou %f) : ",desiredValue1,desiredValue2);
+		m_print(number);
+
+		m_clear(number);
+	}else {
+
+
 
    char * appName = argv[0];
    int hasInitializeParams = initParams(appName);
@@ -254,6 +278,6 @@ int main( int argc, char *argv[] )  {
    } else {
       printFinalErrorStatement();
    }
-
+	}
    return state;
 }
