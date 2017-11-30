@@ -261,6 +261,12 @@ enum ParamEnum getParamEnumFromString(char * paramName) {
 	free(paramNameUpper);
 	return res;
 }
+
+/* --------------*/
+/* ROUNDING MODE */
+/* --------------*/
+
+
 /**
  * @brief      { function_description }
  *
@@ -323,6 +329,11 @@ mpfr_rnd_t roundingModeEnumToMpfrRndT(enum roundingModeEnum e) {
 	}
 	return mpfr_rnd;
 }
+
+//mpfr_rnd_t m_getRoundingMode() {
+//	enum roundingModeEnum currentRoundingMode = P_ROUNDING_MODE->currentValue.rme;
+//	return roundingModeEnumToMpfrRndT(currentRoundingMode);
+//}
 
 /**
  * @brief      Gets the parameter from parameter enum.
