@@ -79,4 +79,5 @@ add_subdirectory(tests)
 enable_testing()
 add_test(NAME check_array_utils COMMAND check_array_utils)
 add_test(NAME check_matrix_utils COMMAND check_matrix_utils)
+add_test(NAME check_custom_math COMMAND check_custom_math)
 

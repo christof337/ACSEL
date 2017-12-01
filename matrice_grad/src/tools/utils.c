@@ -63,6 +63,10 @@ char** str_split(char* a_str, const char a_delim)
     return result;
 }
 
+/**
+ * http://man.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man3/arc4random.3?query=arc4random%26sec=3
+ * @param randState
+ */
 void getRandstate(gmp_randstate_t randState) {
 	gmp_randinit_default(randState);
 	uint32_t val = arc4random();
