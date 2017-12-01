@@ -7,6 +7,9 @@ set(LIB_SOURCES
   utils.c
 )
 
+set(BSD_LIB_PATH
+        /usr/include/bsd)
+
 set(MAIN_SOURCES
   arrayUtils.c
   errorHandling.c
@@ -28,9 +31,12 @@ set(HEADERS
 )
 
 add_library(tools STATIC ${LIB_SOURCES} ${HEADERS})
+add_library(libbsd SHARED IMPORTED GLOBAL)
+
+set_target_properties(libbsd PROPERTIES IMPORTED_LOCATION ${BSD_LIB_PATH})
 
 find_package(Threads REQUIRED)
-target_link_libraries(tools ${CHECK_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(tools ${CHECK_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} libbsd.a)
 
 #add_executable(main ${HEADERS} ${MAIN_SOURCES})
 #target_link_libraries(main tools)

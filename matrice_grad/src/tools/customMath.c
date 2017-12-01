@@ -60,18 +60,13 @@ void m_clear(mpfr_t value) {
  */
 int stochasticRounding(mpfr_t * v, mpfr_prec_t pre)
 {
-	printLine();
-	printLine();
-	printf("\nStart of rounding :\n");
-	m_print_wm((*v),"\tRounding  `v`=");
+	m_print_wm((*v),"\t\tRounding  `v`=");
 	printf(" at precision %ld",pre);
 
 	int error;
-	mpfr_t res;
-	m_init2(res, pre);
 
 	mpfr_prec_t currentPrecision = mpfr_get_prec(*v);
-	printf("\n Current precision is %ld",currentPrecision);
+	printf("\t Current precision is %ld",currentPrecision);
 
 	// v is a number of `currentPrecision` bits.
 	// res must be the value of `v` with precision `pre` ; rounded with stochastic rounding
@@ -79,7 +74,6 @@ int stochasticRounding(mpfr_t * v, mpfr_prec_t pre)
 		printf("\n\tCurrent precision (%ld) is lower than asked precision (%ld) ; exiting without rouding...",currentPrecision,pre);
 		error += mpfr_prec_round(*v,pre, MPFR_RNDN); // no problem in using RNDN ; because no rounding will be made
 		m_print_wm(*v,"\n\tResult is :");
-		m_clear(res);
 	} else {
 		// v is longer than the asked precision
 		mpfr_t lastDigits;
@@ -89,20 +83,60 @@ int stochasticRounding(mpfr_t * v, mpfr_prec_t pre)
 		m_init2(tempRound, pre);
 
 		mpfr_set(tempRound, *v, MPFR_RNDZ); // tempRound = <0.03>
-		m_print_wm(tempRound,"Rounded (tmp) value : ");
+		m_print_wm(tempRound,"\t\tRounded (tmp) value : ");
 		// /!\ Important : need to round toward zero in order to have an exact rounded value close to zero for last digits
 
 		mpfr_sub(lastDigits,*v, tempRound, MPFR_RNDN); // lastDigits = <0.0345> - <0.03>
-		m_print_wm(lastDigits,"Last digits : ");
+		m_print_wm(lastDigits,"\t\tLast digits : ");
 
 		// last digit is the part we won't keep in the resulting rounded value
 		// so it will be our base for the rounding choice
 
 		// right now we just have to :
 		// multiply lastDigits by its exponent
+		// -------------------------
+		// on n'aurait pas besoin du code qui suit en mettant simplement l'exposant de lastDigits à 0
+		/* mpz_t mantissa;
+		mpfr_get_z_2exp (mantissa, lastDigits);
+
+		mpfr_t mpfr_lastDigits;
+		m_init2(mpfr_lastDigits,(currentPrecision - pre));
+		mpfr_set_z (mpfr_lastDigits, mantissa, MPFR_RNDN);
+		mpfr_set_exp (mpfr_lastDigits, 0); // TODO A VERIFIER QUADRUPLE CHECKER
+
+		m_print_wm(mpfr_lastDigits,"Last digits after exp: ");*/
+		// -------------------------
+
+		mpfr_set_exp (lastDigits, 0); // TODO A VERIFIER QUADRUPLE CHECKER
+		//m_print_wm(lastDigits,"\nJuste pour la blague, lastDigits à l'exposant 0 ça donne quoi?");
+
 		// generate a random value between -0.5 and 0.5
 		// add this value to lastDigits
 		// round to nearest lastDigits
+
+		// --- OR ---
+
+		// equivalent to generate a random value between 0 and 1
+		mpfr_t randomValue;
+		m_init2(randomValue,(currentPrecision - pre));
+		gmp_randstate_t randState;
+		getRandstate(randState);
+		mpfr_urandomb(randomValue,randState);
+		// and see if it is greater than lastDigits or not
+		// if it is, round down, if it is not, round up
+		if ( mpfr_cmp ( lastDigits , randomValue ) > 0 ) {
+			// rounding up
+			printf("\n\t\t\tROUND UP");
+			mpfr_prec_round( *v , pre, MPFR_RNDU );
+		} else {
+			// rounding down
+			printf("\n\t\t\tROUND DOWN");
+			mpfr_prec_round( *v , pre, MPFR_RNDD );
+		}
+
+		m_clear(lastDigits);
+		m_clear(randomValue);
+		//m_clear(mpfr_lastDigits);
 	}
 
 	return error;
