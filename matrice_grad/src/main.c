@@ -33,13 +33,14 @@ int main( int argc, char *argv[] )  {
 		double desiredValue2 = 1.235;
 		mpfr_prec_t desiredPrecision = 5;
 		m_init2(number,numberPrecision);
+		//m_init2(*test,numberPrecision);
 		mpfr_set_d(number,value,MPFR_RNDN);
-		printf("\nAffichage du nombre avant opération (objectif %f) : ",value);
+		printf("\nAffichage du nombre avant opération :\n\t");
 		m_print(number);
 
 		stochasticRounding(&number,desiredPrecision);
 
-		printf("\nAffichage du nombre APRES opération (objectif %f ou %f) : ",desiredValue1,desiredValue2);
+		printf("\nAffichage du nombre APRES opération : \n\t");
 		m_print(number);
 
 		m_clear(number);

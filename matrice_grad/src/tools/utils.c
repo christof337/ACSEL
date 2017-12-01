@@ -1,10 +1,11 @@
 #include "utils.h"
 
 #include <stdio.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 #include <ctype.h>
 #include <assert.h>
 #include <string.h>
+#include <bsd/stdlib.h>
 
 char * toUpperCase(char * str, const int size) {
 	char * res = malloc(size * sizeof(char));
@@ -62,6 +63,12 @@ char** str_split(char* a_str, const char a_delim)
     return result;
 }
 
+void getRandstate(gmp_randstate_t randState) {
+	gmp_randinit_default(randState);
+	uint32_t val = arc4random();
+	//uint32_t arc4random(void)
+	gmp_randseed_ui (randState, val);
+}
 
 void printLine() {
 	printf("\n-----------\n");
