@@ -1,7 +1,10 @@
 #include <stdlib.h>
 #include <check.h>
+#include <mpfr.h>
+
 #include "../src/tools/arrayUtils.h"
 #include "../src/tools/customMath.h"
+
 
 #define RM m_getRoundingMode()
 

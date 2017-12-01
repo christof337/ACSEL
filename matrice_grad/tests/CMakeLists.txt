@@ -26,6 +26,7 @@ include_directories(${CHECK_INCLUDE_DIRS})
 set_target_properties(libmpfr PROPERTIES IMPORTED_LOCATION ${MPFR_LIB_PATH})
 set_target_properties(libgmp PROPERTIES IMPORTED_LOCATION ${GMP_LIB_PATH})
 
+
 # Array utils
 set(ARRAY_UTILS_TEST_SOURCES
   check_array_utils.c
@@ -36,7 +37,7 @@ target_link_libraries(check_array_utils tools
                                         ${CHECK_LIB_PATH}
 					${CHECK_LIBRARIES}
 					libmpfr.a
-                    libgmp.a)
+                                        libgmp.a)
 
 
 # Matrix utils
@@ -47,6 +48,20 @@ set(MATRIX_UTILS_TEST_SOURCES
 add_executable(check_matrix_utils ${MATRIX_UTILS_TEST_SOURCES})
 target_link_libraries(check_matrix_utils tools 
                                         ${CHECK_LIB_PATH}
-					${CHECK_LIBRARIES}
-					libmpfr.a
-                    libgmp.a)
+                                        ${CHECK_LIBRARIES}
+                                        libmpfr.a
+                                        libgmp.a)
+
+                                        
+# Custom math
+set(CUSTOM_MATH_TEST_SOURCES
+  check_custom_math.c
+)
+
+add_executable(check_custom_math ${CUSTOM_MATH_TEST_SOURCES})
+target_link_libraries(check_custom_math tools 
+                                        ${CHECK_LIB_PATH}
+                                        ${CHECK_LIBRARIES}
+                                        libmpfr.a
+                                        libgmp.a)
+                                        
