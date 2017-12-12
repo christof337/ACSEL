@@ -63,6 +63,7 @@ char** str_split(char* a_str, const char a_delim)
     return result;
 }
 
+
 /**
  * http://man.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man3/arc4random.3?query=arc4random%26sec=3
  * @param randState
@@ -72,6 +73,15 @@ void getRandstate(gmp_randstate_t randState) {
 	uint32_t val = arc4random();
 	//uint32_t arc4random(void)
 	gmp_randseed_ui (randState, val);
+}
+
+/*
+ * Envisager chaine de Markov ?
+ */
+void setRandomValue(mpfr_t * val) {
+	gmp_randstate_t randState;
+	getRandstate(randState);
+	mpfr_urandomb(*val,randState);
 }
 
 void printLine() {

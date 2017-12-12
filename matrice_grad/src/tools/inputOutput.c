@@ -145,3 +145,34 @@ int writeArray(mpfr_t * array, const int size,const char * fileName, const char 
 
    return 0;
 }
+
+FILE * openLog(const char * fileName) {
+	FILE * file;
+	int errnum;
+	file = fopen(fileName,"a");
+
+	 if ( file == NULL ) {
+	      // failed to open file
+	      errnum = errno;
+	      printError(errnum);
+	 }
+
+	 return file;
+}
+
+//void m_log(FILE * logFile, const char * str) {
+void m_log(FILE * logFile, FILE * str) { /*
+	if ( logFile != NULL ) {
+		fprintf(logFile,"%s",str);
+	}
+*/}
+
+int closeLog(FILE * fileToClose) {
+	if(fileToClose != NULL ) {
+		fclose(fileToClose);
+		return 0;
+	} else {
+		errorHandling();
+		return -1;
+	}
+}

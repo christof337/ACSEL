@@ -22,4 +22,13 @@ void m_print_wm(mpfr_t v, char * msg);
 
 mpfr_rnd_t m_getRoundingMode();
 
+int getLastDigits(mpfr_t * lastDigits, long int initialPrecision, long int precisionToRoundTo, mpfr_t valToRound);
+
+int generateRandomValueInPrecisionRange(mpfr_t * valToRound,
+		long int precision, mpfr_t maxValueInRange, int flagSign);
+
+int m_setPrecision(mpfr_t * v, mpfr_prec_t pre);
+
+void getMaxValue(mpfr_t * maxValue, mpfr_prec_t precision);
+
 #endif // CUSTOM_MATH_H
