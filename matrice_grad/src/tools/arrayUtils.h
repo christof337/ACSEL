@@ -5,7 +5,7 @@
 
 void createArray(mpfr_t ** result, const int n, mpfr_prec_t precision);
 
-int fillArrayWithZeros(mpfr_t * array, const int size) ;
+int fillArrayWithZeros(mpfr_t * array, const int size);
 
 int fillArrayWith(mpfr_t * array, const int size, mpfr_t fillWith);
 
@@ -13,9 +13,11 @@ int fillArrayLinearly(mpfr_t * array, const int size);
 
 int vectorMult(mpfr_t * res, mpfr_t * array1, const int size1, mpfr_t * array2, const int size2);
 
-int vectorPlusVector(mpfr_t * res, mpfr_t * vector1, const int size1, mpfr_t * vector2, const int size2);
+int vectorPlusVector(mpfr_t * res, mpfr_t * vector1, const int size1, mpfr_t * vector2,
+		const int size2);
 
-int vectorMinusVector(mpfr_t * res, mpfr_t * vector1, const int size1, mpfr_t * vector2, const int size2);
+int vectorMinusVector(mpfr_t * res, mpfr_t * vector1, const int size1, mpfr_t * vector2,
+		const int size2);
 
 int vectorCopy(mpfr_t * res, mpfr_t * vector, const int size);
 

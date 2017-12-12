@@ -36,9 +36,8 @@ int askTailleMatrice() {
 	do {
 		printf("\nTaille Matrice ?\n");
 		tailleMatrice = askForInt();
-	}while ( tailleMatrice <= 0 );
+	} while (tailleMatrice <= 0);
 }
-
 
 /**
  * Custom function used to bypass the fact that in our program we only have one
@@ -53,7 +52,7 @@ int askTailleMatrice() {
  *             values, < 0 if globally rounded downwards the exact values
  */
 int customMatrixMultVector(mpfr_t * result, mpfr_t ** matrix, mpfr_t * vector, const int size) {
-   return matrixMultVector(result, matrix, size, size, vector, size);
+	return matrixMultVector(result, matrix, size, size, vector, size);
 }
 
 /**
@@ -67,10 +66,9 @@ int customMatrixMultVector(mpfr_t * result, mpfr_t ** matrix, mpfr_t * vector, c
  */
 int writeMatrixInFile(mpfr_t ** matrix, const int n, const int m, const mpfr_prec_t precision) {
 	char fileName[20];
-	sprintf(fileName,"%s%ld%s",MATRIX_FILE_NAME,precision,MATRIX_EXTENSION);
-	return writeMatrix(matrix,n,m,fileName);
+	sprintf(fileName, "%s%ld%s", MATRIX_FILE_NAME, precision, MATRIX_EXTENSION);
+	return writeMatrix(matrix, n, m, fileName);
 }
-
 
 /**
  * @brief      Writes data in a file named `DATA_FILE_NAME`.
@@ -85,29 +83,20 @@ int writeMatrixInFile(mpfr_t ** matrix, const int n, const int m, const mpfr_pre
 int writeDataInFile(mpfr_t * x, mpfr_t * solgc, const int size, mpfr_prec_t precision) {
 	char fileName[20];
 
-	const char * labels[] = {
-		"i",
-		"x",
-		"solgc"
-	} ;
-	const int n_array = (sizeof(labels) / sizeof (const char *));
+	const char * labels[] = { "i", "x", "solgc" };
+	const int n_array = (sizeof(labels) / sizeof(const char *));
 
 	// i 
 	mpfr_t * iArray;
 	createArray(&iArray, size, precision);
-	fillArrayLinearly(iArray,size);
+	fillArrayLinearly(iArray, size);
 
-	mpfr_t * data[] = {
-		iArray,
-		x,
-		solgc
-	} ;
+	mpfr_t * data[] = { iArray, x, solgc };
 
-	sprintf(fileName,"%s%ld%s",DATA_FILE_NAME,precision,DATA_EXTENSION);
+	sprintf(fileName, "%s%ld%s", DATA_FILE_NAME, precision, DATA_EXTENSION);
 
 	return writeData(data, size, fileName, labels, n_array);
 }
-
 
 /**
  * @brief      Writes a gk array in file named `GK_FILE_NAME`.
@@ -121,18 +110,17 @@ int writeGkArrayInFile(mpfr_t * array, const int size, mpfr_prec_t precision) {
 	char fileName[19];
 	//sprintf(fileName,"%s%ld%s",GK_FILE_NAME,precision,GK_EXTENSION);
 	//TODO : spécifier les paramètres actuels de l'application dans le nom du fichier
-	sprintf(fileName,"%s%s",GK_FILE_NAME,GK_EXTENSION);
+	sprintf(fileName, "%s%s", GK_FILE_NAME, GK_EXTENSION);
 
-	if(precision == 2) {
+	if (precision == 2) {
 		// réinitialisation du fichier et écriture des en têtes
-	   FILE * pf;
-	   pf = fopen(fileName,"w+");
-       fprintf(pf,"i\t%12s\tprec\n",GK_LABEL);
-	   fclose(pf);
+		FILE * pf;
+		pf = fopen(fileName, "w+");
+		fprintf(pf, "i\t%12s\tprec\n", GK_LABEL);
+		fclose(pf);
 	}
 
-
-	return writeArray(array,size,fileName,GK_LABEL);
+	return writeArray(array, size, fileName, GK_LABEL);
 }
 
 /**

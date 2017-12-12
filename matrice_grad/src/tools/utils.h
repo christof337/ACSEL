@@ -12,6 +12,6 @@ void getRandstate(gmp_randstate_t randState);
 
 void setRandomValue(mpfr_t * val);
 
-void printLine(); 
+void printLine();
 
 #endif /* UTILS_H */

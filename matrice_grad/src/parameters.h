@@ -18,9 +18,9 @@ enum roundingModeEnum {
 	RNDN, // round to nearest (roundTiesToEven in IEEE 754-2008),
 	STOCHASTIC, // custom ;)
 	RNDZ, // round toward zero (roundTowardZero in IEEE 754-2008),
-    RNDU, // round toward plus infinity (roundTowardPositive in IEEE 754-2008),
-    RNDD, // round toward minus infinity (roundTowardNegative in IEEE 754-2008),
-    RNDA  // round away from zero. 
+	RNDU, // round toward plus infinity (roundTowardPositive in IEEE 754-2008),
+	RNDD, // round toward minus infinity (roundTowardNegative in IEEE 754-2008),
+	RNDA  // round away from zero.
 };
 
 /**
@@ -36,7 +36,12 @@ union defaultValueUnion {
 /**
  * @brief      Enum listing the different types of the default value of the params
  */
-enum type {DOUBLE, MATRIXTYPEENUM, LONGINT, ROUNDINGMODEENUM};
+enum type {
+	DOUBLE,
+	MATRIXTYPEENUM,
+	LONGINT,
+	ROUNDINGMODEENUM
+};
 
 /**
  * @brief      Main structure of this file. Contains all of the fields used to
@@ -44,30 +49,34 @@ enum type {DOUBLE, MATRIXTYPEENUM, LONGINT, ROUNDINGMODEENUM};
  *             Handle the default values.
  */
 struct Param {
-   char  name[50];
-   char shortName[10];
-   enum type typ_defaultValue;
-   union defaultValueUnion defaultValue;
-   char description[200];
-   int error;
-   unsigned int isDefault:1;
-   union defaultValueUnion currentValue;
+	char name[50];
+	char shortName[10];
+	enum type typ_defaultValue;
+	union defaultValueUnion defaultValue;
+	char description[200];
+	int error;
+	unsigned int isDefault :1;
+	union defaultValueUnion currentValue;
 };
 
 /**
  * @brief      List the different parameters used by this program.
  * param_min and param_max are used to loop through the enum
  */
-enum ParamEnum { param_min, 
-	MATRIX_SIZE = param_min, 
-	NB_ITER, MAX_PREC, ROUNDING_MODE, // add params before this comment
+enum ParamEnum {
+	param_min,
+	MATRIX_SIZE = param_min,
+	NB_ITER,
+	MAX_PREC,
+	ROUNDING_MODE, // add params before this comment
 	MATRIX_TYPE,
 	param_max = MATRIX_TYPE,
-	PARAM_ENUM_ERROR };
+	PARAM_ENUM_ERROR
+};
 
-int initParams(char * appName) ;
+int initParams(char * appName);
 
-int handleParams( int argc, char *argv[] ) ;
+int handleParams(int argc, char *argv[]);
 
 int assignValueToParam(struct Param * param, char * strValue);
 
@@ -78,9 +87,9 @@ enum ParamEnum getParamEnumFromString(char * paramName);
 void paramAdressInit();
 
 // ROUNDING MODE
-enum roundingModeEnum stringToRoundingModeEnum(char * string, const int size) ;
+enum roundingModeEnum stringToRoundingModeEnum(char * string, const int size);
 
-mpfr_rnd_t roundingModeEnumToMpfrRndT(enum roundingModeEnum e) ;
+mpfr_rnd_t roundingModeEnumToMpfrRndT(enum roundingModeEnum e);
 
 // mpfr_rnd_t m_getRoundingMode();
 
@@ -89,11 +98,11 @@ void printParam(struct Param param);
 
 void printParametersFull();
 
-void printParametersShort(); 
+void printParametersShort();
 
-void printParamEnum(enum ParamEnum pe) ;
+void printParamEnum(enum ParamEnum pe);
 
-void printDefaultValue( enum type dvtype, union defaultValueUnion dv ) ;
+void printDefaultValue(enum type dvtype, union defaultValueUnion dv);
 
 // HELP
 
@@ -102,6 +111,5 @@ void printHelp();
 void printParamHelp(enum ParamEnum param);
 
 void printRoundingModeHelp();
-
 
 #endif /* PARAMETERS_H */

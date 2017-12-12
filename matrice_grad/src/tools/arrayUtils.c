@@ -9,7 +9,6 @@
 
 #include "customMath.h"
 
-
 #define RM m_getRoundingMode()
 
 /**
@@ -37,14 +36,14 @@
  */
 void createArray(mpfr_t ** result, const int n, mpfr_prec_t precision) {
 	mpfr_t tmp;
-	m_init2(tmp,precision);
-    (*result) = malloc(n * sizeof(tmp));
-    if((*result) == NULL) {
-  		fprintf(stderr, "Error - unable to allocate required memory\n");
-  	} else {
-	  	for (int i = 0 ; i < n ; ++i ) {
-	  		m_init2((*result)[i],precision);
-	  	}
+	m_init2(tmp, precision);
+	(*result) = malloc(n * sizeof(tmp));
+	if ((*result) == NULL) {
+		fprintf(stderr, "Error - unable to allocate required memory\n");
+	} else {
+		for (int i = 0 ; i < n ; ++i) {
+			m_init2((*result)[i], precision);
+		}
 	}
 }
 
@@ -61,9 +60,9 @@ void createArray(mpfr_t ** result, const int n, mpfr_prec_t precision) {
 int fillArrayWithZeros(mpfr_t * array, const int size) {
 	int err = 0;
 	mpfr_t zero;
-	m_init2(zero,mpfr_get_prec(array[0]));
+	m_init2(zero, mpfr_get_prec(array[0]));
 
-	mpfr_set_d(zero,0.0,RM);
+	mpfr_set_d(zero, 0.0, RM);
 
 	err = fillArrayWith(array, size, zero);
 
@@ -84,10 +83,10 @@ int fillArrayWithZeros(mpfr_t * array, const int size) {
  * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
  *             values, < 0 if globally rounded downwards the exact values
  */
-int fillArrayWith(mpfr_t * array, const int size, mpfr_t fillWith) {   
+int fillArrayWith(mpfr_t * array, const int size, mpfr_t fillWith) {
 	int err = 0;
-	for ( int i = 0 ; i < size ; ++i ) {
-		err += mpfr_set(array[i],fillWith, RM) ;
+	for (int i = 0 ; i < size ; ++i) {
+		err += mpfr_set(array[i], fillWith, RM);
 	}
 	return err;
 }
@@ -103,8 +102,8 @@ int fillArrayWith(mpfr_t * array, const int size, mpfr_t fillWith) {
  */
 int fillArrayLinearly(mpfr_t * array, const int size) {
 	int err = 0;
-	for ( long int i = 0 ; i < size ; ++i ) {
-		err += mpfr_set_si(array[i], i+1, RM);
+	for (long int i = 0 ; i < size ; ++i) {
+		err += mpfr_set_si(array[i], i + 1, RM);
 	}
 	return err;
 }
@@ -126,8 +125,8 @@ int fillArrayLinearly(mpfr_t * array, const int size) {
  *             values, < 0 if globally rounded downwards the exact values
  */
 int vectorMult(mpfr_t * result, mpfr_t * array1, const int size1, mpfr_t * array2, const int size2) {
-	int err = 0 ;
-	for ( int i = 0 ; i < size1 ; ++i ) {
+	int err = 0;
+	for (int i = 0 ; i < size1 ; ++i) {
 		err += m_mul(result[i], array1[i], array2[i], RM);
 	}
 	return err;
@@ -147,9 +146,10 @@ int vectorMult(mpfr_t * result, mpfr_t * array1, const int size1, mpfr_t * array
  * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
  *             values, < 0 if globally rounded downwards the exact values
  */
-int vectorPlusVector(mpfr_t * result, mpfr_t * vector1, const int size1, mpfr_t * vector2, const int size2) {
-	int err = 0 ;
-	for ( int i = 0 ; i < size1 ; ++i ) {
+int vectorPlusVector(mpfr_t * result, mpfr_t * vector1, const int size1, mpfr_t * vector2,
+		const int size2) {
+	int err = 0;
+	for (int i = 0 ; i < size1 ; ++i) {
 		err += mpfr_add(result[i], vector1[i], vector2[i], RM);
 	}
 	return err;
@@ -169,28 +169,29 @@ int vectorPlusVector(mpfr_t * result, mpfr_t * vector1, const int size1, mpfr_t 
  * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
  *             values, < 0 if globally rounded downwards the exact values
  */
-int vectorMinusVector(mpfr_t * result, mpfr_t * vector1, const int size1, mpfr_t * vector2, const int size2) {
-	int err = 0 ;
-	for ( int i = 0 ; i < size1 ; ++i ) {
+int vectorMinusVector(mpfr_t * result, mpfr_t * vector1, const int size1, mpfr_t * vector2,
+		const int size2) {
+	int err = 0;
+	for (int i = 0 ; i < size1 ; ++i) {
 		err += mpfr_sub(result[i], vector1[i], vector2[i], RM);
 	}
 	return err;
 }
 
 /**
-  * @brief 	   Copy vector into result
-  *
-  * @param      result  The result. must be of size `size`, and initialized
-  * @param      vector  The vector to copy
-  * @param[in]  size    The size of `vector`. Must be > 0
-  *
-  * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
-  *             values, < 0 if globally rounded downwards the exact values
-  */
+ * @brief 	   Copy vector into result
+ *
+ * @param      result  The result. must be of size `size`, and initialized
+ * @param      vector  The vector to copy
+ * @param[in]  size    The size of `vector`. Must be > 0
+ *
+ * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
+ *             values, < 0 if globally rounded downwards the exact values
+ */
 int vectorCopy(mpfr_t * result, mpfr_t * vector, const int size) {
 	int err = 0;
-	for ( int i = 0 ; i < size ; ++i ) {
-		err += mpfr_set(result[i],vector[i],RM);
+	for (int i = 0 ; i < size ; ++i) {
+		err += mpfr_set(result[i], vector[i], RM);
 	}
 	return err;
 }
@@ -206,7 +207,7 @@ int vectorCopy(mpfr_t * result, mpfr_t * vector, const int size) {
  *             values, < 0 if globally rounded downwards the exact values
  */
 int innerDotProduct(mpfr_t result, mpfr_t * vector, const int size) {
-	return dotProduct(result,vector,size,vector,size);
+	return dotProduct(result, vector, size, vector, size);
 }
 
 /**
@@ -228,14 +229,14 @@ int dotProduct(mpfr_t product, mpfr_t * vector1, const int size1, mpfr_t * vecto
 	mpfr_prec_t prec = mpfr_get_prec(product);
 	mpfr_t t;
 
-	m_init2(t,prec);
+	m_init2(t, prec);
 
-	mpfr_set_d(product,0.0,RM); // product = 0;
+	mpfr_set_d(product, 0.0, RM); // product = 0;
 
-	for ( int i = 0 ; i < size1 ; ++i ) {
+	for (int i = 0 ; i < size1 ; ++i) {
 		//product += vector1[i]*vector2[i];
-		err += m_mul(t,vector1[i],vector2[i],RM);
-		err += mpfr_add(product,product,t,RM);
+		err += m_mul(t, vector1[i], vector2[i], RM);
+		err += mpfr_add(product, product, t, RM);
 	}
 
 	m_clear(t);
@@ -257,9 +258,9 @@ int dotProduct(mpfr_t product, mpfr_t * vector1, const int size1, mpfr_t * vecto
 int vectorMultValue(mpfr_t * result, mpfr_t * vector, const int size, mpfr_t value) {
 	int err = 0;
 
-	for ( int i = 0 ; i < size ; ++i ) {
+	for (int i = 0 ; i < size ; ++i) {
 		// result[i] = vector[i] * value;
-		err += m_mul(result[i],vector[i],value,RM);
+		err += m_mul(result[i], vector[i], value, RM);
 	}
 
 	return err;
@@ -278,23 +279,23 @@ int vectorMultValue(mpfr_t * result, mpfr_t * vector, const int size, mpfr_t val
 int sumSquare(mpfr_t result, mpfr_t * vector, const int size) {
 	int err = 0;
 	mpfr_prec_t prec = mpfr_get_prec(result);
-	mpfr_t t,exp;
+	mpfr_t t, exp;
 
 	mpfr_inits2(prec, t, exp, (mpfr_ptr) NULL);
 
-	mpfr_set_d(exp,2.0,RM);
+	mpfr_set_d(exp, 2.0, RM);
 
 	mpfr_set_d(result, 0.0, RM); // result = 0
-	
-	for ( int i = 0 ; i < size ; ++i ) {
+
+	for (int i = 0 ; i < size ; ++i) {
 		// result += pow(vector[i],2);
-		err += mpfr_pow(t,vector[i],exp, RM);
-        err += mpfr_add(result, result, t, RM); 
-    }
+		err += mpfr_pow(t, vector[i], exp, RM);
+		err += mpfr_add(result, result, t, RM);
+	}
 
-    mpfr_clears(t,exp,(mpfr_ptr)NULL);
+	mpfr_clears(t, exp, (mpfr_ptr) NULL);
 
-    return err;
+	return err;
 }
 
 /**
@@ -305,9 +306,9 @@ int sumSquare(mpfr_t result, mpfr_t * vector, const int size) {
  * @param[in]  size   The number of elements to print
  */
 void printArray(mpfr_t * array, const int size) {
-	for ( int i = 0 ; i < size ; ++i ) {
-		printf("[%d] : ",i);
-		mpfr_printf("%G \n",array[i]);
+	for (int i = 0 ; i < size ; ++i) {
+		printf("[%d] : ", i);
+		mpfr_printf("%G \n", array[i]);
 	}
 }
 
@@ -318,7 +319,7 @@ void printArray(mpfr_t * array, const int size) {
  * @param[in]  size   The size of the array
  */
 void freeArray(mpfr_t * array, const int size) {
-	for ( int i = 0 ; i < size ; ++i ) {
+	for (int i = 0 ; i < size ; ++i) {
 		m_clear(array[i]);
 	}
 	free(array);
