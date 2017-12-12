@@ -7,6 +7,13 @@
 #include <string.h>
 #include <bsd/stdlib.h>
 
+/**
+ * Return the uppercase string of the given `str`.
+ * Result must be freed afterwards.
+ * @param str	The string to up
+ * @param size	The size of `str`
+ * @return		A new string uppercase of `str`
+ */
 char * toUpperCase(char * str, const int size) {
 	char * res = malloc(size * sizeof(char));
 	for ( int i = 0 ; i < size ; ++i ) {
@@ -15,6 +22,12 @@ char * toUpperCase(char * str, const int size) {
 	return res;
 }
 
+/**
+ * Split the string `a_str` with the given delimiter
+ * @param a_str		The string to split
+ * @param a_delim	The delimiter around which split
+ * @return			An array of strings, splitted from a_str with a_delim
+ */
 char** str_split(char* a_str, const char a_delim)
 {
     char** result    = 0;
@@ -65,8 +78,9 @@ char** str_split(char* a_str, const char a_delim)
 
 
 /**
+ * Init and seed the given randState a specific randstate.
  * http://man.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man3/arc4random.3?query=arc4random%26sec=3
- * @param randState
+ * @param randState	The randstate to init and seed
  */
 void getRandstate(gmp_randstate_t randState) {
 	gmp_randinit_default(randState);
@@ -75,6 +89,11 @@ void getRandstate(gmp_randstate_t randState) {
 	gmp_randseed_ui (randState, val);
 }
 
+/**
+ *	Put a random value between 0 and 1 in `val` using gmp_randstate and mpfr_urandomb.
+ *	TODO : enable multiple random seeding.
+ * @param val 	The value to randomize
+ */
 /*
  * Envisager chaine de Markov ?
  */
@@ -84,6 +103,9 @@ void setRandomValue(mpfr_t * val) {
 	mpfr_urandomb(*val,randState);
 }
 
+/**
+ * Simply print a line with one charriot return before and one after on the standard output.
+ */
 void printLine() {
 	printf("\n-----------\n");
 }
