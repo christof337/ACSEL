@@ -158,8 +158,8 @@ int test_stochastic_rounding() {
 					// on détermine la valeur attendue (pourcentage d'arrondis vers le haut, pourcentage d'arrondis vers le bas)
 
 					mpfr_t lastDigits;
-					getLastDigits(&lastDigits, initialPrecision,
-							precisionToRoundTo, valToRound);
+					getLastDigits(&lastDigits, valToRound, initialPrecision,
+							precisionToRoundTo);
 
 					long int nbRoundUp = 0;
 
