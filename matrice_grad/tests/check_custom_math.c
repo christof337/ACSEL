@@ -62,7 +62,7 @@ START_TEST(test_m_init2)
 
 START_TEST(test_stochastic_rounding)
 	{
-		logFile = openLog(LOG_FILE_NAME);
+//		logFile = openLog(LOG_FILE_NAME);
 		char logBuffer[1000];
 		int res = 0;
 		long int initialPrecision = _i;
@@ -75,23 +75,23 @@ START_TEST(test_stochastic_rounding)
 		m_init2(mInitPrec, mpfr_get_default_prec());
 		mpfr_set_si(mInitPrec, initialPrecision, MPFR_RNDN);
 
-		sprintf(logBuffer, "\n[%ld] - Start of stochastic rounding test for precision `%ld` ...\n",
-				initialPrecision, initialPrecision);
-		m_log(logFile, logBuffer);
+//		sprintf(logBuffer, "\n[%ld] - Start of stochastic rounding test for precision `%ld` ...\n",
+//				initialPrecision, initialPrecision);
+//		m_log(logFile, logBuffer);
 		sprintf(logBuffer, "[%ld] - Begin of changing the target precision...\n", initialPrecision);
-		m_log(logFile, logBuffer);
+//		m_log(logFile, logBuffer);
 
 		for (long int precisionToRoundTo = MPFR_PREC_MIN ; precisionToRoundTo <= MPFR_PREC_MAX ;
 				++precisionToRoundTo) {
-			sprintf(logBuffer, "[%ld]\t[%ld] - Target precision is now `%ld`\n", initialPrecision,
-					precisionToRoundTo, precisionToRoundTo);
-			m_log(logFile, logBuffer);
+//			sprintf(logBuffer, "[%ld]\t[%ld] - Target precision is now `%ld`\n", initialPrecision,
+//					precisionToRoundTo, precisionToRoundTo);
+//			m_log(logFile, logBuffer);
 			int flagSign = 0;
 			m_init2(valToRound, initialPrecision);
 
 			sprintf(logBuffer, "[%ld]\t[%ld] - Begin of changing the values...\n", initialPrecision,
 					precisionToRoundTo);
-			m_log(logFile, logBuffer);
+//			m_log(logFile, logBuffer);
 			// on va tester plusieurs valeurs
 			for (int j = 0 ; j < NB_VALUES ; ++j) {
 				char logCurrentVal[12];
@@ -100,7 +100,7 @@ START_TEST(test_stochastic_rounding)
 				// on pick une value aléatoire (entre 0 et 1)
 				mpfr_t tmpRnd;
 				m_init2(tmpRnd, initialPrecision);
-				setRandomValue(tmpRnd);
+				setRandomValue(&tmpRnd);
 
 				// on la multiplie par le maximum représentable à la précision initialPrecision //`min(initialPrecision,precisionToRoundTo)`
 				mpfr_t maxValue;
@@ -116,7 +116,7 @@ START_TEST(test_stochastic_rounding)
 				mpfr_sprintf(logCurrentVal, "%.8f", valToRound);
 				sprintf(logBuffer, "[%ld]\t[%ld]\tStarting to test the value `%s`\n",
 						initialPrecision, precisionToRoundTo, logCurrentVal);
-				m_log(logFile, logBuffer);
+//				m_log(logFile, logBuffer);
 
 				mpfr_t actualResult;
 				m_init2(actualResult, initialPrecision);
@@ -128,7 +128,7 @@ START_TEST(test_stochastic_rounding)
 							"-----[%ld]\t[%ld]\t{%s} - Target precision (%ld) is greater than initialPrecision (%ld). Simple rounding.\n",
 							initialPrecision, precisionToRoundTo, logCurrentVal, precisionToRoundTo,
 							initialPrecision);
-					m_log(logFile, logBuffer);
+//					m_log(logFile, logBuffer);
 					stochasticRounding(&actualResult, precisionToRoundTo);
 					// simple rounding (filling with zeros actually)
 					mpfr_prec_round(valToRound, precisionToRoundTo, MPFR_RNDN); // no problem in using RNDN ;
@@ -160,7 +160,7 @@ START_TEST(test_stochastic_rounding)
 					sprintf(logBuffer,
 							"[%ld]\t[%ld]\t{%s} - Begin of loop over multiple stochastic roundings...\n",
 							initialPrecision, precisionToRoundTo, logCurrentVal);
-					m_log(logFile, logBuffer);
+//					m_log(logFile, logBuffer);
 					for (int k = 0 ; k < NB_ITER ; ++k) {
 						int roundingDirection;
 						m_init2(actualResult, initialPrecision);
@@ -195,7 +195,7 @@ START_TEST(test_stochastic_rounding)
 							initialPrecision, precisionToRoundTo, logCurrentVal, nbRoundUp, NB_ITER,
 							mpfr_get_d(actualPctRoundUp, MPFR_RNDN) * 100, "%",
 							mpfr_get_d(expectedPctRoundUp, MPFR_RNDN) * 100, "%");
-					m_log(logFile, logBuffer);
+//					m_log(logFile, logBuffer);
 					ck_assert(
 							mpfr_greaterequal_p(actualPctRoundUp, lowerBound)
 									|| mpfr_lessequal_p(actualPctRoundUp, upperBound));
@@ -212,7 +212,7 @@ START_TEST(test_stochastic_rounding)
 		m_clear(mInitPrec);
 		//}
 
-		closeLog(logFile);
+//		closeLog(logFile);
 		// on refait ça pour la précision initiale suivante
 	}END_TEST
 
