@@ -94,10 +94,10 @@ void getRandstate(gmp_randstate_t randState) {
  *	TODO : enable multiple random seeding.
  * @param val 	The value to randomize
  */
-/*
- * Envisager chaine de Markov ?
- */
 void setRandomValue(mpfr_t * val) {
+	/*
+	 * Envisager chaine de Markov ?
+	 */
 	gmp_randstate_t randState;
 	getRandstate(randState);
 	mpfr_urandomb(*val,randState);
