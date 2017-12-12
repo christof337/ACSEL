@@ -222,7 +222,7 @@ void getMaxValue(mpfr_t * maxValue, const mpfr_prec_t precision) {
 	mpfr_t mPrec;
 	m_init2(mPrec, mpfr_get_default_prec());
 	mpfr_set_si(mPrec, precision, MPFR_RNDN);
-	m_init2(*maxValue, max(precision, MPFR_PREC_MIN));// max needed in order not to throw an exception when initializing
+	m_init2(*maxValue, max(precision, MPFR_PREC_MIN)); // max needed in order not to throw an exception when initializing
 	// getting the highest possible value for the initialPrecision range
 	mpfr_exp2(*maxValue, mPrec, MPFR_RNDN);
 

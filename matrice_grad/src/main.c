@@ -16,14 +16,14 @@
 
 #define PRECISION_MIN MPFR_PREC_MIN // 2
 
-#define DEBUG 1
+#define DEBUG 0
 
 // compilation : ../make
 // ce code est inspiré du programme "matrice_grad".
 // l'objectif est de faire varier la précision pour observer le comportement de réduction du gradient 
 
-int main( int argc, char *argv[] )  {
-	   int state = 0;
+int main(int argc, char *argv[]) {
+	int state = 0;
 	if (DEBUG) {
 		// test
 		mpfr_t number;
@@ -32,253 +32,266 @@ int main( int argc, char *argv[] )  {
 		double desiredValue1 = 1.234;
 		double desiredValue2 = 1.235;
 		mpfr_prec_t desiredPrecision = 5;
-		m_init2(number,numberPrecision);
+		m_init2(number, numberPrecision);
 		//m_init2(*test,numberPrecision);
-		mpfr_set_d(number,value,MPFR_RNDN);
+		mpfr_set_d(number, value, MPFR_RNDN);
 		printf("\nAffichage du nombre avant opération :\n\t");
 		m_print(number);
 
-		stochasticRounding(&number,desiredPrecision);
+		stochasticRounding(&number, desiredPrecision);
 
 		printf("\nAffichage du nombre APRES opération : \n\t");
 		m_print(number);
 
 		m_clear(number);
-	}else {
+	} else {
 
+		char * appName = argv[0];
+		int hasInitializeParams = initParams(appName);
+		if (hasInitializeParams != 0) {
+			printErrorMessage("Error while initializing application parameters.\n");
+			state = -1;
+		} else {
+			printf("\nHandling parameters...");
+			fflush(stdout);
+			state = handleParams(argc, argv);
+			if (state != 0 && state != 1) {
+				printErrorMessage("\nInput error. Abort execution.\n");
+			} else if (state != 1) {
+				// printParam(getParamFromParamEnum(MATRIX_SIZE));
 
+				// DECLARATIONS
+				// getting the params from param enum :
+				// enum paramsEnum { MATRIX_SIZE, NB_ITER, MAX_PREC, ROUNDING_MODE, MATRIX_TYPE};
+				const int NB_GRAD = getParamFromParamEnum(NB_ITER)->currentValue.li; // nombre d'itérations du gradient
 
-   char * appName = argv[0];
-   int hasInitializeParams = initParams(appName);
-   if( hasInitializeParams != 0 ) {
-      printErrorMessage("Error while initializing application parameters.\n");
-      state = -1;
-   }else {
-      printf("\nHandling parameters...");
-      state = handleParams(argc,argv);
-      if ( state != 0 && state != 1 ) {
-         printErrorMessage("\nInput error. Abort execution.\n");
-      } else if ( state != 1 ) {
-         // printParam(getParamFromParamEnum(MATRIX_SIZE));
+				const int M_SIZE = getParamFromParamEnum(MATRIX_SIZE)->currentValue.li;
 
-      	// DECLARATIONS
-         // getting the params from param enum : 
-            // enum paramsEnum { MATRIX_SIZE, NB_ITER, MAX_PREC, ROUNDING_MODE, MATRIX_TYPE}; 
-         const int NB_GRAD = getParamFromParamEnum(NB_ITER)->currentValue.li; // nombre d'itérations du gradient
+				const int RANGE_PRECISION = getParamFromParamEnum(MAX_PREC)->currentValue.li; // précision maximum utilisée TODO : la passer en paramètre du programme
 
-         const int M_SIZE = getParamFromParamEnum(MATRIX_SIZE)->currentValue.li;
+				const mpfr_rnd_t RM = roundingModeEnumToMpfrRndT(
+						getParamFromParamEnum(MAX_PREC)->currentValue.rme);
 
-         const int RANGE_PRECISION = getParamFromParamEnum(MAX_PREC)->currentValue.li; // précision maximum utilisée TODO : la passer en paramètre du programme
-         
-         const mpfr_rnd_t RM = roundingModeEnumToMpfrRndT(getParamFromParamEnum(MAX_PREC)->currentValue.rme);
+				StartTimer();
 
+				printf("\nDébut programme...");
+				printf("\nParamètres :");
+				printf("\n\tNombre d'itérations : %d", NB_GRAD);
+				printf("\n\tTaille de la matrice : %d", M_SIZE);
+				printf("\n\tPlage de précisions traitée : [%d,%d]\n", PRECISION_MIN,
+						RANGE_PRECISION);
 
-         StartTimer();
+				printf("\nAppuyez sur une touche pour lancer le programme...");
+				getchar();
 
-         printf("\nDébut programme...");
-         printf("\nParamètres :");
-         printf("\n\tNombre d'itérations : %d",NB_GRAD);
-         printf("\n\tTaille de la matrice : %d",M_SIZE);
-         printf("\n\tPlage de précisions traitée : [%d,%d]\n",PRECISION_MIN, RANGE_PRECISION);
+				// DECLARATIONS DES TABLEAUX
+				mpfr_t ** a;         // a
+				mpfr_t * x;          // x
+				mpfr_t * solgc;
+				mpfr_t * gkgk2save;
 
-         printf("\nAppuyez sur une touche pour lancer le programme...");
-         getchar();
+				mpfr_t * b;          // b
+				mpfr_t * gk;         // gk : gradient conjugué?
+				mpfr_t * gkTmp;      // gk temporaire
+				mpfr_t * dk;         // dk : ?
+				mpfr_t * adk;        // adk : ?
 
-         // DECLARATIONS DES TABLEAUX
-         mpfr_t ** a;         // a
-         mpfr_t * x;          // x
-         mpfr_t * solgc;
-         mpfr_t * gkgk2save;
+				mpfr_t gkGkTmp1;
+				mpfr_t adkDkTmp;
+				mpfr_t alphak;
+				mpfr_t gkgk2;
+				mpfr_t gkGkTmp2;
+				mpfr_t betak;
 
-         mpfr_t * b;          // b
-         mpfr_t * gk;         // gk : gradient conjugué?
-         mpfr_t * gkTmp;      // gk temporaire
-         mpfr_t * dk;         // dk : ? 
-         mpfr_t * adk;        // adk : ? 
+				mpfr_t * dkAlphakTmp;
+				mpfr_t * adkAlphakTmp;
+				mpfr_t * dkBetaKTmp;
 
-         mpfr_t gkGkTmp1;
-         mpfr_t adkDkTmp;
-         mpfr_t alphak;
-         mpfr_t gkgk2;
-         mpfr_t gkGkTmp2;
-         mpfr_t betak;
+				printf("\nDébut boucle principale itérant sur les précisions (non parrallélisée)");
 
-         mpfr_t * dkAlphakTmp;
-         mpfr_t * adkAlphakTmp;
-         mpfr_t * dkBetaKTmp;
+				// DEBUT BOUCLE ( entièrement parralélisable )
+				for (int pre = PRECISION_MIN ; pre < RANGE_PRECISION ; ++pre) {
+					printf("\n------\tBoucle precision [%d]\t------", pre);
+					printf("\n[%d]", pre);
+					fflush(stdout);
+					// INITIALISATIONS
+					printf("\n\tInitialisation des tableaux");
+					fflush(stdout);
+					// ALLOCATIONS
+					createArray(&x, M_SIZE, pre);
+					createMatrix(&a, M_SIZE, M_SIZE, pre);
 
-         printf("\nDébut boucle principale itérant sur les précisions (non parrallélisée)");
+					createArray(&solgc, M_SIZE, pre);
+					createArray(&b, M_SIZE, pre);
+					createArray(&gkTmp, M_SIZE, pre);
+					createArray(&gk, M_SIZE, pre);
+					createArray(&dk, M_SIZE, pre);
+					createArray(&adk, M_SIZE, pre);
 
-         // DEBUT BOUCLE ( entièrement parralélisable )
-         for (int pre = PRECISION_MIN ; pre < RANGE_PRECISION ; ++pre ) {
-            printf("\n------\tBoucle precision [%d]\t------",pre);
-            printf("\n[%d]",pre);
+					createArray(&gkgk2save, NB_GRAD, pre);
 
-         	// INITIALISATIONS
-            printf("\n\tInitialisation des tableaux");
-            // ALLOCATIONS
-            createArray(&x,M_SIZE,pre); 
-            createMatrix(&a,M_SIZE, M_SIZE,pre);
+					printf("\n\tAllocation des variables MPFR");
+					fflush(stdout);
+					m_init2(gkGkTmp1, pre);
+					m_init2(adkDkTmp, pre);
+					m_init2(alphak, pre);
+					m_init2(gkgk2, pre);
+					m_init2(gkGkTmp2, pre);
+					m_init2(betak, pre);
 
-            createArray(&solgc,M_SIZE,pre);
-            createArray(&b,M_SIZE,pre);
-            createArray(&gkTmp,M_SIZE,pre);
-            createArray(&gk,M_SIZE,pre);
-            createArray(&dk,M_SIZE,pre);
-            createArray(&adk,M_SIZE,pre);
+					printf("\n\tInitialisation des tableaux temporaires");
+					fflush(stdout);
+					createArray(&dkAlphakTmp, M_SIZE, pre);
+					createArray(&adkAlphakTmp, M_SIZE, pre);
+					createArray(&dkBetaKTmp, M_SIZE, pre);
 
-            createArray(&gkgk2save,NB_GRAD,pre);
+					printf("\n\tRemplissage des tableaux");
+					fflush(stdout);
+					// initialisation de a
+					fillMatrixExponentially(a, M_SIZE, M_SIZE);
 
-            printf("\n\tAllocation des variables MPFR");
-            m_init2(gkGkTmp1,pre);
-            m_init2(adkDkTmp,pre);
-            m_init2(alphak,pre);
-            m_init2(gkgk2,pre);
-            m_init2(gkGkTmp2,pre);
-            m_init2(betak,pre);
+					// initialisation de x linéairement
+					fillArrayLinearly(x, M_SIZE);
 
-            printf("\n\tInitialisation des tableaux temporaires");
-            createArray(&dkAlphakTmp,M_SIZE,pre);
-            createArray(&adkAlphakTmp,M_SIZE,pre);
-            createArray(&dkBetaKTmp,M_SIZE,pre);
+					printf("\n\tDébut des calculs");
+					fflush(stdout);
 
-            printf("\n\tRemplissage des tableaux");
-            // initialisation de a
-            fillMatrixExponentially(a, M_SIZE, M_SIZE);
+					// on multiplie a et x ( B = AX )
+					customMatrixMultVector(b, a, x, M_SIZE);
 
-            // initialisation de x linéairement
-            fillArrayLinearly(x, M_SIZE);
+					fillArrayWithZeros(solgc, M_SIZE);
 
-            printf("\n\tDébut des calculs");
+					// on se propose de réaliser une inversion par minimisation d'énergie (descente de gradient)
+					// gradient conjugué
+					// GK = A * XX - B
+					customMatrixMultVector(gkTmp, a, solgc, M_SIZE);
+					vectorMinusVector(gk, gkTmp, M_SIZE, b, M_SIZE);
 
-            // on multiplie a et x ( B = AX )
-            customMatrixMultVector(b, a, x, M_SIZE);
+					// DK = GK
+					vectorCopy(dk, gk, M_SIZE);
 
-            fillArrayWithZeros(solgc, M_SIZE);
+					printf("\n\t-- Itérations du gradient... --");
+					fflush(stdout);
+					// on itère sur le nombre d'itérations déterminé par NB_GRAD
+					for (int iter = 0 ; iter < NB_GRAD ; ++iter) {
+						// ADK = A * DK
+						customMatrixMultVector(adk, a, dk, M_SIZE);
+						// GKGK = GK * GK
+						innerDotProduct(gkGkTmp1, gk, M_SIZE); // gkgk
 
-            // on se propose de réaliser une inversion par minimisation d'énergie (descente de gradient)
-            // gradient conjugué
-            // GK = A * XX - B
-            customMatrixMultVector(gkTmp,a,solgc,M_SIZE);
-            vectorMinusVector(gk, gkTmp, M_SIZE, b, M_SIZE);
+						// ADKDK = ADK * DK
+						dotProduct(adkDkTmp, adk, M_SIZE, dk, M_SIZE); // adkdk
+						// AlphaK = GKGK / ADKDK ==> AlphaK = (GK*GK)/(ADK*DK)
+						m_div(alphak, gkGkTmp1, adkDkTmp, RM);
 
-            // DK = GK
-            vectorCopy(dk, gk, M_SIZE);
+						// XX = XX - AlphaK * DK
+						vectorMultValue(dkAlphakTmp, dk, M_SIZE, alphak);
+						vectorMinusVector(solgc, solgc, M_SIZE, dkAlphakTmp, M_SIZE);
 
-            printf("\n\t-- Itérations du gradient... --");
-            // on itère sur le nombre d'itérations déterminé par NB_GRAD
-            for ( int iter = 0 ; iter < NB_GRAD ; ++iter ) {
-               // ADK = A * DK
-               customMatrixMultVector(adk, a, dk, M_SIZE);
-               // GKGK = GK * GK
-               innerDotProduct(gkGkTmp1, gk, M_SIZE); // gkgk
+						// GK = GK - AlphaK * ADK
+						vectorMultValue(adkAlphakTmp, adk, M_SIZE, alphak);
+						vectorMinusVector(gk, gk, M_SIZE, adkAlphakTmp, M_SIZE);
 
-               // ADKDK = ADK * DK
-               dotProduct(adkDkTmp, adk, M_SIZE, dk, M_SIZE); // adkdk
-               // AlphaK = GKGK / ADKDK ==> AlphaK = (GK*GK)/(ADK*DK)
-               m_div(alphak,gkGkTmp1,adkDkTmp,RM);
+						// gkgk2 = sqrt of (square sum of gk elements)
+						sumSquare(gkgk2, gk, M_SIZE);
+						mpfr_sqrt(gkgk2, gkgk2, RM);
+						// GKGK = GK*GK
+						innerDotProduct(gkGkTmp2, gk, M_SIZE); // pertinent car changements réalisés sur gk depuis gkgkTmp1
+						m_div(betak, gkGkTmp2, gkGkTmp1, RM);
+						// DK = GK + BetaK*DK
+						vectorMultValue(dkBetaKTmp, dk, M_SIZE, betak);
+						vectorPlusVector(dk, gk, M_SIZE, dkBetaKTmp, M_SIZE);
 
-               // XX = XX - AlphaK * DK
-               vectorMultValue(dkAlphakTmp, dk, M_SIZE, alphak);
-               vectorMinusVector(solgc, solgc, M_SIZE, dkAlphakTmp, M_SIZE);
+						// sauvegarde
+						mpfr_set(gkgk2save[iter], gkgk2, RM);
 
-               // GK = GK - AlphaK * ADK
-               vectorMultValue(adkAlphakTmp, adk, M_SIZE, alphak);
-               vectorMinusVector(gk, gk, M_SIZE, adkAlphakTmp, M_SIZE);
+						// libérations mémoire
+						//free(dkAlphakTmp);
+						//free(solgcTmp);
+						//free(adkAlphakTmp);
+						//free(gkTmp);
+						//free(dkBetaKTmp);
+					}
 
-               // gkgk2 = sqrt of (square sum of gk elements)
-               sumSquare(gkgk2, gk,M_SIZE);
-               mpfr_sqrt(gkgk2, gkgk2,RM);
-               // GKGK = GK*GK
-               innerDotProduct(gkGkTmp2, gk, M_SIZE); // pertinent car changements réalisés sur gk depuis gkgkTmp1
-               m_div(betak, gkGkTmp2,gkGkTmp1,RM);
-               // DK = GK + BetaK*DK
-               vectorMultValue(dkBetaKTmp, dk, M_SIZE, betak);
-               vectorPlusVector(dk, gk, M_SIZE, dkBetaKTmp, M_SIZE);
+					printf("\n\tEcriture de la matrice a dans un fichier (output/matrix.dat)");
+					fflush(stdout);
+					// écriture de la matrice a dans un fichier
+					int error = writeMatrixInFile(a, M_SIZE, M_SIZE, pre);
+					if (error != 0) {
+						// error
+						state = error;
+					}
 
-               // sauvegarde
-               mpfr_set(gkgk2save[iter], gkgk2, RM);
+					printf(
+							"\n\tEcriture de i, x(i) et solgc(i) dans un fichier (output/solggc.dat)");
+					fflush(stdout);
+					// écriture de i, x(i) et solgc(i) dans un fichier solggc.dat
+					error = writeDataInFile(x, solgc, M_SIZE, pre);
+					if (error != 0) {
+						// error
+						state = error;
+					}
 
-               // libérations mémoire
-               //free(dkAlphakTmp);
-               //free(solgcTmp);
-               //free(adkAlphakTmp);
-               //free(gkTmp);
-               //free(dkBetaKTmp);
-            }
+					printf("\n\tEcriture de gkgk2 dans un fichier (output/gkgk.dat)");
+					fflush(stdout);
+					// écriture de gkgk2 dans un fichier gkgk.dat
+					error = writeGkArrayInFile(gkgk2save, NB_GRAD, pre);
+					if (error != 0) {
+						// error
+						state = error;
+					}
 
-            printf("\n\tEcriture de la matrice a dans un fichier (output/matrix.dat)");
-            // écriture de la matrice a dans un fichier
-            int error = writeMatrixInFile(a, M_SIZE, M_SIZE, pre);
-            if ( error != 0 ) {
-               // error
-               state = error;
-            }
+					printf("\n\tLibérations des variables");
+					fflush(stdout);
+					m_clear(gkGkTmp1);
+					m_clear(adkDkTmp);
+					m_clear(alphak);
+					m_clear(gkgk2);
+					m_clear(gkGkTmp2);
+					m_clear(betak);
 
-            printf("\n\tEcriture de i, x(i) et solgc(i) dans un fichier (output/solggc.dat)");
-            // écriture de i, x(i) et solgc(i) dans un fichier solggc.dat
-            error = writeDataInFile(x,solgc,M_SIZE, pre);
-            if ( error != 0 ) {
-               // error
-               state = error;
-            }
+					printf("\n\tLibérations des tableaux");
+					fflush(stdout);
+					freeArray(x, M_SIZE);
+					freeMatrix(a, M_SIZE, M_SIZE);
+					freeArray(b, M_SIZE);
+					freeArray(solgc, M_SIZE);
+					freeArray(gkgk2save, NB_GRAD);
+					freeArray(gk, M_SIZE);
+					freeArray(dk, M_SIZE);
+					freeArray(adk, M_SIZE);
+					freeArray(gkTmp, M_SIZE);
 
-            printf("\n\tEcriture de gkgk2 dans un fichier (output/gkgk.dat)");
-            // écriture de gkgk2 dans un fichier gkgk.dat
-            error = writeGkArrayInFile(gkgk2save,NB_GRAD, pre);
-            if ( error != 0 ) {
-               // error
-               state = error;
-            }
+					freeArray(dkAlphakTmp, M_SIZE);
+					freeArray(adkAlphakTmp, M_SIZE);
+					freeArray(dkBetaKTmp, M_SIZE);
 
-            printf("\n\tLibérations des variables");
-            m_clear(gkGkTmp1);
-            m_clear(adkDkTmp);
-            m_clear(alphak);
-            m_clear(gkgk2);
-            m_clear(gkGkTmp2);
-            m_clear(betak);
+				} // fin boucle principale (pre)
 
-            printf("\n\tLibérations des tableaux");
-            freeArray(x,M_SIZE); 
-            freeMatrix(a,M_SIZE, M_SIZE);
-            freeArray(b,M_SIZE);
-            freeArray(solgc,M_SIZE);
-            freeArray(gkgk2save,NB_GRAD);
-            freeArray(gk, M_SIZE);
-            freeArray(dk, M_SIZE);
-            freeArray(adk, M_SIZE);
-            freeArray(gkTmp, M_SIZE);
+				// désallocation des tableaux
+				//freeArray(x, M_SIZE);
+				//freeArray(b, M_SIZE);
+				//freeArray(gk, M_SIZE);
+				//freeArray(dk, M_SIZE);
+				//freeArray(adk, M_SIZE);
+				//freeArray(solgc, M_SIZE);
+				//freeArray(gkTmp, M_SIZE);
+				//freeMatrix(a, M_SIZE, M_SIZE);
+				double runtime = GetTimer();
 
-            freeArray(dkAlphakTmp,M_SIZE);
-            freeArray(adkAlphakTmp,M_SIZE);
-            freeArray(dkBetaKTmp,M_SIZE);
-            
-         } // fin boucle principale (pre)
+				printf(" \n\nTotal time ellapsed: %f s\n", runtime / 1000);
+				fflush(stdout);
+			}
+		}
 
-         // désallocation des tableaux
-         //freeArray(x, M_SIZE);
-         //freeArray(b, M_SIZE);
-         //freeArray(gk, M_SIZE);
-         //freeArray(dk, M_SIZE);
-         //freeArray(adk, M_SIZE);
-         //freeArray(solgc, M_SIZE);
-         //freeArray(gkTmp, M_SIZE);
-         //freeMatrix(a, M_SIZE, M_SIZE);
-         double runtime = GetTimer();
-
-         printf(" \n\nTotal time ellapsed: %f s\n", runtime / 1000);
-      }
-   }
-
-   if ( state == 0 ) {
-      printf("\nFIN PROGRAMME NORMAL\n");
-   } else if ( state == 1 ) {
-      printf("\nClosing help...");
-      printLine();
-   } else {
-      printFinalErrorStatement();
-   }
+		if (state == 0) {
+			printf("\nFIN PROGRAMME NORMAL\n");
+		} else if (state == 1) {
+			printf("\nClosing help...");
+			printLine();
+		} else {
+			printFinalErrorStatement();
+		}
 	}
-   return state;
+	return state;
 }
