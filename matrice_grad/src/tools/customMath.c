@@ -36,7 +36,23 @@ void m_init2(mpfr_t value, const mpfr_prec_t precision) {
  *             values, < 0 if globally rounded downwards the exact values
  */
 int m_mul(mpfr_t product, const mpfr_t factor1, const mpfr_t factor2, const mpfr_rnd_t roundingMode) {
-	return mpfr_mul(product, factor1, factor2, roundingMode);
+	if (roundingMode == STOCHASTIC) {
+		int res = 0;
+		mpfr_t longFactor1, longFactor2, longProduct;
+		mpfr_prec_t targetPrecision = mpfr_get_prec(product);
+
+		handleExtendedRounding2(longFactor1, longFactor2, longProduct, factor1, factor2);
+		mpfr_mul(longProduct, longFactor1, longFactor2, MPFR_RNDN);
+
+		res = stochasticRounding(&longProduct, targetPrecision);
+
+		mpfr_set(product, longProduct, MPFR_RNDN);
+
+		return res;
+	} else {
+		// passer le enumRM à mpfr_rm_t
+		return mpfr_mul(product, factor1, factor2, roundingMode);
+	}
 }
 
 /**
@@ -51,7 +67,91 @@ int m_mul(mpfr_t product, const mpfr_t factor1, const mpfr_t factor2, const mpfr
  */
 int m_div(mpfr_t quotient, const mpfr_t dividend, const mpfr_t divisor,
 		const mpfr_rnd_t roundingMode) {
-	return mpfr_div(quotient, dividend, divisor, roundingMode);
+	if (roundingMode == STOCHASTIC) {
+		int res = 0;
+		mpfr_t longDividend, longDivisor, longQuotient;
+
+		mpfr_prec_t targetPrecision = mpfr_get_prec(quotient);
+
+		handleExtendedRounding2(longDividend, longDivisor, longQuotient, dividend, divisor);
+
+		mpfr_div(longQuotient, longDividend, longDivisor, MPFR_RNDN);
+
+		res = stochasticRounding(&longQuotient, targetPrecision);
+
+		mpfr_set(quotient, longQuotient, MPFR_RNDN);
+
+		return res;
+	} else {
+		// passer le enumRM à mpfr_rm_t
+		return mpfr_div(quotient, dividend, divisor, roundingMode);
+	}
+}
+
+/**
+ * @brief      Add `addends1` by `addends2` and put the sum in `summation`.
+ *
+ * @param[out]	summation		The sum
+ * @param[in]	addend1			The first term
+ * @param[in]	addend2			The second term
+ * @param[in]	roundingMode	The rounding mode
+ * @return		0 if rounded exactly, > 0 if globally rounded upwards the exact
+ *             values, < 0 if globally rounded downwards the exact values
+ */
+int m_add(mpfr_t summation, const mpfr_t addend1, const mpfr_t addend2,
+		const mpfr_rnd_t roundingMode) {
+	if (roundingMode == STOCHASTIC) {
+		int res = 0;
+		mpfr_t longAddend1, longAddend2, longSummation;
+
+		mpfr_prec_t targetPrecision = mpfr_get_prec(summation);
+
+		handleExtendedRounding2(longAddend1, longAddend2, longSummation, addend1, addend2);
+
+		mpfr_add(longSummation, longAddend1, longAddend2, MPFR_RNDN);
+
+		res = stochasticRounding(&longSummation, targetPrecision);
+
+		mpfr_set(summation, longSummation, MPFR_RNDN);
+
+		return res;
+	} else {
+		// passer le enumRM à mpfr_rm_t
+		return mpfr_div(summation, addend1, addend2, roundingMode);
+	}
+}
+
+/**
+ * @brief      	Substract `substrahend` from `minuend` and put the difference in `difference`.
+ *
+ * @param[out]	difference		The difference
+ * @param[in]	minuend			The number substrahend is substracted from
+ * @param[in]	substrahend		The number being substracted
+ * @param[in]	roundingMode	The rounding mode
+ * @return		0 if rounded exactly, > 0 if globally rounded upwards the exact
+ *             values, < 0 if globally rounded downwards the exact values
+ */
+int m_sub(mpfr_t difference, const mpfr_t minuend, const mpfr_t substrahend,
+		const mpfr_rnd_t roundingMode) {
+	if (roundingMode == STOCHASTIC) {
+		int res = 0;
+		mpfr_t longMinuend, longSubstrahend, longDifference;
+
+		mpfr_prec_t targetPrecision = mpfr_get_prec(difference);
+
+		handleExtendedRounding2(longMinuend, longSubstrahend, longDifference, minuend, substrahend);
+
+		mpfr_sub(longDifference, longMinuend, longSubstrahend, MPFR_RNDN);
+
+		res = stochasticRounding(&longDifference, targetPrecision);
+
+		mpfr_set(difference, longDifference, MPFR_RNDN);
+
+		return res;
+	} else {
+		// passer le enumRM à mpfr_rm_t
+		return mpfr_div(difference, minuend, substrahend, roundingMode);
+	}
 }
 
 /**
@@ -62,6 +162,34 @@ int m_div(mpfr_t quotient, const mpfr_t dividend, const mpfr_t divisor,
 void m_clear(mpfr_t value) {
 	mpfr_clear(value);
 }
+
+/**
+ * @brief				Sum the precision of shortValue1 and shortValue2 and set longResult, longValue1 and longValue2 with the resulting precision (or MPFR_PREC_MAX if lower).
+ * 						Also set the value of longValue1 and longValue2 to the value of shortValue1 and shortValue2 (respectively)
+ * @param longValue1	The value to set at a larger precision
+ * @param longValue2	The other value to set at a larger precision
+ * @param longResult	Just a value to initialize at a larger precision, without set
+ * @param shortValue1	The value to set longValue1 with
+ * @param shortValue2	The value to set longValue2 with
+ */
+void handleExtendedRounding2(mpfr_t longValue1, mpfr_t longValue2, mpfr_t longResult,
+		const mpfr_t shortValue1, const mpfr_t shortValue2) {
+	mpfr_prec_t currentPrecision1 = mpfr_get_prec(longValue1);
+	mpfr_prec_t currentPrecision2 = mpfr_get_prec(longValue2);
+	mpfr_prec_t extendedPrecision = 0L;
+
+	if (currentPrecision1 + currentPrecision2 < MPFR_PREC_MAX) {
+		extendedPrecision = currentPrecision1 + currentPrecision2;
+	} else {
+		extendedPrecision = MPFR_PREC_MAX;
+	}
+	m_init2(longValue1, extendedPrecision);
+	m_init2(longValue2, extendedPrecision);
+	m_init2(longResult, extendedPrecision);
+	mpfr_set(longValue1, shortValue1, MPFR_RNDN);
+	mpfr_set(longValue2, shortValue2, MPFR_RNDN);
+}
+
 
 /**
  * @brief			Increase the precision of v, keeping the previous value.
@@ -127,22 +255,22 @@ int stochasticRounding(mpfr_t * value, const mpfr_prec_t pre) {
 		mpfr_t randomValue;
 		//m_init2(randomValue,lastDigitPrecision);
 		m_init2(randomValue, mpfr_get_default_prec());
-		do {
-			setRandomValue(&randomValue);
-			// and see if it is greater than lastDigits or not
-			// if it is, round down, if it is not, round up
-			if (mpfr_greater_p(lastDigits, randomValue)) {
-				// rounding up
-				if (DEBUG) printf("\tROUND UP");
-				roundingDirection = mpfr_prec_round(*value, pre, MPFR_RNDU);
-				roundingDirection = 1;
-			} else if (mpfr_less_p(lastDigits, randomValue)) {
-				// rounding down
-				if (DEBUG) printf("\tROUND DOWN");
-				roundingDirection = mpfr_prec_round(*value, pre, MPFR_RNDD);
-				roundingDirection = -1;
-			}
-		} while (mpfr_equal_p(randomValue, lastDigits)); // loop in order to not misinterpret the equal case (occurs likely at low precision)
+//		do {
+		setRandomValue(&randomValue);
+		// and see if it is greater than lastDigits or not
+		// if it is, round down, if it is not, round up
+		if (mpfr_greater_p(lastDigits, randomValue)) {
+			// rounding up
+			if (DEBUG) printf("\tROUND UP");
+			roundingDirection = mpfr_prec_round(*value, pre, MPFR_RNDU);
+			roundingDirection = 1;
+		} else if (mpfr_less_p(lastDigits, randomValue)) {
+			// rounding down
+			if (DEBUG) printf("\tROUND DOWN");
+			roundingDirection = mpfr_prec_round(*value, pre, MPFR_RNDD);
+			roundingDirection = -1;
+		}
+//		} while (mpfr_equal_p(randomValue, lastDigits)); // loop in order to not misinterpret the equal case (occurs likely at low precision)
 
 		m_clear(lastDigits);
 		m_clear(randomValue);
@@ -227,6 +355,37 @@ void getMaxValue(mpfr_t * maxValue, const mpfr_prec_t precision) {
 	mpfr_exp2(*maxValue, mPrec, MPFR_RNDN);
 
 	m_clear(mPrec);
+}
+
+mpfr_rnd_t roundingModeEnumToMpfrRndT(enum roundingModeEnum e) {
+	mpfr_rnd_t mpfr_rnd;
+	switch (e) {
+	case RNDN:
+		mpfr_rnd = MPFR_RNDN; // round to nearest (roundTiesToEven in IEEE 754-2008)
+		break;
+	case STOCHASTIC:
+		mpfr_rnd = -1; // not implemented in mpfr yet. Call customMath/m_<operation>.
+		// round randomly to toward plus infinity or toward minus infinity,
+		// the more close it is from the rounded value, the more probability
+		// to round to this value.
+		break;
+	case RNDZ:
+		mpfr_rnd = MPFR_RNDZ; // round toward zero (roundTowardZero in IEEE 754-2008)
+		break;
+	case RNDU:
+		mpfr_rnd = MPFR_RNDU; // round toward plus infinity (roundTowardPositive in IEEE 754-2008)
+		break;
+	case RNDD:
+		mpfr_rnd = MPFR_RNDD; //round toward minus infinity (roundTowardNegative in IEEE 754-2008)
+		break;
+	case RNDA:
+		mpfr_rnd = MPFR_RNDA; // round toward minus infinity (roundTowardNegative in IEEE 754-2008)
+		break;
+	default:
+		mpfr_rnd = mpfr_get_default_rounding_mode();
+		break;
+	}
+	return mpfr_rnd;
 }
 
 /**

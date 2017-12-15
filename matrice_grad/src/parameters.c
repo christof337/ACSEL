@@ -299,36 +299,6 @@ enum roundingModeEnum stringToRoundingModeEnum(char * string, const int size) {
 	return res;
 }
 
-mpfr_rnd_t roundingModeEnumToMpfrRndT(enum roundingModeEnum e) {
-	mpfr_rnd_t mpfr_rnd;
-	switch (e) {
-	case RNDN:
-		mpfr_rnd = MPFR_RNDN; // round to nearest (roundTiesToEven in IEEE 754-2008)
-		break;
-		// case STOCHASTIC:
-		// mpfr_rnd = pasCodé; // round randomly to toward plus infinity or toward minus infinity,
-		// the more close it is from the rounded value, the more probability
-		// to round to this value.
-		// break;
-	case RNDZ:
-		mpfr_rnd = MPFR_RNDZ; // round toward zero (roundTowardZero in IEEE 754-2008)
-		break;
-	case RNDU:
-		mpfr_rnd = MPFR_RNDU; // round toward plus infinity (roundTowardPositive in IEEE 754-2008)
-		break;
-	case RNDD:
-		mpfr_rnd = MPFR_RNDD; //round toward minus infinity (roundTowardNegative in IEEE 754-2008)
-		break;
-	case RNDA:
-		mpfr_rnd = MPFR_RNDA; // round toward minus infinity (roundTowardNegative in IEEE 754-2008)
-		break;
-	default:
-		mpfr_rnd = roundingModeEnumToMpfrRndT(DEFAULT_ROUNDING_MODE);
-		break;
-	}
-	return mpfr_rnd;
-}
-
 //mpfr_rnd_t m_getRoundingMode() {
 //	enum roundingModeEnum currentRoundingMode = P_ROUNDING_MODE->currentValue.rme;
 //	return roundingModeEnumToMpfrRndT(currentRoundingMode);
