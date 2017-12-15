@@ -3,24 +3,14 @@
 
 #include <mpfr.h>
 
+#include "tools/customMath.h"
+
 /**
  * @brief      List the different matrix types handled by the program
  */
 enum matrixTypeEnum {
 	EXPONENTIAL,
 	HILBERT
-};
-
-/**
- * @brief      List the different rounding mode types handled by the program
- */
-enum roundingModeEnum {
-	RNDN, // round to nearest (roundTiesToEven in IEEE 754-2008),
-	STOCHASTIC, // custom ;)
-	RNDZ, // round toward zero (roundTowardZero in IEEE 754-2008),
-	RNDU, // round toward plus infinity (roundTowardPositive in IEEE 754-2008),
-	RNDD, // round toward minus infinity (roundTowardNegative in IEEE 754-2008),
-	RNDA  // round away from zero.
 };
 
 /**
@@ -88,8 +78,6 @@ void paramAdressInit();
 
 // ROUNDING MODE
 enum roundingModeEnum stringToRoundingModeEnum(char * string, const int size);
-
-mpfr_rnd_t roundingModeEnumToMpfrRndT(enum roundingModeEnum e);
 
 // mpfr_rnd_t m_getRoundingMode();
 
