@@ -28,7 +28,7 @@
 
 /**
  * @brief      Ask for the matrix size up until a positive value is input
- *
+ * @deprecated
  * @return     The input int value
  */
 int askTailleMatrice() {
@@ -37,6 +37,7 @@ int askTailleMatrice() {
 		printf("\nTaille Matrice ?\n");
 		tailleMatrice = askForInt();
 	} while (tailleMatrice <= 0);
+	return tailleMatrice;
 }
 
 /**
@@ -51,8 +52,8 @@ int askTailleMatrice() {
  * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
  *             values, < 0 if globally rounded downwards the exact values
  */
-int customMatrixMultVector(mpfr_t * result, mpfr_t ** matrix, mpfr_t * vector, const int size) {
-	return matrixMultVector(result, matrix, size, size, vector, size);
+int customMatrixMultVector(mpfr_t * result, mpfr_t ** matrix, mpfr_t * vector, const int size, const enum roundingModeEnum rme) {
+	return matrixMultVector(result, matrix, size, size, vector, size, rme);
 }
 
 /**

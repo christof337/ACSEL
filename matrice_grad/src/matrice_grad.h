@@ -3,9 +3,11 @@
 
 #include <mpfr.h>
 
+#include "tools/customMath.h"
+
 int askTailleMatrice();
 
-int customMatrixMultVector(mpfr_t * result, mpfr_t ** matrix, mpfr_t * vector, const int size);
+int customMatrixMultVector(mpfr_t * result, mpfr_t ** matrix, mpfr_t * vector, const int size, const enum roundingModeEnum rme);
 
 int writeMatrixInFile(mpfr_t ** matrix, const int n, const int m, mpfr_prec_t precision);
 

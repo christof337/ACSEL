@@ -13,6 +13,8 @@
 
 #define RM m_getRoundingMode()
 
+#define RME RNDN
+
 #define DEFAULT_PRECISION 32
 
 /**
@@ -70,7 +72,7 @@ START_TEST(test_fill_matrix_exponentially)
 		mpfr_set_d(t, -0.05, RM);
 		mpfr_set_d(exp, 2.0, RM);
 
-		fillMatrixExponentially(matrixTest, DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS);
+		fillMatrixExponentially(matrixTest, DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS,RME);
 
 		for (long int i = 0 ; i < DEFAULT_NB_ROWS ; ++i) {
 			for (long int j = 0 ; j < DEFAULT_NB_COLUMNS ; ++j) {
@@ -97,11 +99,11 @@ START_TEST(test_matrix_mult)
 		createMatrix(&matrix2, p, DEFAULT_NB_COLUMNS, DEFAULT_PRECISION);
 
 		fillMatrixRandomly(matrix1, DEFAULT_NB_ROWS, p); // not pure test but still
-		fillMatrixExponentially(matrix2, p, DEFAULT_NB_COLUMNS);
+		fillMatrixExponentially(matrix2, p, DEFAULT_NB_COLUMNS,RME);
 
 		mpfr_t ** multipliedMatrix;
 		createMatrix(&multipliedMatrix, DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS, DEFAULT_PRECISION);
-		matrixMult(multipliedMatrix, matrix1, DEFAULT_NB_ROWS, p, matrix2, p, DEFAULT_NB_COLUMNS);
+		matrixMult(multipliedMatrix, matrix1, DEFAULT_NB_ROWS, p, matrix2, p, DEFAULT_NB_COLUMNS,RME);
 
 		mpfr_t sum;
 		m_init2(sum, DEFAULT_PRECISION);
@@ -136,14 +138,14 @@ START_TEST(test_matrix_mult_vector)
 		mpfr_t * vector;
 		createArray(&vector, DEFAULT_NB_COLUMNS, DEFAULT_PRECISION);
 
-		fillMatrixExponentially(matrix, DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS);
+		fillMatrixExponentially(matrix, DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS,RME);
 		fillArrayLinearly(vector, DEFAULT_NB_COLUMNS);
 
 		mpfr_t * multipliedVector;
 		createArray(&multipliedVector, DEFAULT_NB_ROWS, DEFAULT_PRECISION);
 
 		matrixMultVector(multipliedVector, matrix, DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS, vector,
-				DEFAULT_NB_COLUMNS);
+				DEFAULT_NB_COLUMNS,RME);
 
 		mpfr_t sum;
 		m_init2(sum, DEFAULT_PRECISION);

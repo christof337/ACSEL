@@ -77,7 +77,7 @@ void freeMatrix(mpfr_t ** matrix, const int m, const int n) {
  *             values, < 0 if globally rounded downwards the exact values
  */
 int matrixMult(mpfr_t ** multipliedMatrix, mpfr_t ** array1, const int m1, const int n1,
-		mpfr_t ** array2, const int m2, const int n2) {
+		mpfr_t ** array2, const int m2, const int n2, const enum roundingModeEnum rme) {
 
 	int res = 0;
 
@@ -98,8 +98,8 @@ int matrixMult(mpfr_t ** multipliedMatrix, mpfr_t ** array1, const int m1, const
 			for (int k = 0 ; k < m2 ; ++k) {
 				// lignes de la seconde matrice m2 / colonnes de la première n1
 				// sum = sum + array1[i][k]*array2[k][j];
-				res += m_mul(t, array1[i][k], array2[k][j], RM);
-				res += mpfr_add(sum, sum, t, RM);
+				res += m_mul(t, array1[i][k], array2[k][j], rme);
+				res += m_add(sum, sum, t, rme);
 			}
 			mpfr_set(multipliedMatrix[i][j], sum, RM);
 			mpfr_set_d(sum, 0.0, RM); // sum = 0;
@@ -124,7 +124,7 @@ int matrixMult(mpfr_t ** multipliedMatrix, mpfr_t ** array1, const int m1, const
  *             values, < 0 if globally rounded downwards the exact values
  */
 int matrixMultVector(mpfr_t * result, mpfr_t ** matrix, const int m, const int n, mpfr_t * vector,
-		const int sizeVector) {
+		const int sizeVector, const enum roundingModeEnum rme) {
 
 	int res = 0;
 	mpfr_t ** resultTmp;
@@ -145,7 +145,7 @@ int matrixMultVector(mpfr_t * result, mpfr_t ** matrix, const int m, const int n
 	}
 
 	// multiplication matrice / vecteur
-	res = matrixMult(resultTmp, matrix, m, n, matrixTemp, sizeVector, 1);
+	res = matrixMult(resultTmp, matrix, m, n, matrixTemp, sizeVector, 1,rme);
 
 	for (int i = 0 ; i < m ; ++i) {
 		mpfr_set(result[i], resultTmp[i][0], RM);
@@ -188,7 +188,7 @@ int fillMatrixRandomly(mpfr_t ** array, const int m, const int n) {
  * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
  *             value, < 0 if globally rounded downwards the exact value
  */
-int fillMatrixExponentially(mpfr_t ** array, const int m, const int n) {
+int fillMatrixExponentially(mpfr_t ** array, const int m, const int n, const enum roundingModeEnum rme) {
 	int res = 0;
 	mpfr_t s, t, u, exp; // intermediate temporary variables
 
@@ -204,8 +204,8 @@ int fillMatrixExponentially(mpfr_t ** array, const int m, const int n) {
 			// array[i][j] = exp(-0.05*pow((i-j),2.0))
 			mpfr_prec_t prec = mpfr_get_prec(array[i][j]);
 			mpfr_set_si(s, i - j, RM);
-			mpfr_pow(u, s, exp, RM);
-			m_mul(u, u, t, RM);
+			m_pow(u, s, exp, rme);
+			m_mul(u, u, t, rme);
 			res += mpfr_exp(array[i][j], u, RM);
 		}
 	}

@@ -18,9 +18,9 @@
 
 #define HELP_CAPTION "HELP"
 
-struct Param * P_MATRIX_SIZE, *P_NB_ITER, *P_MAX_PREC, *P_ROUNDING_MODE, *P_MATRIX_TYPE;
+struct Param * P_MATRIX_SIZE, *P_NB_ITER, *P_MAX_PREC, *P_ROUNDING_MODE, *P_MATRIX_TYPE,*P_ERROR;
 
-struct Param _p_m_s, _p_n_i, _p_m_p, _p_r_m, _p_m_t;
+struct Param _p_m_s, _p_n_i, _p_m_p, _p_r_m, _p_m_t, _p_e;
 
 char * globalAppName;
 
@@ -88,6 +88,10 @@ int initParams(char * appName) {
 	P_MATRIX_TYPE->error = 0;
 	P_MATRIX_TYPE->isDefault = 1;
 	P_MATRIX_TYPE->currentValue.mte = DEFAULT_MATRIX_TYPE;
+
+	// ERROR
+	strcpy(P_ERROR->name,"Error");
+	P_ERROR->error = -1;
 
 	return 0;
 }
@@ -331,6 +335,7 @@ struct Param * getParamFromParamEnum(enum ParamEnum pe) {
 		break;
 	case PARAM_ENUM_ERROR:
 	default:
+		askedParam = P_ERROR;
 		askedParam->error = -1;
 		break;
 	}
@@ -346,6 +351,7 @@ void paramAdressInit() {
 	P_MAX_PREC = &_p_m_p;
 	P_ROUNDING_MODE = &_p_r_m;
 	P_MATRIX_TYPE = &_p_m_t;
+	P_ERROR = &_p_e;
 }
 
 // ---------------- PRINT ----------------
@@ -452,6 +458,9 @@ void printDefaultValue(enum type dvtype, union defaultValueUnion dv) {
 			break;
 		case HILBERT:
 			printf("HILBERT");
+			break;
+		case RANDOM:
+			printf("RANDOM");
 			break;
 		}
 		break;

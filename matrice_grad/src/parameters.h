@@ -9,6 +9,7 @@
  * @brief      List the different matrix types handled by the program
  */
 enum matrixTypeEnum {
+	RANDOM,
 	EXPONENTIAL,
 	HILBERT
 };

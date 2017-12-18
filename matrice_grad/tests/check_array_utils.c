@@ -7,6 +7,8 @@
 
 #define RM m_getRoundingMode()
 
+#define RME RNDN
+
 #define SIZE 10
 
 #define DEFAULT_PRECISION 32
@@ -107,10 +109,10 @@ START_TEST(test_vector_mult)
 		// initializations
 		initArrayDesc(&secondArrayTest);
 
-		vectorMult(multipliedMatrix, arrayTest, SIZE, secondArrayTest, SIZE);
+		vectorMult(multipliedMatrix, arrayTest, SIZE, secondArrayTest, SIZE, RME);
 
 		for (int i = 0 ; i < SIZE ; ++i) {
-			m_mul(t, arrayTest[i], secondArrayTest[i], RM);
+			m_mul(t, arrayTest[i], secondArrayTest[i], RME);
 			ck_assert(mpfr_cmp(multipliedMatrix[i],t)==0);
 		}
 
@@ -122,7 +124,7 @@ START_TEST(test_vector_mult)
 Suite * array_utils_suite(void) {
 	Suite *s;
 	TCase *tc_core;
-	TCase *tc_lmits;
+//	TCase *tc_lmits;
 
 	s = suite_create("Array Utils");
 

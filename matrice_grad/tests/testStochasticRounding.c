@@ -177,7 +177,7 @@ int test_stochastic_rounding() {
 					mpfr_t expectedPctRoundUp;
 					m_init2(expectedPctRoundUp, mpfr_get_default_prec() * 2);
 					m_div(expectedPctRoundUp, lastDigits, maxLastDigitsValue, MPFR_RNDN);
-					mpfr_mul_si(expectedPctRoundUp, expectedPctRoundUp, 100L, MPFR_RNDN);
+					m_mul_si(expectedPctRoundUp, expectedPctRoundUp, 100L, RNDN);
 
 					mpfr_t lowerBound;
 					getBound(&lowerBound, expectedPctRoundUp, 0);
@@ -190,7 +190,7 @@ int test_stochastic_rounding() {
 					m_init2(tmpNbRndUp, mpfr_get_default_prec());
 					mpfr_set_si(tmpNbRndUp, nbRoundUp, MPFR_RNDN);
 					m_div(actualPctRoundUp, tmpNbRndUp, mpfrNbIter, MPFR_RNDN);
-					mpfr_mul_si(actualPctRoundUp, actualPctRoundUp, 100L, MPFR_RNDN);
+					m_mul_si(actualPctRoundUp, actualPctRoundUp, 100L, RNDN);
 
 					fprintf(logBuffer, "------[%ld]\t[%ld]\t(%d)\t{%4f} - ", initialPrecision,
 							precisionToRoundTo, j, mpfr_get_d(valToRound, MPFR_RNDN));

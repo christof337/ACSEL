@@ -124,10 +124,10 @@ int fillArrayLinearly(mpfr_t * array, const int size) {
  * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
  *             values, < 0 if globally rounded downwards the exact values
  */
-int vectorMult(mpfr_t * result, mpfr_t * array1, const int size1, mpfr_t * array2, const int size2) {
+int vectorMult(mpfr_t * result, mpfr_t * array1, const int size1, mpfr_t * array2, const int size2, const enum roundingModeEnum rme) {
 	int err = 0;
 	for (int i = 0 ; i < size1 ; ++i) {
-		err += m_mul(result[i], array1[i], array2[i], RM);
+		err += m_mul(result[i], array1[i], array2[i], rme);
 	}
 	return err;
 }
@@ -147,10 +147,10 @@ int vectorMult(mpfr_t * result, mpfr_t * array1, const int size1, mpfr_t * array
  *             values, < 0 if globally rounded downwards the exact values
  */
 int vectorPlusVector(mpfr_t * result, mpfr_t * vector1, const int size1, mpfr_t * vector2,
-		const int size2) {
+		const int size2, const enum roundingModeEnum rme) {
 	int err = 0;
 	for (int i = 0 ; i < size1 ; ++i) {
-		err += mpfr_add(result[i], vector1[i], vector2[i], RM);
+		err += m_add(result[i], vector1[i], vector2[i], rme);
 	}
 	return err;
 }
@@ -170,10 +170,10 @@ int vectorPlusVector(mpfr_t * result, mpfr_t * vector1, const int size1, mpfr_t 
  *             values, < 0 if globally rounded downwards the exact values
  */
 int vectorMinusVector(mpfr_t * result, mpfr_t * vector1, const int size1, mpfr_t * vector2,
-		const int size2) {
+		const int size2, const enum roundingModeEnum rme) {
 	int err = 0;
 	for (int i = 0 ; i < size1 ; ++i) {
-		err += mpfr_sub(result[i], vector1[i], vector2[i], RM);
+		err += m_sub(result[i], vector1[i], vector2[i], rme);
 	}
 	return err;
 }
@@ -206,8 +206,8 @@ int vectorCopy(mpfr_t * result, mpfr_t * vector, const int size) {
  * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
  *             values, < 0 if globally rounded downwards the exact values
  */
-int innerDotProduct(mpfr_t result, mpfr_t * vector, const int size) {
-	return dotProduct(result, vector, size, vector, size);
+int innerDotProduct(mpfr_t result, mpfr_t * vector, const int size, const enum roundingModeEnum rme) {
+	return dotProduct(result, vector, size, vector, size,rme);
 }
 
 /**
@@ -224,7 +224,7 @@ int innerDotProduct(mpfr_t result, mpfr_t * vector, const int size) {
  * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
  *             values, < 0 if globally rounded downwards the exact values
  */
-int dotProduct(mpfr_t product, mpfr_t * vector1, const int size1, mpfr_t * vector2, const int size2) {
+int dotProduct(mpfr_t product, mpfr_t * vector1, const int size1, mpfr_t * vector2, const int size2, const enum roundingModeEnum rme) {
 	int err = 0;
 	mpfr_prec_t prec = mpfr_get_prec(product);
 	mpfr_t t;
@@ -235,8 +235,8 @@ int dotProduct(mpfr_t product, mpfr_t * vector1, const int size1, mpfr_t * vecto
 
 	for (int i = 0 ; i < size1 ; ++i) {
 		//product += vector1[i]*vector2[i];
-		err += m_mul(t, vector1[i], vector2[i], RM);
-		err += mpfr_add(product, product, t, RM);
+		err += m_mul(t, vector1[i], vector2[i], rme);
+		err += m_add(product, product, t, rme);
 	}
 
 	m_clear(t);
@@ -255,12 +255,12 @@ int dotProduct(mpfr_t product, mpfr_t * vector1, const int size1, mpfr_t * vecto
  * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
  *             values, < 0 if globally rounded downwards the exact values
  */
-int vectorMultValue(mpfr_t * result, mpfr_t * vector, const int size, mpfr_t value) {
+int vectorMultValue(mpfr_t * result, mpfr_t * vector, const int size, mpfr_t value, const enum roundingModeEnum rme) {
 	int err = 0;
 
 	for (int i = 0 ; i < size ; ++i) {
 		// result[i] = vector[i] * value;
-		err += m_mul(result[i], vector[i], value, RM);
+		err += m_mul(result[i], vector[i], value, rme);
 	}
 
 	return err;
@@ -276,12 +276,13 @@ int vectorMultValue(mpfr_t * result, mpfr_t * vector, const int size, mpfr_t val
  * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
  *             values, < 0 if globally rounded downwards the exact values
  */
-int sumSquare(mpfr_t result, mpfr_t * vector, const int size) {
+int sumSquare(mpfr_t result, mpfr_t * vector, const int size, const enum roundingModeEnum rme) {
 	int err = 0;
 	mpfr_prec_t prec = mpfr_get_prec(result);
 	mpfr_t t, exp;
 
-	mpfr_inits2(prec, t, exp, (mpfr_ptr) NULL);
+	m_init2(t,prec);
+	m_init2(exp,prec);
 
 	mpfr_set_d(exp, 2.0, RM);
 
@@ -289,11 +290,12 @@ int sumSquare(mpfr_t result, mpfr_t * vector, const int size) {
 
 	for (int i = 0 ; i < size ; ++i) {
 		// result += pow(vector[i],2);
-		err += mpfr_pow(t, vector[i], exp, RM);
-		err += mpfr_add(result, result, t, RM);
+		err += m_pow(t, vector[i], exp, rme);
+		err += m_add(result, result, t, rme);
 	}
 
-	mpfr_clears(t, exp, (mpfr_ptr) NULL);
+	m_clear(t);
+	m_clear(exp);
 
 	return err;
 }

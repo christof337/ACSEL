@@ -29,8 +29,8 @@ int main(int argc, char *argv[]) {
 		mpfr_t number;
 		mpfr_prec_t numberPrecision = 8;
 		double value = 1.234375;
-		double desiredValue1 = 1.234;
-		double desiredValue2 = 1.235;
+//		double desiredValue1 = 1.234;
+//		double desiredValue2 = 1.235;
 		mpfr_prec_t desiredPrecision = 5;
 		m_init2(number, numberPrecision);
 		//m_init2(*test,numberPrecision);
@@ -69,10 +69,13 @@ int main(int argc, char *argv[]) {
 
 				const int RANGE_PRECISION = getParamFromParamEnum(MAX_PREC)->currentValue.li; // précision maximum utilisée TODO : la passer en paramètre du programme
 
-				const mpfr_rnd_t RM = roundingModeEnumToMpfrRndT(
-						getParamFromParamEnum(MAX_PREC)->currentValue.rme);
+				const enum roundingModeEnum RME = getParamFromParamEnum(MAX_PREC)->currentValue.rme;
 
-				StartTimer();
+				const mpfr_rnd_t RM = roundingModeEnumToMpfrRndT(RME);
+
+
+				const enum matrixTypeEnum M_TYPE = getParamFromParamEnum(MATRIX_TYPE)->currentValue.mte;
+
 
 				printf("\nDébut programme...");
 				printf("\nParamètres :");
@@ -83,6 +86,8 @@ int main(int argc, char *argv[]) {
 
 				printf("\nAppuyez sur une touche pour lancer le programme...");
 				getchar();
+
+				StartTimer();
 
 				// DECLARATIONS DES TABLEAUX
 				mpfr_t ** a;         // a
@@ -148,7 +153,18 @@ int main(int argc, char *argv[]) {
 					printf("\n\tRemplissage des tableaux");
 					fflush(stdout);
 					// initialisation de a
-					fillMatrixExponentially(a, M_SIZE, M_SIZE);
+					switch(M_TYPE) {
+					case RANDOM:
+						fillMatrixRandomly(a,M_SIZE,M_SIZE);
+						break;
+					case EXPONENTIAL:
+						fillMatrixExponentially(a,M_SIZE,M_SIZE,RME);
+						break;
+					case HILBERT:
+					default:
+						printErrorMessage("\nError : Matrix type not implemented.\n");
+						return -1;
+					}
 
 					// initialisation de x linéairement
 					fillArrayLinearly(x, M_SIZE);
@@ -157,15 +173,15 @@ int main(int argc, char *argv[]) {
 					fflush(stdout);
 
 					// on multiplie a et x ( B = AX )
-					customMatrixMultVector(b, a, x, M_SIZE);
+					customMatrixMultVector(b, a, x, M_SIZE, RME);
 
 					fillArrayWithZeros(solgc, M_SIZE);
 
 					// on se propose de réaliser une inversion par minimisation d'énergie (descente de gradient)
 					// gradient conjugué
 					// GK = A * XX - B
-					customMatrixMultVector(gkTmp, a, solgc, M_SIZE);
-					vectorMinusVector(gk, gkTmp, M_SIZE, b, M_SIZE);
+					customMatrixMultVector(gkTmp, a, solgc, M_SIZE, RME);
+					vectorMinusVector(gk, gkTmp, M_SIZE, b, M_SIZE,RME);
 
 					// DK = GK
 					vectorCopy(dk, gk, M_SIZE);
@@ -175,32 +191,32 @@ int main(int argc, char *argv[]) {
 					// on itère sur le nombre d'itérations déterminé par NB_GRAD
 					for (int iter = 0 ; iter < NB_GRAD ; ++iter) {
 						// ADK = A * DK
-						customMatrixMultVector(adk, a, dk, M_SIZE);
+						customMatrixMultVector(adk, a, dk, M_SIZE, RME);
 						// GKGK = GK * GK
-						innerDotProduct(gkGkTmp1, gk, M_SIZE); // gkgk
+						innerDotProduct(gkGkTmp1, gk, M_SIZE, RME); // gkgk
 
 						// ADKDK = ADK * DK
-						dotProduct(adkDkTmp, adk, M_SIZE, dk, M_SIZE); // adkdk
+						dotProduct(adkDkTmp, adk, M_SIZE, dk, M_SIZE,RME); // adkdk
 						// AlphaK = GKGK / ADKDK ==> AlphaK = (GK*GK)/(ADK*DK)
-						m_div(alphak, gkGkTmp1, adkDkTmp, RM);
+						m_div(alphak, gkGkTmp1, adkDkTmp, RME);
 
 						// XX = XX - AlphaK * DK
-						vectorMultValue(dkAlphakTmp, dk, M_SIZE, alphak);
-						vectorMinusVector(solgc, solgc, M_SIZE, dkAlphakTmp, M_SIZE);
+						vectorMultValue(dkAlphakTmp, dk, M_SIZE, alphak,RME);
+						vectorMinusVector(solgc, solgc, M_SIZE, dkAlphakTmp, M_SIZE,RME);
 
 						// GK = GK - AlphaK * ADK
-						vectorMultValue(adkAlphakTmp, adk, M_SIZE, alphak);
-						vectorMinusVector(gk, gk, M_SIZE, adkAlphakTmp, M_SIZE);
+						vectorMultValue(adkAlphakTmp, adk, M_SIZE, alphak,RME);
+						vectorMinusVector(gk, gk, M_SIZE, adkAlphakTmp, M_SIZE,RME);
 
 						// gkgk2 = sqrt of (square sum of gk elements)
-						sumSquare(gkgk2, gk, M_SIZE);
+						sumSquare(gkgk2, gk, M_SIZE,RME);
 						mpfr_sqrt(gkgk2, gkgk2, RM);
 						// GKGK = GK*GK
-						innerDotProduct(gkGkTmp2, gk, M_SIZE); // pertinent car changements réalisés sur gk depuis gkgkTmp1
-						m_div(betak, gkGkTmp2, gkGkTmp1, RM);
+						innerDotProduct(gkGkTmp2, gk, M_SIZE, RME); // pertinent car changements réalisés sur gk depuis gkgkTmp1
+						m_div(betak, gkGkTmp2, gkGkTmp1,RME);
 						// DK = GK + BetaK*DK
-						vectorMultValue(dkBetaKTmp, dk, M_SIZE, betak);
-						vectorPlusVector(dk, gk, M_SIZE, dkBetaKTmp, M_SIZE);
+						vectorMultValue(dkBetaKTmp, dk, M_SIZE, betak,RME);
+						vectorPlusVector(dk, gk, M_SIZE, dkBetaKTmp, M_SIZE,RME);
 
 						// sauvegarde
 						mpfr_set(gkgk2save[iter], gkgk2, RM);

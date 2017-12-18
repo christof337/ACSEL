@@ -18,18 +18,22 @@ enum roundingModeEnum {
 };
 
 
-int m_mul(mpfr_t product, const mpfr_t factor1, const mpfr_t factor2, const mpfr_rnd_t roundingMode);
+int m_mul(mpfr_t product, const mpfr_t factor1, const mpfr_t factor2, const enum roundingModeEnum roundingMode);
+
+int m_mul_si(mpfr_t product, const mpfr_t factor1, long int factor2, const enum roundingModeEnum roundingMode);
 
 int m_div(mpfr_t quotient, const mpfr_t dividend, const mpfr_t divisor,
-		const mpfr_rnd_t roundingMode);
+		const enum roundingModeEnum roundingMode);
 
 int m_add(mpfr_t summation, const mpfr_t addend1, const mpfr_t addend2,
-		const mpfr_rnd_t roundingMode);
+		const enum roundingModeEnum roundingMode);
 
 int m_sub(mpfr_t difference, const mpfr_t minuend, const mpfr_t substrahend,
-		const mpfr_rnd_t roundingMode);
+		const enum roundingModeEnum roundingMode);
 
-void handleExtendedRounding2(mpfr_t longValue1, mpfr_t longValue2, mpfr_t longResult,
+int m_pow(mpfr_t res, mpfr_t val, mpfr_t exp, const enum roundingModeEnum roundingMode);
+
+void handleExtendedRounding(mpfr_t longValue1, mpfr_t longValue2, mpfr_t longResult,
 		const mpfr_t shortValue1, const mpfr_t shortValue2);
 
 void m_init2(mpfr_t value, const mpfr_prec_t precision);
