@@ -3,7 +3,12 @@
 
 #include <mpfr.h>
 
+#include "parameters.h"
 #include "tools/customMath.h"
+
+int conjuguateGradientDescent(const int maxPrecision, const int matrixSize,
+		const int nbGradientIterations, const enum matrixTypeEnum matrixType,
+		const enum roundingModeEnum roundingModeEnum, const mpfr_rnd_t roundingMode, int res);
 
 int askTailleMatrice();
 
