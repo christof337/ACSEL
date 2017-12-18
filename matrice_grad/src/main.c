@@ -17,6 +17,8 @@
 // compilation : ../make
 // ce code est inspiré du programme "matrice_grad".
 // l'objectif est de faire varier la précision pour observer le comportement de réduction du gradient 
+// quick run : src/main ms=100 ni=30 pre=16 rm=STOCHASTIC
+
 
 int main(int argc, char *argv[]) {
 	int state = 0;
@@ -60,7 +62,7 @@ int main(int argc, char *argv[]) {
 				// getting the params from param enum :
 				const int NB_GRAD = getParamFromParamEnum(NB_ITER)->currentValue.li; // nombre d'itérations du gradient
 				const int M_SIZE = getParamFromParamEnum(MATRIX_SIZE)->currentValue.li;
-				const int RANGE_PRECISION = getParamFromParamEnum(MAX_PREC)->currentValue.li; // précision maximum utilisée TODO : la passer en paramètre du programme
+				const int RANGE_PRECISION = getParamFromParamEnum(MAX_PREC)->currentValue.li; // précision maximum utilisée
 				const enum roundingModeEnum RME = getParamFromParamEnum(MAX_PREC)->currentValue.rme;
 				const mpfr_rnd_t RM = roundingModeEnumToMpfrRndT(RME);
 				const enum matrixTypeEnum M_TYPE = getParamFromParamEnum(MATRIX_TYPE)->currentValue.mte;

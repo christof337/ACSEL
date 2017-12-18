@@ -8,7 +8,9 @@
 
 #include "customMath.h"
 
-#define RM m_getRoundingMode()
+#ifndef RM
+#define RM mpfr_get_default_rounding_mode()
+#endif // RM
 
 /**
  * @brief      Ask for an int in the standard input and return it

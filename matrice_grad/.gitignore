@@ -1,12 +1,13 @@
 # Output executables
-#main
-# check_array_utils
+# main
+check_array_utils
 
 # Log files
 *.log
 
 # Makefiles ( have to be generated with cmake )
 Makefile
+"src/Makefile"
 
 # Libs
 *.a
@@ -31,3 +32,4 @@ Testing
 output
 .libs
 .deps
+/matrice_grad_conf/

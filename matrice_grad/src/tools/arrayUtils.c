@@ -9,7 +9,7 @@
 
 #include "customMath.h"
 
-#define RM m_getRoundingMode()
+#define RM mpfr_get_default_rounding_mode()
 
 /**
  * @file arrayUtils.c
@@ -45,6 +45,7 @@ void createArray(mpfr_t ** result, const int n, mpfr_prec_t precision) {
 			m_init2((*result)[i], precision);
 		}
 	}
+	m_clear(tmp);
 }
 
 /**

@@ -337,7 +337,7 @@ int stochasticRounding(mpfr_t * value, const mpfr_prec_t pre) {
 }
 
 /**
- * // FIXME m_getRoundingMode
+ * @deprecated
  * @return The rounding mode to use through the whole application
  */
 mpfr_rnd_t m_getRoundingMode() {

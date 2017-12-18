@@ -5,7 +5,7 @@
 #include "../src/tools/arrayUtils.h"
 #include "../src/tools/customMath.h"
 
-#define RM m_getRoundingMode()
+#define RM mpfr_get_default_rounding_mode()
 
 #define RME RNDN
 

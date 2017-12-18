@@ -65,6 +65,7 @@ void testExtendedRounding(mpfr_t * valToRound, mpfr_t* actualResult, long int in
 				mpfr_get_d(*valToRound, MPFR_RNDN), mpfr_get_d(*actualResult, MPFR_RNDN),
 				mpfr_get_d(*valToRound, MPFR_RNDN));
 	}
+	m_clear(expectedResult);
 }
 
 /**

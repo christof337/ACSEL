@@ -12,7 +12,7 @@
 #define GK_FILE_NAME "output/gkgk2"
 #define GK_LABEL "gkgk2"
 
-#define MATRIX_EXTENSION ".dat" // TODO : séparer le nom du fichier et l'extension (implique de faire un utilitaire de concaténation)
+#define MATRIX_EXTENSION ".dat"
 #define DATA_EXTENSION ".dat" 
 #define GK_EXTENSION ".dat"
 
@@ -257,6 +257,8 @@ int writeMatrixInFile(mpfr_t ** matrix, const int n, const int m, const mpfr_pre
  * @return     0 en cas de succès, la valeur de l'erreur sinon
  */
 int writeDataInFile(mpfr_t * x, mpfr_t * solgc, const int size, mpfr_prec_t precision) {
+	int res = 0;
+
 	char fileName[20];
 
 	const char * labels[] = { "i", "x", "solgc" };
@@ -271,7 +273,11 @@ int writeDataInFile(mpfr_t * x, mpfr_t * solgc, const int size, mpfr_prec_t prec
 
 	sprintf(fileName, "%s%ld%s", DATA_FILE_NAME, precision, DATA_EXTENSION);
 
-	return writeData(data, size, fileName, labels, n_array);
+	res = writeData(data, size, fileName, labels, n_array);
+
+	freeArray(iArray);
+
+	return res;
 }
 
 /**

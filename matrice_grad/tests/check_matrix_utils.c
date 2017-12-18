@@ -11,7 +11,7 @@
 #define DEFAULT_NB_ROWS 15
 #define DEFAULT_NB_COLUMNS 10
 
-#define RM m_getRoundingMode()
+#define RM mpfr_get_default_rounding_mode()
 
 #define RME RNDN
 
@@ -78,7 +78,7 @@ START_TEST(test_fill_matrix_exponentially)
 			for (long int j = 0 ; j < DEFAULT_NB_COLUMNS ; ++j) {
 				// ck_assert(matrixTest[i][j] == exp(-0.05 * pow((i-j), 2.0)));
 				mpfr_set_si(s, i - j, RM);
-				mpfr_pow(u, s, exp, RM);
+				m_pow(u, s, exp, RME);
 				m_mul(u, u, t, RM);
 				mpfr_exp(s, u, RM);
 				ck_assert(mpfr_cmp(matrixTest[i][j],s) == 0);
@@ -113,8 +113,8 @@ START_TEST(test_matrix_mult)
 			for (int j = 0 ; j < DEFAULT_NB_COLUMNS ; ++j) {
 				for (int k = 0 ; k < p ; ++k) {
 					// sum = sum + matrix1[i][k]*matrix2[k][j];
-					m_mul(t, matrix1[i][k], matrix2[k][j], RM);
-					mpfr_add(sum, sum, t, RM);
+					m_mul(t, matrix1[i][k], matrix2[k][j], RME);
+					mpfr_add(sum, sum, t, RME);
 				}
 				ck_assert(mpfr_cmp(multipliedMatrix[i][j],sum) == 0);
 				mpfr_set_d(sum, 0.0, RM); // sum = 0
@@ -154,8 +154,8 @@ START_TEST(test_matrix_mult_vector)
 		for (int i = 0 ; i < DEFAULT_NB_ROWS ; ++i) {
 			for (int j = 0 ; j < DEFAULT_NB_COLUMNS ; ++j) {
 				//sum = sum + matrix[i][j]*vector[j];
-				m_mul(t, matrix[i][j], vector[j], RM);
-				mpfr_add(sum, sum, t, RM);
+				m_mul(t, matrix[i][j], vector[j], RME);
+				mpfr_add(sum, sum, t, RME);
 			}
 			ck_assert(mpfr_cmp(multipliedVector[i],sum)==0);
 			mpfr_set_d(sum, 0.0, RM); // sum = 0

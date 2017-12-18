@@ -10,8 +10,8 @@ int errorHandling() {
 	int errnum;
 
 	errnum = errno;
-	perror("Error : ");
-	fprintf(stderr, "Error : %s\n", strerror(errnum));
+	perror("\nError : ");
+	fprintf(stderr, "\nError : %s\n", strerror(errnum));
 
 	return 0;
 }
@@ -64,5 +64,5 @@ void printCustomError(enum ERRORS err, int nbParams, ...) {
 }
 
 void printErrorMessage(char * message) {
-	fprintf(stderr, "%s", message);
+	fprintf(stderr, "\n%s", message);
 }

@@ -9,7 +9,7 @@
 
 #include "customMath.h"
 
-#define RM m_getRoundingMode()
+#define RM mpfr_get_default_rounding_mode()
 
 /**
  * Create a matrix and allocate memory for it. DO NOT initialize the space
@@ -83,7 +83,6 @@ int matrixMult(mpfr_t ** multipliedMatrix, mpfr_t ** array1, const int m1, const
 
 	mpfr_prec_t prec = mpfr_get_prec(array1[0][0]);
 
-	// mpfr_t ** multipliedMatrix = createMatrix(m1, n2);
 	mpfr_t sum;
 	m_init2(sum, prec);
 	mpfr_set_d(sum, 0.0, RM);
@@ -105,6 +104,9 @@ int matrixMult(mpfr_t ** multipliedMatrix, mpfr_t ** array1, const int m1, const
 			mpfr_set_d(sum, 0.0, RM); // sum = 0;
 		}
 	}
+
+	m_clear(sum);
+	m_clear(t);
 
 	return res;
 }
@@ -129,7 +131,7 @@ int matrixMultVector(mpfr_t * result, mpfr_t ** matrix, const int m, const int n
 	int res = 0;
 	mpfr_t ** resultTmp;
 
-	mpfr_prec_t prec = mpfr_get_prec(matrix[0][0]); // FIXME
+	mpfr_prec_t prec = mpfr_get_prec(matrix[0][0]); // ok to use a given precision
 
 	createMatrix(&resultTmp, m, 1, prec);
 
@@ -152,6 +154,7 @@ int matrixMultVector(mpfr_t * result, mpfr_t ** matrix, const int m, const int n
 	}
 
 	freeMatrix(resultTmp, m, 1);
+	freeMatrix(matrixTemp,sizeVector,1);
 
 	return res;
 }
@@ -192,8 +195,7 @@ int fillMatrixExponentially(mpfr_t ** array, const int m, const int n, const enu
 	int res = 0;
 	mpfr_t s, t, u, exp; // intermediate temporary variables
 
-	mpfr_prec_t prec = mpfr_get_prec(array[0][0]); // FIXME
-	//mpfr_prec_t prec = 2; // FIXME
+	mpfr_prec_t prec = mpfr_get_prec(array[0][0]); // ok to use a given precision
 
 	mpfr_inits2(prec, s, t, u, exp, (mpfr_ptr) NULL);
 	mpfr_set_d(exp, 2.0, RM);
