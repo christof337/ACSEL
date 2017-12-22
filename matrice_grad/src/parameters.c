@@ -285,7 +285,7 @@ enum roundingModeEnum stringToRoundingModeEnum(char * string, const int size) {
 	if (strcmp(str, "RNDN") == 0) {
 		res = RNDN;
 	} else if (strcmp(str, "STOCHASTIC") == 0) {
-		res = -1; // NOT IMPLEMENTED YET
+		res = STOCHASTIC;
 	} else if (strcmp(str, "RNDZ") == 0) {
 		res = RNDZ;
 	} else if (strcmp(str, "RNDU") == 0) {

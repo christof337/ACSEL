@@ -1,6 +1,7 @@
 #ifndef INPUT_OUTPUT_H
 #define INPUT_OUTPUT_H
 
+#include <stdio.h>
 #include <mpfr.h>
 
 int askForInt();
@@ -18,5 +19,7 @@ FILE * openLog(const char * fileName);
 void m_log(FILE * logFile, FILE * str);
 
 int closeLog(FILE * fileToClose);
+
+void eraseFile(const char * fileName);
 
 #endif /* INPUT_OUTPUT_H */

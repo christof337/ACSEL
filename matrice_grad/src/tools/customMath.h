@@ -17,6 +17,7 @@ enum roundingModeEnum {
 	RNDA  // round away from zero.
 };
 
+long int NB_STOCH_ROUND;
 
 int m_mul(mpfr_t product, const mpfr_t factor1, const mpfr_t factor2, const enum roundingModeEnum roundingMode);
 
@@ -31,7 +32,7 @@ int m_add(mpfr_t summation, const mpfr_t addend1, const mpfr_t addend2,
 int m_sub(mpfr_t difference, const mpfr_t minuend, const mpfr_t substrahend,
 		const enum roundingModeEnum roundingMode);
 
-int m_pow(mpfr_t res, mpfr_t val, mpfr_t exp, const enum roundingModeEnum roundingMode);
+int m_pow(mpfr_t res, const mpfr_t val, const mpfr_t exp, const enum roundingModeEnum roundingMode);
 
 void handleExtendedRounding(mpfr_t longValue1, mpfr_t longValue2, mpfr_t longResult,
 		const mpfr_t shortValue1, const mpfr_t shortValue2);
@@ -41,6 +42,7 @@ void m_init2(mpfr_t value, const mpfr_prec_t precision);
 void m_clear(mpfr_t value);
 
 int m_setPrecision(mpfr_t * value, const mpfr_prec_t pre);
+int m_setPrecisionWithRoundingMode(mpfr_t * value, const mpfr_prec_t pre, const mpfr_rnd_t roundingMode);
 
 int stochasticRounding(mpfr_t * v, const mpfr_prec_t pre);
 

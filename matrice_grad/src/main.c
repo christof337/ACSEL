@@ -18,9 +18,10 @@
 // ce code est inspiré du programme "matrice_grad".
 // l'objectif est de faire varier la précision pour observer le comportement de réduction du gradient 
 // quick run : src/main ms=100 ni=30 pre=16 rm=STOCHASTIC
-
+// long run : src/main ms=3000 ni=100 rm=STOCHASTIC
 
 int main(int argc, char *argv[]) {
+	NB_STOCH_ROUND = 0;
 	int state = 0;
 	if (DEBUG) {
 		// test
@@ -63,8 +64,7 @@ int main(int argc, char *argv[]) {
 				const int NB_GRAD = getParamFromParamEnum(NB_ITER)->currentValue.li; // nombre d'itérations du gradient
 				const int M_SIZE = getParamFromParamEnum(MATRIX_SIZE)->currentValue.li;
 				const int RANGE_PRECISION = getParamFromParamEnum(MAX_PREC)->currentValue.li; // précision maximum utilisée
-				const enum roundingModeEnum RME = getParamFromParamEnum(MAX_PREC)->currentValue.rme;
-				const mpfr_rnd_t RM = roundingModeEnumToMpfrRndT(RME);
+				const enum roundingModeEnum RME = getParamFromParamEnum(ROUNDING_MODE)->currentValue.rme;
 				const enum matrixTypeEnum M_TYPE = getParamFromParamEnum(MATRIX_TYPE)->currentValue.mte;
 
 				printf("\nDébut programme...");
@@ -78,9 +78,15 @@ int main(int argc, char *argv[]) {
 
 				StartTimer();
 
-				// CONJUGUATE GRADIENT DESCENT METHOD
-				state = conjuguateGradientDescent(RANGE_PRECISION, M_SIZE, NB_GRAD, M_TYPE, RME, RM,
-						state);
+				printf("\nDébut boucle principale itérant sur les précisions (non parrallélisée)");
+
+				// DEBUT BOUCLE ( entièrement parralélisable )
+//#pragma acc parallel loop
+				for (int pre = PRECISION_MIN ; pre < RANGE_PRECISION ; ++pre) {
+					// CONJUGUATE GRADIENT DESCENT METHOD
+					/*state += */ conjuguateGradientDescent(pre, M_SIZE, NB_GRAD, M_TYPE, RME);
+				}
+				// fin boucle principale (pre)
 
 				double runtime = GetTimer();
 
@@ -88,6 +94,8 @@ int main(int argc, char *argv[]) {
 				fflush(stdout);
 			}
 		}
+
+		printf("\n\n--Stochastic rounding has been called %ld times.\n",NB_STOCH_ROUND);
 
 		if (state == 0) {
 			printf("\nFIN PROGRAMME NORMAL\n");
@@ -98,5 +106,8 @@ int main(int argc, char *argv[]) {
 			printFinalErrorStatement();
 		}
 	}
+
+	mpfr_free_cache ();
+
 	return state;
 }

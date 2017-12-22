@@ -31,9 +31,12 @@
  * @see        http://www.mpfr.org/mpfr-current/mpfr.html
  */
 
-int conjuguateGradientDescent(const int maxPrecision, const int matrixSize,
+int conjuguateGradientDescent(const int precision, const int matrixSize,
 		const int nbGradientIterations, const enum matrixTypeEnum matrixType,
-		const enum roundingModeEnum roundingModeEnum, const mpfr_rnd_t roundingMode, int res) {
+		const enum roundingModeEnum roundingModeEnum) {
+	int res=0;
+	const mpfr_rnd_t roundingMode = roundingModeEnumToMpfrRndT(roundingModeEnum);
+
 	// DECLARATIONS DES TABLEAUX
 	mpfr_t** a;	// a
 	mpfr_t* x;	// x
@@ -53,151 +56,137 @@ int conjuguateGradientDescent(const int maxPrecision, const int matrixSize,
 	mpfr_t* dkAlphakTmp;
 	mpfr_t* adkAlphakTmp;
 	mpfr_t* dkBetaKTmp;
-	printf("\nDébut boucle principale itérant sur les précisions (non parrallélisée)");
-	// DEBUT BOUCLE ( entièrement parralélisable )
-	for (int pre = PRECISION_MIN ; pre < maxPrecision ; ++pre) {
-		printf("\n------\tBoucle precision [%d]\t------", pre);
-		printf("\n[%d]", pre);
-		fflush(stdout);
-		// INITIALISATIONS
-		printf("\n\tInitialisation des tableaux");
-		fflush(stdout);
-		// ALLOCATIONS
-		createArray(&x, matrixSize, pre);
-		createMatrix(&a, matrixSize, matrixSize, pre);
-		createArray(&solgc, matrixSize, pre);
-		createArray(&b, matrixSize, pre);
-		createArray(&gkTmp, matrixSize, pre);
-		createArray(&gk, matrixSize, pre);
-		createArray(&dk, matrixSize, pre);
-		createArray(&adk, matrixSize, pre);
-		createArray(&gkgk2save, nbGradientIterations, pre);
-		printf("\n\tAllocation des variables MPFR");
-		fflush(stdout);
-		m_init2(gkGkTmp1, pre);
-		m_init2(adkDkTmp, pre);
-		m_init2(alphak, pre);
-		m_init2(gkgk2, pre);
-		m_init2(gkGkTmp2, pre);
-		m_init2(betak, pre);
-		printf("\n\tInitialisation des tableaux temporaires");
-		fflush(stdout);
-		createArray(&dkAlphakTmp, matrixSize, pre);
-		createArray(&adkAlphakTmp, matrixSize, pre);
-		createArray(&dkBetaKTmp, matrixSize, pre);
-		printf("\n\tRemplissage des tableaux");
-		fflush(stdout);
-		// initialisation de a
-		switch (matrixType) {
-		case RANDOM:
-			fillMatrixRandomly(a, matrixSize, matrixSize);
-			break;
-		case EXPONENTIAL:
-			fillMatrixExponentially(a, matrixSize, matrixSize, roundingModeEnum);
-			break;
-		case HILBERT:
-		default:
-			printErrorMessage("\nError : Matrix type not implemented.\n");
-			return -1;
-		}
-		// initialisation de x linéairement
-		fillArrayLinearly(x, matrixSize);
-		printf("\n\tDébut des calculs");
-		fflush(stdout);
-		// on multiplie a et x ( B = AX )
-		customMatrixMultVector(b, a, x, matrixSize, roundingModeEnum);
-		fillArrayWithZeros(solgc, matrixSize);
-		// on se propose de réaliser une inversion par minimisation d'énergie (descente de gradient)
-		// gradient conjugué
-		// GK = A * XX - B
-		customMatrixMultVector(gkTmp, a, solgc, matrixSize, roundingModeEnum);
-		vectorMinusVector(gk, gkTmp, matrixSize, b, matrixSize, roundingModeEnum);
-		// DK = GK
-		vectorCopy(dk, gk, matrixSize);
-		printf("\n\t-- Itérations du gradient... --");
-		fflush(stdout);
-		// on itère sur le nombre d'itérations déterminé par NB_GRAD
-		for (int iter = 0 ; iter < nbGradientIterations ; ++iter) {
-			// ADK = A * DK
-			customMatrixMultVector(adk, a, dk, matrixSize, roundingModeEnum);
-			// GKGK = GK * GK
-			innerDotProduct(gkGkTmp1, gk, matrixSize, roundingModeEnum); // gkgk
-			// ADKDK = ADK * DK
-			dotProduct(adkDkTmp, adk, matrixSize, dk, matrixSize, roundingModeEnum); // adkdk
-			// AlphaK = GKGK / ADKDK ==> AlphaK = (GK*GK)/(ADK*DK)
-			m_div(alphak, gkGkTmp1, adkDkTmp, roundingModeEnum);
-			// XX = XX - AlphaK * DK
-			vectorMultValue(dkAlphakTmp, dk, matrixSize, alphak, roundingModeEnum);
-			vectorMinusVector(solgc, solgc, matrixSize, dkAlphakTmp, matrixSize, roundingModeEnum);
-			// GK = GK - AlphaK * ADK
-			vectorMultValue(adkAlphakTmp, adk, matrixSize, alphak, roundingModeEnum);
-			vectorMinusVector(gk, gk, matrixSize, adkAlphakTmp, matrixSize, roundingModeEnum);
-			// gkgk2 = sqrt of (square sum of gk elements)
-			sumSquare(gkgk2, gk, matrixSize, roundingModeEnum);
-			mpfr_sqrt(gkgk2, gkgk2, roundingMode);
-			// GKGK = GK*GK
-			innerDotProduct(gkGkTmp2, gk, matrixSize, roundingModeEnum); // pertinent car changements réalisés sur gk depuis gkgkTmp1
-			m_div(betak, gkGkTmp2, gkGkTmp1, roundingModeEnum);
-			// DK = GK + BetaK*DK
-			vectorMultValue(dkBetaKTmp, dk, matrixSize, betak, roundingModeEnum);
-			vectorPlusVector(dk, gk, matrixSize, dkBetaKTmp, matrixSize, roundingModeEnum);
-			// sauvegarde
-			mpfr_set(gkgk2save[iter], gkgk2, RM);
-			// libérations mémoire
-			//free(dkAlphakTmp);
-			//free(solgcTmp);
-			//free(adkAlphakTmp);
-			//free(gkTmp);
-			//free(dkBetaKTmp);
-		}
-		printf("\n\tEcriture de la matrice a dans un fichier (output/matrix.dat)");
-		fflush(stdout);
-		// écriture de la matrice a dans un fichier
-		int error = writeMatrixInFile(a, matrixSize, matrixSize, pre);
-		if (error != 0) {
-			// error
-			res = error;
-		}
-		printf("\n\tEcriture de i, x(i) et solgc(i) dans un fichier (output/solggc.dat)");
-		fflush(stdout);
-		// écriture de i, x(i) et solgc(i) dans un fichier solggc.dat
-		error = writeDataInFile(x, solgc, matrixSize, pre);
-		if (error != 0) {
-			// error
-			res = error;
-		}
-		printf("\n\tEcriture de gkgk2 dans un fichier (output/gkgk.dat)");
-		fflush(stdout);
-		// écriture de gkgk2 dans un fichier gkgk.dat
-		error = writeGkArrayInFile(gkgk2save, nbGradientIterations, pre);
-		if (error != 0) {
-			// error
-			res = error;
-		}
-		printf("\n\tLibérations des variables");
-		fflush(stdout);
-		m_clear(gkGkTmp1);
-		m_clear(adkDkTmp);
-		m_clear(alphak);
-		m_clear(gkgk2);
-		m_clear(gkGkTmp2);
-		m_clear(betak);
-		printf("\n\tLibérations des tableaux");
-		fflush(stdout);
-		freeArray(x, matrixSize);
-		freeMatrix(a, matrixSize, matrixSize);
-		freeArray(b, matrixSize);
-		freeArray(solgc, matrixSize);
-		freeArray(gkgk2save, nbGradientIterations);
-		freeArray(gk, matrixSize);
-		freeArray(dk, matrixSize);
-		freeArray(adk, matrixSize);
-		freeArray(gkTmp, matrixSize);
-		freeArray(dkAlphakTmp, matrixSize);
-		freeArray(adkAlphakTmp, matrixSize);
-		freeArray(dkBetaKTmp, matrixSize);
+
+	printf("\n------\tBoucle precision [%d]\t------\n", precision);
+	printf("[%d]\n", precision);
+	// INITIALISATIONS
+	printf("\tInitialisation des tableaux\n");
+	// ALLOCATIONS
+	createArray(&x, matrixSize, precision);
+	createMatrix(&a, matrixSize, matrixSize, precision);
+	createArray(&solgc, matrixSize, precision);
+	createArray(&b, matrixSize, precision);
+	createArray(&gkTmp, matrixSize, precision);
+	createArray(&gk, matrixSize, precision);
+	createArray(&dk, matrixSize, precision);
+	createArray(&adk, matrixSize, precision);
+	createArray(&gkgk2save, nbGradientIterations, precision);
+	printf("\tAllocation des variables MPFR\n");
+	m_init2(gkGkTmp1, precision);
+	m_init2(adkDkTmp, precision);
+	m_init2(alphak, precision);
+	m_init2(gkgk2, precision);
+	m_init2(gkGkTmp2, precision);
+	m_init2(betak, precision);
+	printf("\tInitialisation des tableaux temporaires\n");
+	createArray(&dkAlphakTmp, matrixSize, precision);
+	createArray(&adkAlphakTmp, matrixSize, precision);
+	createArray(&dkBetaKTmp, matrixSize, precision);
+	printf("\tRemplissage des tableaux\n");
+	// initialisation de a
+	switch (matrixType) {
+	case RANDOM:
+		fillMatrixRandomly(a, matrixSize, matrixSize);
+		break;
+	case EXPONENTIAL:
+		fillMatrixExponentially(a, matrixSize, matrixSize, roundingModeEnum);
+		break;
+	case HILBERT:
+	default:
+		printErrorMessage("\nError : Matrix type not implemented.\n");
+		return -1;
 	}
-	// fin boucle principale (pre)
+	// initialisation de x linéairement
+	fillArrayLinearly(x, matrixSize);
+	printf("\tDébut des calculs\n");
+	// on multiplie a et x ( B = AX )
+	customMatrixMultVector(b, a, x, matrixSize, roundingModeEnum);
+	fillArrayWithZeros(solgc, matrixSize);
+	// on se propose de réaliser une inversion par minimisation d'énergie (descente de gradient)
+	// gradient conjugué
+	// GK = A * XX - B
+	customMatrixMultVector(gkTmp, a, solgc, matrixSize, roundingModeEnum);
+	vectorMinusVector(gk, gkTmp, matrixSize, b, matrixSize, roundingModeEnum);
+	// DK = GK
+	vectorCopy(dk, gk, matrixSize);
+	printf("\t-- Itérations du gradient... --\n");
+	// on itère sur le nombre d'itérations déterminé par NB_GRAD
+	for (int iter = 0 ; iter < nbGradientIterations ; ++iter) {
+		// ADK = A * DK
+		customMatrixMultVector(adk, a, dk, matrixSize, roundingModeEnum);
+		// GKGK = GK * GK
+		innerDotProduct(gkGkTmp1, gk, matrixSize, roundingModeEnum); // gkgk
+		// ADKDK = ADK * DK
+		dotProduct(adkDkTmp, adk, matrixSize, dk, matrixSize, roundingModeEnum); // adkdk
+		// AlphaK = GKGK / ADKDK ==> AlphaK = (GK*GK)/(ADK*DK)
+		m_div(alphak, gkGkTmp1, adkDkTmp, roundingModeEnum);
+		// XX = XX - AlphaK * DK
+		vectorMultValue(dkAlphakTmp, dk, matrixSize, alphak, roundingModeEnum);
+		vectorMinusVector(solgc, solgc, matrixSize, dkAlphakTmp, matrixSize, roundingModeEnum);
+		// GK = GK - AlphaK * ADK
+		vectorMultValue(adkAlphakTmp, adk, matrixSize, alphak, roundingModeEnum);
+		vectorMinusVector(gk, gk, matrixSize, adkAlphakTmp, matrixSize, roundingModeEnum);
+		// gkgk2 = sqrt of (square sum of gk elements)
+		sumSquare(gkgk2, gk, matrixSize, roundingModeEnum);
+		mpfr_sqrt(gkgk2, gkgk2, roundingMode);
+		// GKGK = GK*GK
+		innerDotProduct(gkGkTmp2, gk, matrixSize, roundingModeEnum); // pertinent car changements réalisés sur gk depuis gkgkTmp1
+		m_div(betak, gkGkTmp2, gkGkTmp1, roundingModeEnum);
+		// DK = GK + BetaK*DK
+		vectorMultValue(dkBetaKTmp, dk, matrixSize, betak, roundingModeEnum);
+		vectorPlusVector(dk, gk, matrixSize, dkBetaKTmp, matrixSize, roundingModeEnum);
+		// sauvegarde
+		mpfr_set(gkgk2save[iter], gkgk2, RM);
+		// libérations mémoire
+		//free(dkAlphakTmp);
+		//free(solgcTmp);
+		//free(adkAlphakTmp);
+		//free(gkTmp);
+		//free(dkBetaKTmp);
+	}
+	printf("\tEcriture de la matrice a dans un fichier (output/matrix.dat)\n");
+	// écriture de la matrice a dans un fichier
+	int error = writeMatrixInFile(a, matrixSize, matrixSize, precision);
+	if (error != 0) {
+		// error
+		res = error;
+	}
+	printf("\tEcriture de i, x(i) et solgc(i) dans un fichier (output/solggc.dat)\n");
+	// écriture de i, x(i) et solgc(i) dans un fichier solggc.dat
+	error = writeDataInFile(x, solgc, matrixSize, precision);
+	if (error != 0) {
+		// error
+		res = error;
+	}
+	printf("\tEcriture de gkgk2 dans un fichier (output/gkgk.dat)\n");
+	// écriture de gkgk2 dans un fichier gkgk.dat
+	error = writeGkArrayInFile(gkgk2save, nbGradientIterations, precision);
+	if (error != 0) {
+		// error
+		res = error;
+	}
+	printf("\tLibérations des variables\n");
+	m_clear(gkGkTmp1);
+	m_clear(adkDkTmp);
+	m_clear(alphak);
+	m_clear(gkgk2);
+	m_clear(gkGkTmp2);
+	m_clear(betak);
+	printf("\tLibérations des tableaux\n");
+	freeArray(x, matrixSize);
+	freeMatrix(a, matrixSize, matrixSize);
+	freeArray(b, matrixSize);
+	freeArray(solgc, matrixSize);
+	freeArray(gkgk2save, nbGradientIterations);
+	freeArray(gk, matrixSize);
+	freeArray(dk, matrixSize);
+	freeArray(adk, matrixSize);
+	freeArray(gkTmp, matrixSize);
+	freeArray(dkAlphakTmp, matrixSize);
+	freeArray(adkAlphakTmp, matrixSize);
+	freeArray(dkBetaKTmp, matrixSize);
+
+	printf("\nStochastic rounding has been called %ld times.\n",NB_STOCH_ROUND);
 	return res;
 }
 
@@ -227,7 +216,8 @@ int askTailleMatrice() {
  * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
  *             values, < 0 if globally rounded downwards the exact values
  */
-int customMatrixMultVector(mpfr_t * result, mpfr_t ** matrix, mpfr_t * vector, const int size, const enum roundingModeEnum rme) {
+int customMatrixMultVector(mpfr_t * result, mpfr_t ** matrix, mpfr_t * vector, const int size,
+		const enum roundingModeEnum rme) {
 	return matrixMultVector(result, matrix, size, size, vector, size, rme);
 }
 
@@ -243,6 +233,9 @@ int customMatrixMultVector(mpfr_t * result, mpfr_t ** matrix, mpfr_t * vector, c
 int writeMatrixInFile(mpfr_t ** matrix, const int n, const int m, const mpfr_prec_t precision) {
 	char fileName[20];
 	sprintf(fileName, "%s%ld%s", MATRIX_FILE_NAME, precision, MATRIX_EXTENSION);
+//	if (precision == MPFR_PREC_MIN) {
+	eraseFile(fileName);
+//	}
 	return writeMatrix(matrix, n, m, fileName);
 }
 
@@ -273,9 +266,13 @@ int writeDataInFile(mpfr_t * x, mpfr_t * solgc, const int size, mpfr_prec_t prec
 
 	sprintf(fileName, "%s%ld%s", DATA_FILE_NAME, precision, DATA_EXTENSION);
 
+//	if (precision == MPFR_PREC_MIN) {
+	eraseFile(fileName);
+//	}
+
 	res = writeData(data, size, fileName, labels, n_array);
 
-	freeArray(iArray);
+	freeArray(iArray, size);
 
 	return res;
 }
@@ -294,7 +291,7 @@ int writeGkArrayInFile(mpfr_t * array, const int size, mpfr_prec_t precision) {
 	//TODO : spécifier les paramètres actuels de l'application dans le nom du fichier
 	sprintf(fileName, "%s%s", GK_FILE_NAME, GK_EXTENSION);
 
-	if (precision == 2) {
+	if (precision == MPFR_PREC_MIN) {
 		// réinitialisation du fichier et écriture des en têtes
 		FILE * pf;
 		pf = fopen(fileName, "w+");

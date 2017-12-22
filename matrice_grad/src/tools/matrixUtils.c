@@ -6,10 +6,18 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <mpfr.h>
+#include <assert.h>
 
 #include "customMath.h"
 
 #define RM mpfr_get_default_rounding_mode()
+
+void arr_alloc (const size_t x, const size_t y, mpfr_t(**aptr)[x][y])
+{
+	*aptr = malloc( sizeof(mpfr_t[x][y]) ); // allocate a true 2D array
+	assert(*aptr != NULL);
+}
 
 /**
  * Create a matrix and allocate memory for it. DO NOT initialize the space
@@ -24,6 +32,9 @@
 void createMatrix(mpfr_t *** a, const int m, const int n, mpfr_prec_t precision) {
 	mpfr_t tmp;
 	m_init2(tmp, precision);
+
+
+//	arr_alloc(m,n,a);
 	mpfr_t * values = calloc(n * m, sizeof(tmp));
 	(*a) = malloc(m * sizeof(mpfr_t*));
 
@@ -40,6 +51,8 @@ void createMatrix(mpfr_t *** a, const int m, const int n, mpfr_prec_t precision)
 			m_init2((*a)[i][j], precision);
 		}
 	}
+
+	free(values);
 
 	m_clear(tmp);
 }
@@ -147,14 +160,14 @@ int matrixMultVector(mpfr_t * result, mpfr_t ** matrix, const int m, const int n
 	}
 
 	// multiplication matrice / vecteur
-	res = matrixMult(resultTmp, matrix, m, n, matrixTemp, sizeVector, 1,rme);
+	res = matrixMult(resultTmp, matrix, m, n, matrixTemp, sizeVector, 1, rme);
 
 	for (int i = 0 ; i < m ; ++i) {
 		mpfr_set(result[i], resultTmp[i][0], RM);
 	}
 
 	freeMatrix(resultTmp, m, 1);
-	freeMatrix(matrixTemp,sizeVector,1);
+	freeMatrix(matrixTemp, sizeVector, 1);
 
 	return res;
 }
@@ -191,27 +204,37 @@ int fillMatrixRandomly(mpfr_t ** array, const int m, const int n) {
  * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
  *             value, < 0 if globally rounded downwards the exact value
  */
-int fillMatrixExponentially(mpfr_t ** array, const int m, const int n, const enum roundingModeEnum rme) {
+int fillMatrixExponentially(mpfr_t ** array, const int m, const int n,
+		const enum roundingModeEnum rme) {
 	int res = 0;
 	mpfr_t s, t, u, exp; // intermediate temporary variables
 
 	mpfr_prec_t prec = mpfr_get_prec(array[0][0]); // ok to use a given precision
 
-	mpfr_inits2(prec, s, t, u, exp, (mpfr_ptr) NULL);
-	mpfr_set_d(exp, 2.0, RM);
-	mpfr_set_d(t, -0.05, RM);
+	m_init2(s, prec);
+	m_init2(t, prec);
+	m_init2(u, prec);
+	m_init2(exp, prec);
+
+	mpfr_set_str(exp, "2.0", 10, RM);
+	mpfr_set_str(t, "-0.05", 10, RM);
 
 	for (long int i = 0 ; i < m ; ++i) {
 		for (long int j = 0 ; j < n ; ++j) {
 			// array[i][j] = exp(-0.05*pow((i-j),2.0))
-			mpfr_prec_t prec = mpfr_get_prec(array[i][j]);
-			mpfr_set_si(s, i - j, RM);
+//			mpfr_prec_t prec = mpfr_get_prec(array[i][j]);
+			mpfr_set_si(s, (i - j), RM);
 			m_pow(u, s, exp, rme);
 			m_mul(u, u, t, rme);
 			res += mpfr_exp(array[i][j], u, RM);
 		}
 	}
-	mpfr_clears(s, t, u, exp, (mpfr_ptr) NULL);
+
+	m_clear(s);
+	m_clear(t);
+	m_clear(u);
+	m_clear(exp);
+
 	return res;
 }
 

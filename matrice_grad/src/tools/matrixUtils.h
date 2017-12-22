@@ -15,6 +15,8 @@ int matrixMult(mpfr_t ** res, mpfr_t ** array1, const int m1, const int n1, mpfr
 int matrixMultVector(mpfr_t * res, mpfr_t ** matrix, const int m, const int n, mpfr_t * vector,
 		const int sizeVector, const enum roundingModeEnum rme);
 
+void arr_alloc (const size_t x, const size_t y, mpfr_t(**aptr)[x][y]);
+
 int fillMatrixRandomly(mpfr_t ** array, const int m, const int n);
 
 int fillMatrixExponentially(mpfr_t ** array, const int m, const int n, const enum roundingModeEnum rme);

@@ -149,6 +149,14 @@ int writeArray(mpfr_t * array, const int size, const char * fileName, const char
 	return 0;
 }
 
+void eraseFile(const char * fileName) {
+	// réinitialisation du fichier
+	FILE * pf;
+	pf = fopen(fileName, "w+");
+	fprintf(pf, " "); // TODO : check if necessary
+	fclose(pf);
+}
+
 FILE * openLog(const char * fileName) {
 	FILE * file;
 	int errnum;

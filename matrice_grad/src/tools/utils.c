@@ -81,6 +81,7 @@ void getRandstate(gmp_randstate_t randState) {
 	uint32_t val = arc4random();
 	//uint32_t arc4random(void)
 	gmp_randseed_ui(randState, val);
+	gmp_randclear(randState);
 }
 
 /**
