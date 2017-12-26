@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #include "matrice_grad.h"
 
@@ -24,6 +25,11 @@
 #define RM mpfr_get_default_rounding_mode()
 
 #define OUTPUT 0
+
+
+void initGkgk2_global(const size_t nbPrecisions, const size_t nbIterations) {
+	arr_alloc(nbPrecisions,nbIterations,&gkgk2_global);
+}
 
 void * customConjuguateGradientDescentThreadWrapper(void * precision) {
 	const size_t M_SIZE = getParamFromParamEnum(MATRIX_SIZE)->currentValue.s;
@@ -54,7 +60,6 @@ int conjuguateGradientDescent(const int precision, const size_t matrixSize,
 	int res = 0;
 	char logBuffer[500];
 	const mpfr_rnd_t roundingMode = roundingModeEnumToMpfrRndT(roundingModeEnum);
-
 	// DECLARATIONS DES TABLEAUX
 	mpfr_t (*a)[matrixSize][matrixSize];
 	// mpfr_t** a;	// a
@@ -192,12 +197,16 @@ int conjuguateGradientDescent(const int precision, const size_t matrixSize,
 		sprintf(logBuffer, "\tEcriture de gkgk2 dans un fichier (output/gkgk.dat)\n");
 		m_log(precision, logBuffer);
 		// écriture de gkgk2 dans un fichier gkgk.dat (une seule ligne)
-		error = writeGkArrayInFile(gkgk2save, nbGradientIterations, precision);
-		if (error != 0) {
-			// error
-			res = error;
-		}
+//		error = writeGkArrayInFile(gkgk2save, nbGradientIterations, precision);
+//		if (error != 0) {
+//			// error
+//			res = error;
+//		}
 	}
+	// saving gkgk2
+	createArray(&(gkgk2_global[precision-MPFR_PREC_MIN]),nbGradientIterations,precision);
+	vectorCopy(gkgk2_global[precision-MPFR_PREC_MIN],gkgk2save,nbGradientIterations);
+
 	sprintf(logBuffer,"Gkgk2 : %F",mpfr_get_d(gkgk2,MPFR_RNDN));
 	m_log(precision, logBuffer);
 	sprintf(logBuffer, "\tLibérations des variables\n");
@@ -324,21 +333,45 @@ int writeDataInFile(mpfr_t * x, mpfr_t * solgc, const size_t size, mpfr_prec_t p
  *
  * @return     0 en cas de succès, la valeur de l'erreur sinon
  */
-int writeGkArrayInFile(mpfr_t * array, const size_t size, mpfr_prec_t precision) {
-	char fileName[19];
-	//sprintf(fileName,"%s%ld%s",GK_FILE_NAME,precision,GK_EXTENSION);
-	//TODO : spécifier les paramètres actuels de l'application dans le nom du fichier
-	sprintf(fileName, "%s%s", GK_FILE_NAME, GK_EXTENSION);
+//int writeGkGlobalArrayInFile(mpfr_t ** array, const size_t size, mpfr_prec_t precision) {
+//	char fileName[19];
+//	//sprintf(fileName,"%s%ld%s",GK_FILE_NAME,precision,GK_EXTENSION);
+//	//TODO : spécifier les paramètres actuels de l'application dans le nom du fichier
+//	sprintf(fileName, "%s%s", GK_FILE_NAME, GK_EXTENSION);
+//
+//	if (precision == MPFR_PREC_MIN) {
+//		// réinitialisation du fichier et écriture des en têtes
+//		FILE * pf;
+//		pf = fopen(fileName, "w+");
+//		fprintf(pf, "i\t%12s\tprec\n", GK_LABEL);
+//		fclose(pf);
+//	}
+//
+//	return writeArray(array, size, fileName, GK_LABEL);
+//}
 
-	if (precision == MPFR_PREC_MIN) {
-		// réinitialisation du fichier et écriture des en têtes
-		FILE * pf;
-		pf = fopen(fileName, "w+");
-		fprintf(pf, "i\t%12s\tprec\n", GK_LABEL);
-		fclose(pf);
+
+int writeGkgk2_global(const size_t nbPrecisionsTreated, const size_t nbIterations) {
+	int res = 0;
+
+	char fileName[100];
+	char * prefix = buildPrefixFromParams();
+	char * suffix = buildSuffix();
+
+	sprintf(fileName,"%s%s%s",GK_FILE_NAME,prefix,suffix);
+
+	eraseFile(fileName);
+
+	for ( size_t i = 0 ; i < nbPrecisionsTreated ; ++i ) {
+		writeArray(gkgk2_global[i],nbIterations,fileName,"Gkgk2");
 	}
 
-	return writeArray(array, size, fileName, GK_LABEL);
+	//res = writeGkGlobalArrayInFile(nbPrecisionsTreated,nbIterations,gkgk2_global,fileName);
+
+	free(prefix);
+	free(suffix);
+
+	return res;
 }
 
 /**

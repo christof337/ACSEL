@@ -90,10 +90,16 @@ int main(int argc, char *argv[]) {
 
 				printf("\nDébut boucle principale itérant sur les précisions\n");
 
-				mpfr_t * metaGkgk2save[NB_GRAD];
+//				mpfr_t * metaGkgk2save[NB_GRAD];
 				pthread_t threads[RANGE_PRECISION - PRECISION_MIN];
 				int threadState;
-				int nbThreads=0;
+				int nbThreads = 0;
+
+				initGkgk2_global(RANGE_PRECISION - PRECISION_MIN, NB_ITER);
+
+				printf("\nLancement des threads");
+				printProgressBarLine(RANGE_PRECISION-PRECISION_MIN);
+				printf("|");
 
 				// DEBUT BOUCLE ( entièrement parralélisable )
 //#pragma acc parallel loop
@@ -104,22 +110,39 @@ int main(int argc, char *argv[]) {
 						fprintf(stderr, "\n[%d]Thread error : %s", pre, strerror(threadState));
 						exit(EXIT_FAILURE);
 					} else {
+						printf(".");
+						fflush(stdout);
 						nbThreads++;
 					}
 					// CONJUGUATE GRADIENT DESCENT METHOD
 //					/*state += */conjuguateGradientDescent(pre, M_SIZE, NB_GRAD, M_TYPE,
 //							RME/*, metaGkgk2save*/);
 				}
+				printf("|\n");
 				// fin boucle principale (pre)
-
-				for(int i = 0; i < nbThreads;i++) {
+				printf("\nRécupération des threads...");
+				printProgressBarLine(nbThreads);
+				printf("|");
+				fflush(stdout);
+				for (int i = 0 ; i < nbThreads ; i++) {
 					// in order to wait for everyone to finish
-					pthread_join(threads[i],NULL);
+					pthread_join(threads[i], NULL);
+					printf(".");
+					fflush(stdout);
 				}
+				printf("|\n");
+				fflush(stdout);
+				printLine();
+				printf("--------End of iterations.--------");
+				printLine();
+
+				// when everything's good, writing gkgk2_global to a file
+				printf("Writing gkgk2 to a file...\n");
+				writeGkgk2_global(RANGE_PRECISION - MPFR_PREC_MIN, NB_GRAD);
 
 				int closeSuccess;
 				closeSuccess = closeLogFiles();
-				if(closeSuccess != 0 ) {
+				if (closeSuccess != 0) {
 					printErrorMessage("Error while closing log files");
 				}
 				state += closeSuccess;

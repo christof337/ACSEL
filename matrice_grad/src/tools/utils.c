@@ -102,5 +102,13 @@ void setRandomValue(mpfr_t * val) {
  * Simply print a line with one charriot return before and one after on the standard output.
  */
 void printLine() {
-	printf("\n-----------\n");
+	printf("\n---------------------------------\n");
+}
+
+void printProgressBarLine(const int nbThreads) {
+	printf("\n| Début");
+	for(int i = 0;i<=nbThreads-strlen(" Début")-strlen("Fin ");++i) {
+		printf(" ");
+	}
+	printf("Fin |\n");
 }

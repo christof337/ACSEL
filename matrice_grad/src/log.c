@@ -44,6 +44,7 @@ char * buildPrefixFromParams() {
 	char * fileNamePrefix;
 
 	fileNamePrefix = malloc(sizeof(char)*100);
+	strcpy(fileNamePrefix,"");
 	if(fileNamePrefix != NULL) {
 		for (int p = param_min ; p <= param_max ; ++p) {
 			struct Param * param = getParamFromParamEnum(p);
@@ -54,7 +55,7 @@ char * buildPrefixFromParams() {
 	return fileNamePrefix;
 }
 
-char * buildSuffix() {
+char * buildLogSuffix() {
 	char * suffix = malloc(sizeof(char)*strlen(LOG_SUFFIX));
 	strcpy(suffix,LOG_SUFFIX);
 	return suffix;
@@ -83,7 +84,7 @@ int initLogFiles() {
 			char * prefix;
 			prefix = buildLogPrefixFromParams();
 			char * suffix;
-			suffix = buildSuffix();
+			suffix = buildLogSuffix();
 
 			// opening all the logFiles
 			for (long int i = 0 ; i < nbPrec ; ++i) {

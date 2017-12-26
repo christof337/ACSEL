@@ -17,4 +17,6 @@ void eraseFile(const char * fileName);
 
 char * getFileNameFromPrecision(const char * prefix, const char * suffix, const long int precision);
 
+char * buildSuffix();
+
 #endif /* INPUT_OUTPUT_H */

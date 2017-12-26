@@ -15,7 +15,7 @@ char * buildPrefixFromParams();
 
 char * buildLogPrefixFromParams();
 
-char * buildSuffix();
+char * buildLogSuffix();
 
 int initLogFiles();
 

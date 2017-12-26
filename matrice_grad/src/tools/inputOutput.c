@@ -13,7 +13,7 @@
 #define RM mpfr_get_default_rounding_mode()
 #endif // RM
 
-#define LOG_FILE_PREFIX ""
+#define DATA_SUFFIX ".dat"
 
 /**
  * @brief      Ask for an int in the standard input and return it
@@ -40,7 +40,7 @@ int askForInt() {
 int writeMatrix(const size_t n, const size_t m, mpfr_t matrix[m][n], const char * fileName) {
 	FILE * pf;
 	int errnum;
-	pf = fopen(fileName, "a");
+	pf = fopen(fileName, "w+");
 
 	if (pf == NULL) {
 		// fail to open file
@@ -166,5 +166,12 @@ char * getFileNameFromPrecision(const char * prefix, const char * suffix, const 
 	sprintf(fileName,"%s(%ld)%s",prefix,precision,suffix);
 
 	return fileName;
+}
+
+char * buildSuffix() {
+	char * suffix;
+	suffix = malloc(sizeof(char)*strlen(DATA_SUFFIX));
+	strcpy(suffix,DATA_SUFFIX);
+	return suffix;
 }
 

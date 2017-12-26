@@ -14,4 +14,6 @@ void setRandomValue(mpfr_t * val);
 
 void printLine();
 
+void printProgressBarLine(const int nbThreads) ;
+
 #endif /* UTILS_H */
