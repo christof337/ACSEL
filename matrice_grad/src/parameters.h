@@ -21,6 +21,7 @@ union defaultValueUnion {
 	double d;
 	enum matrixTypeEnum mte;
 	long int li;
+	size_t s;
 	enum roundingModeEnum rme;
 };
 
@@ -31,6 +32,7 @@ enum type {
 	DOUBLE,
 	MATRIXTYPEENUM,
 	LONGINT,
+	SIZE_T,
 	ROUNDINGMODEENUM
 };
 
@@ -77,8 +79,10 @@ enum ParamEnum getParamEnumFromString(char * paramName);
 
 void paramAdressInit();
 
+char * getParamValueString(const struct Param * param);
+
 // ROUNDING MODE
-enum roundingModeEnum stringToRoundingModeEnum(char * string, const int size);
+enum roundingModeEnum stringToRoundingModeEnum(char * string, const size_t size);
 
 // mpfr_rnd_t m_getRoundingMode();
 

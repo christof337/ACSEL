@@ -13,6 +13,8 @@ int errorHandling();
 
 void printError(int errnum);
 
+void printErrorWithMessage(int errnum, char * message);
+
 void printErrorMessage(char * message);
 
 void printCustomError(enum ERRORS err, int nbParams, ...);

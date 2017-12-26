@@ -10,18 +10,21 @@ set(LIB_SOURCES
   main.c
   matrice_grad.c
   parameters.c
+  log.c
 )
 
 set(MAIN_SOURCES
   main.c
   matrice_grad.c
   parameters.c
+  log.c
 )
 
 set(HEADERS 
   ${CONFIG_HEADER}
   matrice_grad.h
   parameters.h
+  log.h
 )
 
 
@@ -45,4 +48,8 @@ install(TARGETS matrice_grad
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib)
 
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/matrice_grad.h DESTINATION include)
+#install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/matrice_grad.h DESTINATION include)
+
+#find_package(FindThreads)
+#if ( CMAKE_USE_PTHREADS_INIT )
+#        target_include_directories(main PUBLIC ${Fin

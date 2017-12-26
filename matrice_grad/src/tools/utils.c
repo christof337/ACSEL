@@ -14,9 +14,9 @@
  * @param size	The size of `str`
  * @return		A new string uppercase of `str`
  */
-char * toUpperCase(char * str, const int size) {
+char * toUpperCase(char * str, const size_t size) {
 	char * res = malloc(size * sizeof(char));
-	for (int i = 0 ; i < size ; ++i) {
+	for (size_t i = 0 ; i < size ; ++i) {
 		res[i] = toupper(str[i]);
 	}
 	return res;

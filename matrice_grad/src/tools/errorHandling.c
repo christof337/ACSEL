@@ -21,6 +21,11 @@ void printError(int errnum) {
 	fprintf(stderr, "\nError : %s\n", strerror(errnum));
 }
 
+void printErrorWithMessage(int errnum, char * message) {
+	perror("\nError : ");
+	fprintf(stderr, "\n%s : %s\n", message, strerror(errnum));
+}
+
 void printCustomError(enum ERRORS err, int nbParams, ...) {
 	va_list valist;
 	char ** params;

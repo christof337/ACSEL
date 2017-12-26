@@ -4,13 +4,16 @@
 #include "errorHandling.h"
 
 #include <errno.h>
-//#include <string.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "customMath.h"
 
 #ifndef RM
 #define RM mpfr_get_default_rounding_mode()
 #endif // RM
+
+#define LOG_FILE_PREFIX ""
 
 /**
  * @brief      Ask for an int in the standard input and return it
@@ -34,7 +37,7 @@ int askForInt() {
  *
  * @return     0 en cas de succès, la valeur de l'erreur sinon
  */
-int writeMatrix(mpfr_t ** matrix, const int n, const int m, const char * fileName) {
+int writeMatrix(const size_t n, const size_t m, mpfr_t matrix[m][n], const char * fileName) {
 	FILE * pf;
 	int errnum;
 	pf = fopen(fileName, "a");
@@ -96,8 +99,8 @@ int writeData(mpfr_t * data[], const int size, const char * fileName, const char
 			fprintf(pf, "%12s\t", labels[i]);
 		}
 		fprintf(pf, "\n");
-		for (int j = 0 ; j < size ; ++j) {
-			for (int i = 0 ; i < n_array ; ++i) {
+		for (size_t j = 0 ; j < size ; ++j) {
+			for (size_t i = 0 ; i < n_array ; ++i) {
 				//fprintf(pf,"%12G\t",data[i][j]);
 				mpfr_out_str(pf, 10, 12, data[i][j], RM);
 				fprintf(pf, "\t");
@@ -135,9 +138,9 @@ int writeArray(mpfr_t * array, const int size, const char * fileName, const char
 		return errnum;
 	} else {
 		// fprintf(pf,"i\t%12s\tprec\n",label);
-		for (int i = 0 ; i < size ; ++i) {
+		for (size_t i = 0 ; i < size ; ++i) {
 			//fprintf(pf,"%d\t%G\n",i,array[i]);
-			fprintf(pf, "%d\t", i);
+			fprintf(pf, "%zu\t", i);
 			mpfr_out_str(pf, 10, 12, array[i], RM);
 			fprintf(pf, "\t%ld\n", prec);
 		}
@@ -157,34 +160,11 @@ void eraseFile(const char * fileName) {
 	fclose(pf);
 }
 
-FILE * openLog(const char * fileName) {
-	FILE * file;
-	int errnum;
-	file = fopen(fileName, "a");
+char * getFileNameFromPrecision(const char * prefix, const char * suffix, const long int precision) {
+	char * fileName = malloc(sizeof(char)*(strlen(prefix)+strlen(suffix)+5));
 
-	if (file == NULL) {
-		// failed to open file
-		errnum = errno;
-		printError(errnum);
-	}
+	sprintf(fileName,"%s(%ld)%s",prefix,precision,suffix);
 
-	return file;
+	return fileName;
 }
 
-//void m_log(FILE * logFile, const char * str) {
-void m_log(FILE * logFile, FILE * str) { /*
- if ( logFile != NULL ) {
- fprintf(logFile,"%s",str);
- }
- */
-}
-
-int closeLog(FILE * fileToClose) {
-	if (fileToClose != NULL) {
-		fclose(fileToClose);
-		return 0;
-	} else {
-		errorHandling();
-		return -1;
-	}
-}

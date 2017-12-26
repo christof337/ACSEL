@@ -13,10 +13,17 @@
 
 #define RM mpfr_get_default_rounding_mode()
 
-void arr_alloc (const size_t x, const size_t y, mpfr_t(**aptr)[x][y])
-{
-	*aptr = malloc( sizeof(mpfr_t[x][y]) ); // allocate a true 2D array
+void arr_alloc(const size_t x, const size_t y, mpfr_t (**aptr)[x][y]) {
+	*aptr = malloc(sizeof(mpfr_t[x][y])); // allocate a true 2D array
 	assert(*aptr != NULL);
+}
+
+void arr_fill(const size_t x, const size_t y, mpfr_t array[x][y], mpfr_prec_t precision) {
+	for (size_t i = 0 ; i < x ; i++) {
+		for (size_t j = 0 ; j < y ; j++) {
+			m_init2(array[i][j], precision);
+		}
+	}
 }
 
 /**
@@ -29,32 +36,33 @@ void arr_alloc (const size_t x, const size_t y, mpfr_t(**aptr)[x][y])
  * @param[in]  precision  The precision
  * @param      matrix  The matrix
  */
-void createMatrix(mpfr_t *** a, const int m, const int n, mpfr_prec_t precision) {
-	mpfr_t tmp;
-	m_init2(tmp, precision);
+//void createMatrix(mpfr_t *** a, const int m, const int n, mpfr_prec_t precision) {
+void createMatrix(const size_t m, const size_t n, mpfr_t (**a)[m][n], mpfr_prec_t precision) {
 
-
-//	arr_alloc(m,n,a);
-	mpfr_t * values = calloc(n * m, sizeof(tmp));
-	(*a) = malloc(m * sizeof(mpfr_t*));
-
-	if (values == NULL || *a == NULL) {
-		fprintf(stderr, "Error - unable to allocate required memory\n");
-	}
-
-	for (int i = 0 ; i < m ; ++i) {
-		(*a)[i] = values + i * n;
-	}
-
-	for (int i = 0 ; i < m ; ++i) {
-		for (int j = 0 ; j < n ; ++j) {
-			m_init2((*a)[i][j], precision);
-		}
-	}
-
-	free(values);
-
-	m_clear(tmp);
+	arr_alloc(m, n, a);
+	arr_fill(m, n, **a, precision);
+//	mpfr_t tmp;
+//	m_init2(tmp, precision);
+//	mpfr_t * values = calloc(n * m, sizeof(tmp));
+//	(*a) = malloc(m * sizeof(mpfr_t*));
+//
+//	if (values == NULL || *a == NULL) {
+//		fprintf(stderr, "Error - unable to allocate required memory\n");
+//	}
+//
+//	for (int i = 0 ; i < m ; ++i) {
+//		(*a)[i] = values + i * n;
+//	}
+//
+//	for (int i = 0 ; i < m ; ++i) {
+//		for (int j = 0 ; j < n ; ++j) {
+//			m_init2((*a)[i][j], precision);
+//		}
+//	}
+//
+//	free(values);
+//
+//	m_clear(tmp);
 }
 
 /**
@@ -64,10 +72,10 @@ void createMatrix(mpfr_t *** a, const int m, const int n, mpfr_prec_t precision)
  * @param[in]  m       number of rows
  * @param[in]  n       number of columns
  */
-void freeMatrix(mpfr_t ** matrix, const int m, const int n) {
+void freeMatrix(const size_t m, const size_t n, mpfr_t (*matrix)[m][n]) {
 	for (int i = 0 ; i < m ; ++i) {
 		for (int j = 0 ; j < n ; ++j) {
-			m_clear(matrix[i][j]);
+			m_clear((*matrix)[i][j]);
 		}
 		// free(matrix[i]); // QUICKFIX
 	}
@@ -89,8 +97,9 @@ void freeMatrix(mpfr_t ** matrix, const int m, const int n) {
  * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
  *             values, < 0 if globally rounded downwards the exact values
  */
-int matrixMult(mpfr_t ** multipliedMatrix, mpfr_t ** array1, const int m1, const int n1,
-		mpfr_t ** array2, const int m2, const int n2, const enum roundingModeEnum rme) {
+int matrixMult(const size_t m1, const size_t n1, mpfr_t array1[m1][n1], const size_t m2,
+		const size_t n2, mpfr_t array2[m2][n2], mpfr_t multipliedMatrix[m1][n2],
+		const enum roundingModeEnum rme) {
 
 	int res = 0;
 
@@ -138,36 +147,41 @@ int matrixMult(mpfr_t ** multipliedMatrix, mpfr_t ** array1, const int m1, const
  * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
  *             values, < 0 if globally rounded downwards the exact values
  */
-int matrixMultVector(mpfr_t * result, mpfr_t ** matrix, const int m, const int n, mpfr_t * vector,
-		const int sizeVector, const enum roundingModeEnum rme) {
+int matrixMultVector(mpfr_t * result, const size_t m, const size_t n, mpfr_t matrix[m][n],
+		mpfr_t * vector, const size_t sizeVector, const enum roundingModeEnum rme) {
 
 	int res = 0;
-	mpfr_t ** resultTmp;
 
 	mpfr_prec_t prec = mpfr_get_prec(matrix[0][0]); // ok to use a given precision
 
-	createMatrix(&resultTmp, m, 1, prec);
+	mpfr_t (*resultTmp)[m][1];
+	createMatrix(m, 1, &resultTmp, prec);
 
 	// on change le vecteur en matrice dont le nombre de ligne serait sizeVector
 	// et le nombre de colonne serait 1 (ce afin d'utiliser la multiplication
 	// matricielle)
-	mpfr_t ** matrixTemp;
-	createMatrix(&matrixTemp, sizeVector, 1, prec);
+	mpfr_t (*matrixTemp)[sizeVector][1];
+	createMatrix(sizeVector, 1, &matrixTemp, prec);
 
 	// on recopie la première colonne ...
-	for (int i = 0 ; i < sizeVector ; ++i) {
-		mpfr_set(matrixTemp[i][0], vector[i], RM);
+	for (size_t i = 0 ; i < sizeVector ; ++i) {
+		mpfr_set((*matrixTemp)[i][0], vector[i], RM);
 	}
 
 	// multiplication matrice / vecteur
-	res = matrixMult(resultTmp, matrix, m, n, matrixTemp, sizeVector, 1, rme);
+	// 	res = matrixMult(resultTmp, matrix, m, n, matrixTemp, sizeVector, 1,rme);
+
+
+	res = matrixMult(m,n,matrix,sizeVector,1,*matrixTemp,*resultTmp,rme);
+//	res = matrixMult(m,n,resultTmp,sizeVector,1,matrixTemp,matrix,rme);
+//	res = matrixMult(m, n, resultTmp, matrix, matrixTemp, sizeVector, 1, rme);
 
 	for (int i = 0 ; i < m ; ++i) {
-		mpfr_set(result[i], resultTmp[i][0], RM);
+		mpfr_set(result[i], (*resultTmp)[i][0], RM);
 	}
 
-	freeMatrix(resultTmp, m, 1);
-	freeMatrix(matrixTemp, sizeVector, 1);
+	freeMatrix(m, 1,resultTmp);
+	freeMatrix(sizeVector, 1,matrixTemp);
 
 	return res;
 }
@@ -182,7 +196,7 @@ int matrixMultVector(mpfr_t * result, mpfr_t ** matrix, const int m, const int n
  * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
  *             values, < 0 if globally rounded downwards the exact values
  */
-int fillMatrixRandomly(mpfr_t ** array, const int m, const int n) {
+int fillMatrixRandomly(const size_t m, const size_t n, mpfr_t array[m][n]) {
 	int res = 0;
 	gmp_randstate_t randState;
 	gmp_randinit_default(randState);
@@ -204,7 +218,7 @@ int fillMatrixRandomly(mpfr_t ** array, const int m, const int n) {
  * @return     0 if rounded exactly, > 0 if globally rounded upwards the exact
  *             value, < 0 if globally rounded downwards the exact value
  */
-int fillMatrixExponentially(mpfr_t ** array, const int m, const int n,
+int fillMatrixExponentially(const size_t m, const size_t n, mpfr_t array[m][n],
 		const enum roundingModeEnum rme) {
 	int res = 0;
 	mpfr_t s, t, u, exp; // intermediate temporary variables
@@ -245,7 +259,7 @@ int fillMatrixExponentially(mpfr_t ** array, const int m, const int n,
  * @param[in]  m      number of rows of the matrix
  * @param[in]  n      number of columns of the matrix
  */
-void printMatrix(mpfr_t ** array, const int m, const int n) {
+void printMatrix(const size_t m, const size_t n, mpfr_t array[m][n]) {
 	printf("\t");
 	for (int j = 0 ; j < n ; ++j) {
 		mpfr_printf("j=%d%5s\t", j, "");

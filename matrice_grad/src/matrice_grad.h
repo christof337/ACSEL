@@ -6,19 +6,22 @@
 #include "parameters.h"
 #include "tools/customMath.h"
 
-int conjuguateGradientDescent(const int precision, const int matrixSize,
+void * customConjuguateGradientDescentThreadWrapper(void * precision) ;
+
+int conjuguateGradientDescent(const int precision, const size_t matrixSize,
 		const int nbGradientIterations, const enum matrixTypeEnum matrixType,
-		const enum roundingModeEnum roundingModeEnum);
+		const enum roundingModeEnum roundingModeEnum/*,mpfr_t *metaGkgk2save[nbGradientIterations]*/);
 
 int askTailleMatrice();
 
-int customMatrixMultVector(mpfr_t * result, mpfr_t ** matrix, mpfr_t * vector, const int size, const enum roundingModeEnum rme);
+int customMatrixMultVector(mpfr_t * result, const size_t size,
+		mpfr_t matrix[size][size], mpfr_t * vector, const enum roundingModeEnum rme);
 
-int writeMatrixInFile(mpfr_t ** matrix, const int n, const int m, mpfr_prec_t precision);
+int writeMatrixInFile(const size_t n, const size_t m, mpfr_t matrix[m][n], mpfr_prec_t precision);
 
-int writeDataInFile(mpfr_t * x, mpfr_t * solgc, const int size, mpfr_prec_t precision);
+int writeDataInFile(mpfr_t * x, mpfr_t * solgc, const size_t size, mpfr_prec_t precision);
 
-int writeGkArrayInFile(mpfr_t * array, const int size, mpfr_prec_t precision);
+int writeGkArrayInFile(mpfr_t * array, const size_t size, mpfr_prec_t precision);
 
 void printFinalErrorStatement();
 

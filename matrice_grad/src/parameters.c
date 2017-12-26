@@ -39,12 +39,12 @@ int initParams(char * appName) {
 	// MATRIX_SIZE
 	strcpy(P_MATRIX_SIZE->name, "matrixSize");
 	strcpy(P_MATRIX_SIZE->shortName, "ms");
-	P_MATRIX_SIZE->typ_defaultValue = LONGINT;
-	P_MATRIX_SIZE->defaultValue.li = DEFAULT_MATRIX_SIZE;
+	P_MATRIX_SIZE->typ_defaultValue = SIZE_T;
+	P_MATRIX_SIZE->defaultValue.s = DEFAULT_MATRIX_SIZE;
 	strcpy(P_MATRIX_SIZE->description, "Define the size of the processed matrix.");
 	P_MATRIX_SIZE->error = 0;
 	P_MATRIX_SIZE->isDefault = 1;
-	P_MATRIX_SIZE->currentValue.li = DEFAULT_MATRIX_SIZE;
+	P_MATRIX_SIZE->currentValue.s = DEFAULT_MATRIX_SIZE;
 
 	// NB_ITER
 	strcpy(P_NB_ITER->name, "nbIter");
@@ -159,7 +159,7 @@ int handleParams(int argc, char *argv[]) {
 							printCustomError(err, 3, globalAppName, param->name, value);
 						} else {
 							// value assigned : everything's fine
-							printf("\n\t Parameter %s has been assigned with the value `%s`.",
+							printf("\n\t`%s`=`%s`.",
 									param->name, value);
 							param->isDefault = 0;
 						}
@@ -186,6 +186,8 @@ int assignValueToParam(struct Param * param, char * strValue) {
 	int res;
 	double dou;
 	long int li;
+	enum roundingModeEnum roundingMode;
+	size_t s;
 	char * valueUp = toUpperCase(strValue, strlen(strValue) + 1);
 	switch (param->typ_defaultValue) {
 	case DOUBLE:
@@ -207,6 +209,15 @@ int assignValueToParam(struct Param * param, char * strValue) {
 			err = -1;
 		}
 		break;
+	case SIZE_T:
+		res = sscanf(strValue,"%zu",&s);
+		if (res == EOF) {
+			// error
+			err = -1;
+		} else {
+			param->currentValue.s = s;
+		}
+		break;
 	case LONGINT:
 		res = sscanf(strValue, "%ld", &li);
 		if (res == EOF) {
@@ -217,21 +228,9 @@ int assignValueToParam(struct Param * param, char * strValue) {
 		}
 		break;
 	case ROUNDINGMODEENUM:
-		if (strcmp(valueUp, "RNDN") == 0) {
-			param->currentValue.rme = RNDN;
-		} else if (strcmp(valueUp, "STOCHASTIC") == 0) {
-			param->currentValue.rme = STOCHASTIC;
-		} else if (strcmp(valueUp, "RNDZ") == 0) {
-			param->currentValue.rme = RNDZ;
-		} else if (strcmp(valueUp, "RNDU") == 0) {
-			param->currentValue.rme = RNDU;
-		} else if (strcmp(valueUp, "RNDD") == 0) {
-			param->currentValue.rme = RNDD;
-		} else if (strcmp(valueUp, "RNDA") == 0) {
-			param->currentValue.rme = RNDA;
-		} else {
-			// error
-			err = -1;
+		err = stringToRoundingModeEnum(valueUp,strlen(valueUp)+1);
+		if ( err != -1 ) {
+			param->currentValue.rme = err;
 		}
 		break;
 	default:
@@ -277,7 +276,7 @@ enum ParamEnum getParamEnumFromString(char * paramName) {
  *
  * @return     `-1` if the rounding mode asked is not handled
  */
-enum roundingModeEnum stringToRoundingModeEnum(char * string, const int size) {
+enum roundingModeEnum stringToRoundingModeEnum(char * string, const size_t size) {
 	enum roundingModeEnum res = -1;
 
 	char * str = toUpperCase(string, size);
@@ -340,6 +339,89 @@ struct Param * getParamFromParamEnum(enum ParamEnum pe) {
 		break;
 	}
 	return askedParam;
+}
+
+char * getStringFromMatrixTypeEnum(const enum matrixTypeEnum mte) {
+	char * res = malloc(sizeof(char)*strlen("EXPONENTIAL"));
+	switch (mte) {
+	case HILBERT:
+		strcpy(res, "HILBERT");
+		break;
+	case RANDOM:
+		strcpy(res, "RANDOM");
+		break;
+	case EXPONENTIAL:
+		strcpy(res, "EXPONENTIAL");
+		break;
+	default:
+		return NULL;
+	}
+	return res;
+}
+
+char * getStringFromRoundingModeEnum(const enum roundingModeEnum rme) {
+	char * res = malloc(sizeof(char)*strlen("STOCHASTIC"));
+	switch(rme) {
+	case RNDN:
+		strcpy(res, "RNDN");
+		break;
+	case STOCHASTIC:
+		strcpy(res, "STOCHASTIC");
+		break;
+	case RNDZ:
+		strcpy(res, "RNDZ");
+		break;
+	case RNDU:
+		strcpy(res, "RNDU");
+		break;
+	case RNDD:
+		strcpy(res, "RNDD");
+		break;
+	case RNDA:
+		strcpy(res, "RNDA");
+		break;
+	default:
+		res = NULL;
+	}
+	return res;
+}
+
+char * getParamValueString(const struct Param * param) {
+	char * value = malloc(sizeof(char)*20);
+	char * tmpStr;
+	switch(param->typ_defaultValue) {
+	case DOUBLE:
+		sprintf(value,"%f",param->currentValue.d);
+		break;
+	case MATRIXTYPEENUM:
+		tmpStr = getStringFromMatrixTypeEnum(param->currentValue.mte);
+		strcpy(value,tmpStr);
+		if(value == NULL) {
+			printErrorMessage("Unknow matrix type.");
+			return NULL;
+		}
+		free(tmpStr);
+		break;
+	case LONGINT:
+		sprintf(value,"%ld",param->currentValue.li);
+		break;
+	case SIZE_T:
+		sprintf(value,"%zu",param->currentValue.s);
+		break;
+	case ROUNDINGMODEENUM:
+		tmpStr = getStringFromRoundingModeEnum(param->currentValue.rme);
+		strcpy(value,tmpStr);
+		if(value == NULL) {
+			printErrorMessage("Unknow rounding mode.");
+			return NULL;
+		}
+		free(tmpStr);
+		break;
+	default:
+		printErrorMessage("Unknow param type.");
+		return NULL;
+	}
+	return value;
 }
 
 /**

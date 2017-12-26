@@ -350,7 +350,7 @@ int stochasticRounding(mpfr_t * value, const mpfr_prec_t pre) {
 			roundingDirection = m_setPrecisionWithRoundingMode(value,pre,MPFR_RNDD);
 		}
 
-		++NB_STOCH_ROUND;
+//		++NB_STOCH_ROUND;
 //		} while (mpfr_equal_p(randomValue, lastDigits)); // loop in order to not misinterpret the equal case (occurs likely at low precision)
 
 		m_clear(lastDigits);

@@ -7,6 +7,9 @@ set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 # Set build features
 set(CMAKE_BUILD_TYPE Debug)
 
+#include(FindOpenACC)
+
+set(STATIC_LINK ON)
 ###############################################################################
 include(CheckCSourceCompiles)
 include(CheckCSourceRuns)
@@ -81,3 +84,10 @@ add_test(NAME check_array_utils COMMAND check_array_utils)
 add_test(NAME check_matrix_utils COMMAND check_matrix_utils)
 add_test(NAME check_custom_math COMMAND check_custom_math)
 
+#ADD_DEFINITIONS( -DUSE_OPENACC )
+#option(OPENACC "Enable OpenACC support" ON)
+#SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -acc")
+#set(CMAKE_CXX_FLAGS "-acc -Minfo=acc --no_warnings")
+#MESSAGE( "Using OpenACC" )
+
+#message("OpenACC is: " ${OPENACC})
