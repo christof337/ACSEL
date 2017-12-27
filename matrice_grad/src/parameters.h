@@ -5,6 +5,8 @@
 
 #include "tools/customMath.h"
 
+char * globalAppName;
+
 /**
  * @brief      List the different matrix types handled by the program
  */
@@ -96,13 +98,5 @@ void printParametersShort();
 void printParamEnum(enum ParamEnum pe);
 
 void printDefaultValue(enum type dvtype, union defaultValueUnion dv);
-
-// HELP
-
-void printHelp();
-
-void printParamHelp(enum ParamEnum param);
-
-void printRoundingModeHelp();
 
 #endif /* PARAMETERS_H */

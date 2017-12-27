@@ -1,5 +1,7 @@
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/tools)
 
+project(matriceGrad)
+
 set(MPFR_LIB_PATH
 	/usr/local/lib)
 
@@ -11,13 +13,11 @@ set(LIB_SOURCES
   matrice_grad.c
   parameters.c
   log.c
+  help.c
 )
 
 set(MAIN_SOURCES
   main.c
-  matrice_grad.c
-  parameters.c
-  log.c
 )
 
 set(HEADERS 
@@ -25,6 +25,7 @@ set(HEADERS
   matrice_grad.h
   parameters.h
   log.h
+  help.h
 )
 
 
@@ -37,10 +38,10 @@ set_target_properties(libgmp PROPERTIES IMPORTED_LOCATION ${GMP_LIB_PATH})
 add_library(matrice_grad STATIC ${LIB_SOURCES} ${HEADERS})
 
 add_executable(main ${HEADERS} ${MAIN_SOURCES})
-target_link_libraries(main tools
+target_link_libraries(main matrice_grad
+                        tools
                         libmpfr.a
                         libgmp.a
-                        matrice_grad
                         ${CHECK_LIBRARIES})
 
 install(TARGETS matrice_grad

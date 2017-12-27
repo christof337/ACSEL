@@ -8,6 +8,7 @@
 #include "tools/matrixUtils.h"
 #include "tools/arrayUtils.h"
 #include "tools/errorHandling.h"
+#include "tools/customMath.h"
 #include "parameters.h"
 #include "log.h"
 
@@ -19,8 +20,6 @@
 #define MATRIX_EXTENSION ".dat"
 #define DATA_EXTENSION ".dat" 
 #define GK_EXTENSION ".dat"
-
-#define PRECISION_MIN MPFR_PREC_MIN // 2 TODO : enable the user to choose the minimum precision
 
 #define RM mpfr_get_default_rounding_mode()
 
