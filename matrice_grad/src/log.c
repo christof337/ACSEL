@@ -69,7 +69,7 @@ int initLogFiles() {
 	int res = 0;
 
 	// getting the number of files
-	long int nbPrec = getParamFromParamEnum(MAX_PREC)->currentValue.li - MPFR_PREC_MIN;
+	long int nbPrec = getParamFromParamEnum(MAX_PREC)->currentValue.li - MPFR_PREC_MIN+1;
 
 	// getting the address of the log files array
 	if (allocateLogFilesArray(nbPrec) != 0) {

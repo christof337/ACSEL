@@ -5,28 +5,37 @@
 
 #include "parameters.h"
 #include "tools/customMath.h"
+#include "tools/errorHandling.h"
 
 mpfr_t ** gkgk2_global;
 
 void initGkgk2_global(const size_t nbPrecisions, const size_t nbIterations);
 
-void * customConjuguateGradientDescentThreadWrapper(void * precision) ;
+void * customConjuguateGradientDescentThreadWrapper(void * precision);
 
-int conjuguateGradientDescent(const int precision, const size_t matrixSize,
+void allocateArrays(const size_t matrixSize, const mpfr_prec_t precision,
+		const int nbGradientIterations, mpfr_t** adk, mpfr_t** gkgk2save, mpfr_t** dkTmp);
+
+void allocateMpfrVars(const mpfr_prec_t precision, mpfr_t gkGkTmp1, mpfr_t adkDkTmp, mpfr_t alphak,
+		mpfr_t gkgk2, mpfr_t gkGkTmp2, mpfr_t betak);
+
+enum ERRORS fillA(const enum matrixTypeEnum matrixType, const size_t m, const size_t n,
+		mpfr_t a[m][n], const enum roundingModeEnum roundingModeEnum);
+
+int conjuguateGradientDescent(const mpfr_prec_t precision, const size_t matrixSize,
 		const int nbGradientIterations, const enum matrixTypeEnum matrixType,
 		const enum roundingModeEnum roundingModeEnum/*,mpfr_t *metaGkgk2save[nbGradientIterations]*/);
 
 int askTailleMatrice();
 
-int customMatrixMultVector(mpfr_t * result, const size_t size,
-		mpfr_t matrix[size][size], mpfr_t * vector, const enum roundingModeEnum rme);
+int customMatrixMultVector(mpfr_t * result, const size_t size, mpfr_t matrix[size][size],
+		mpfr_t * vector, const enum roundingModeEnum rme);
 
 int writeMatrixInFile(const size_t n, const size_t m, mpfr_t matrix[m][n], mpfr_prec_t precision);
 
 int writeDataInFile(mpfr_t * x, mpfr_t * solgc, const size_t size, mpfr_prec_t precision);
 
 //int writeGkGlobalArrayInFile(mpfr_t ** array, const size_t size, mpfr_prec_t precision);
-
 
 int writeGkgk2_global(const size_t nbPrecisionsTreated, const size_t nbIterations);
 

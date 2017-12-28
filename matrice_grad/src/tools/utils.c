@@ -81,7 +81,6 @@ void getRandstate(gmp_randstate_t randState) {
 	uint32_t val = arc4random();
 	//uint32_t arc4random(void)
 	gmp_randseed_ui(randState, val);
-	gmp_randclear(randState);
 }
 
 /**
@@ -96,6 +95,7 @@ void setRandomValue(mpfr_t * val) {
 	gmp_randstate_t randState;
 	getRandstate(randState);
 	mpfr_urandomb(*val, randState);
+	gmp_randclear(randState);
 }
 
 /**
@@ -107,7 +107,7 @@ void printLine() {
 
 void printProgressBarLine(const int nbThreads) {
 	printf("\n| Début");
-	for(int i = 0;i<=nbThreads-strlen(" Début")-strlen("Fin ");++i) {
+	for(int i = 0;i<=nbThreads-strlen(" Début")-strlen("Fin ")+1;++i) {
 		printf(" ");
 	}
 	printf("Fin |\n");

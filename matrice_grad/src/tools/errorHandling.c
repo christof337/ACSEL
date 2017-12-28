@@ -57,6 +57,9 @@ void printCustomError(enum ERRORS err, int nbParams, ...) {
 		fprintf(stderr, "Wrong parameter given. \n");
 		fprintf(stderr, "Type `%s help` in order to know which parameter to use.", params[0]);
 		break;
+	case ERROR_MATRIX_TYPE_NOT_IMPLEMENTED:
+		printErrorMessage("\nError : Matrix type not implemented.\n");
+		break;
 	default:
 		fprintf(stderr, "Something bad happened.");
 		break;

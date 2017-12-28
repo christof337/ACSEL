@@ -17,6 +17,8 @@
 
 #define DEBUG 1
 
+#define PARALLEL 1
+
 #if defined (Linux)
 #  include <unistd.h>
 #  define psleep(sec) sleep ((sec))
@@ -97,44 +99,51 @@ int main(int argc, char *argv[]) {
 
 				initGkgk2_global(RANGE_PRECISION - PRECISION_MIN, NB_ITER);
 
-				printf("\nLancement des threads");
-				printProgressBarLine(RANGE_PRECISION-PRECISION_MIN);
-				printf("|");
+				if ( PARALLEL) {
+					printf("\nLancement des threads");
+					printProgressBarLine(RANGE_PRECISION - PRECISION_MIN);
+					printf("|");
 
-				// DEBUT BOUCLE ( entièrement parralélisable )
+					// DEBUT BOUCLE ( entièrement parralélisable )
 //#pragma acc parallel loop
-				for (int pre = PRECISION_MIN ; pre < RANGE_PRECISION ; ++pre) {
-					threadState = pthread_create(&threads[nbThreads], NULL,
-							customConjuguateGradientDescentThreadWrapper, (void*) pre);
-					if (threadState) {
-						fprintf(stderr, "\n[%d]Thread error : %s", pre, strerror(threadState));
-						exit(EXIT_FAILURE);
-					} else {
-						printf(".");
-						fflush(stdout);
-						nbThreads++;
-					}
-					// CONJUGUATE GRADIENT DESCENT METHOD
+					for (int pre = PRECISION_MIN ; pre <= RANGE_PRECISION ; ++pre) {
+						threadState = pthread_create(&threads[nbThreads], NULL,
+								customConjuguateGradientDescentThreadWrapper, (void*) pre);
+						if (threadState) {
+							fprintf(stderr, "\n[%d]Thread error : %s", pre, strerror(threadState));
+							exit(EXIT_FAILURE);
+						} else {
+							printf(".");
+							fflush(stdout);
+							nbThreads++;
+						}
+						// CONJUGUATE GRADIENT DESCENT METHOD
 //					/*state += */conjuguateGradientDescent(pre, M_SIZE, NB_GRAD, M_TYPE,
 //							RME/*, metaGkgk2save*/);
-				}
-				printf("|\n");
-				// fin boucle principale (pre)
-				printf("\nRécupération des threads...");
-				printProgressBarLine(nbThreads);
-				printf("|");
-				fflush(stdout);
-				for (int i = 0 ; i < nbThreads ; i++) {
-					// in order to wait for everyone to finish
-					pthread_join(threads[i], NULL);
-					printf(".");
+					}
+					printf("|\n");
+					// fin boucle principale (pre)
+					printf("\nRécupération des threads...");
+					printProgressBarLine(nbThreads);
+					printf("|");
 					fflush(stdout);
+					for (int i = 0 ; i < nbThreads ; i++) {
+						// in order to wait for everyone to finish
+						pthread_join(threads[i], NULL);
+						printf(".");
+						fflush(stdout);
+					}
+					printf("|\n");
+					fflush(stdout);
+					printLine();
+					printf("--------End of iterations.--------");
+					printLine();
+				} else {
+					for (mpfr_prec_t pre = PRECISION_MIN ; pre <= RANGE_PRECISION ; ++pre) {
+						conjuguateGradientDescent(pre, M_SIZE, NB_GRAD, M_TYPE,
+								RME/*, metaGkgk2save[nbGradientIterations]*/);
+					}
 				}
-				printf("|\n");
-				fflush(stdout);
-				printLine();
-				printf("--------End of iterations.--------");
-				printLine();
 
 				// when everything's good, writing gkgk2_global to a file
 				printf("Writing gkgk2 to a file...\n");
