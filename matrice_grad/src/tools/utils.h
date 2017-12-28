@@ -12,6 +12,8 @@ void getRandstate(gmp_randstate_t randState);
 
 void setRandomValue(mpfr_t * val);
 
+void clearRandState();
+
 void printLine();
 
 void printProgressBarLine(const int nbThreads) ;

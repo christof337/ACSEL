@@ -183,6 +183,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	mpfr_free_cache();
+	clearRandState();
 
 	return state;
 }

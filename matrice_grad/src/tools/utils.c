@@ -71,6 +71,9 @@ char** str_split(char* a_str, const char a_delim) {
 	return result;
 }
 
+gmp_randstate_t randState;
+int isRandstateInitialized = 0;
+
 /**
  * Init and seed the given randState a specific randstate.
  * http://man.openbsd.org/cgi-bin/man.cgi/OpenBSD-current/man3/arc4random.3?query=arc4random%26sec=3
@@ -81,6 +84,7 @@ void getRandstate(gmp_randstate_t randState) {
 	uint32_t val = arc4random();
 	//uint32_t arc4random(void)
 	gmp_randseed_ui(randState, val);
+	isRandstateInitialized = 1;
 }
 
 /**
@@ -92,10 +96,16 @@ void setRandomValue(mpfr_t * val) {
 	/*
 	 * Envisager chaine de Markov ?
 	 */
-	gmp_randstate_t randState;
-	getRandstate(randState);
+	if (!isRandstateInitialized) {
+		getRandstate(randState);
+	}
 	mpfr_urandomb(*val, randState);
-	gmp_randclear(randState);
+}
+
+void clearRandState() {
+	if (isRandstateInitialized) {
+		gmp_randclear(randState);
+	}
 }
 
 /**
@@ -107,7 +117,8 @@ void printLine() {
 
 void printProgressBarLine(const int nbThreads) {
 	printf("\n| Début");
-	for(int i = 0;i<=nbThreads-strlen(" Début")-strlen("Fin ")+1;++i) {
+	int nbSpaces = (nbThreads - strlen(" Début") - strlen("Fin ") + 1);
+	for (int i = 0 ; i <= nbSpaces ; ++i) {
 		printf(" ");
 	}
 	printf("Fin |\n");
