@@ -1,0 +1,39 @@
+# Output executables
+# main
+
+# Log files
+*.log
+
+# Makefiles ( have to be generated with cmake )
+Makefile
+"src/Makefile"
+
+# Libs
+*.a
+
+# CMake files
+*.cmake
+
+# CMake directories
+CMakeFiles
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Debug folder
+Debug
+
+# Eclipse files
+.settings
+.project
+.cproject
+
+# Various config files
+CMakeCache.txt
+config.h
+
+# Various directories
+Data
+.libs
+.deps
