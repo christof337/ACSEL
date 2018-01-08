@@ -141,7 +141,7 @@ int writeArray(mpfr_t * array, const int size, const char * fileName, const char
 		for (size_t i = 0 ; i < size ; ++i) {
 			//fprintf(pf,"%d\t%G\n",i,array[i]);
 			fprintf(pf, "%zu\t", i);
-			mpfr_out_str(pf, 10, 12, array[i], RM);
+			mpfr_out_str(pf, 10, 0, array[i], RM);
 			fprintf(pf, "\t%ld\n", prec);
 		}
 		fprintf(pf, "\n"); // adding a chariot in order to have a nice view in gnuplot :) <3
@@ -156,7 +156,7 @@ void eraseFile(const char * fileName) {
 	// réinitialisation du fichier
 	FILE * pf;
 	pf = fopen(fileName, "w+");
-	fprintf(pf, " "); // TODO : check if necessary
+	// fprintf(pf, " "); // TODO : check if necessary
 	fclose(pf);
 }
 
