@@ -8,6 +8,8 @@
 #ifndef READOUTPUTFILE_H_
 #define READOUTPUTFILE_H_
 
+#include "customMath.h"
+
 enum parameterOrderEnum {
 	param_min = 0,
 	VALUE_TREATED = param_min,
@@ -26,14 +28,14 @@ enum matrixTypeEnum {
 	HILBERT
 };
 
-enum roundingModeEnum {
-	RNDN, // round to nearest (roundTiesToEven in IEEE 754-2008),
-	STOCHASTIC, // custom ;)
-	RNDZ, // round toward zero (roundTowardZero in IEEE 754-2008),
-	RNDU, // round toward plus infinity (roundTowardPositive in IEEE 754-2008),
-	RNDD, // round toward minus infinity (roundTowardNegative in IEEE 754-2008),
-	RNDA  // round away from zero.
-};
+//enum roundingModeEnum {
+//	RNDN, // round to nearest (roundTiesToEven in IEEE 754-2008),
+//	STOCHASTIC, // custom ;)
+//	RNDZ, // round toward zero (roundTowardZero in IEEE 754-2008),
+//	RNDU, // round toward plus infinity (roundTowardPositive in IEEE 754-2008),
+//	RNDD, // round toward minus infinity (roundTowardNegative in IEEE 754-2008),
+//	RNDA  // round away from zero.
+//};
 
 enum valueTreatedEnum {
 	GKGK2
@@ -46,6 +48,12 @@ int extractParamsFromFileName(const char * fileName, enum valueTreatedEnum * val
 void parametersPrint(enum roundingModeEnum roundingMode, enum matrixTypeEnum matrixType,
 		enum valueTreatedEnum valueTreated, long int matrixSize, long int numberOfIterations,
 		long int precisionMaxTreated);
+
+int getLastElements(size_t m, mpfr_t (**lastElements)[m], size_t n, mpfr_t (*array)[m][n]);
+
+void printMinimums(int nbMin, size_t minIndexes[nbMin]);
+
+char* removePath(char* fileName) ;
 
 char * getStringFromRoundingModeEnum(const enum roundingModeEnum rme);
 

@@ -14,54 +14,167 @@
 #include <errno.h>
 #include <string.h>
 #include <assert.h>
+#include <mpfr.h>
 
 #include "utils.h"
+#include "matrixUtils.h"
+#include "arrayUtils.h"
+#include "inputOutput.h"
 
 #define EXTENSION ".dat"
 
+#define SIMPLIFIED_OUTPUT_FILE_NAME_PREFIX "simple_"
+
+#define GKGK2_TRESHOLD "10.0"
+
 int main(int argc, char *argv[]) {
+	printf("\nProgram start...\n");
+	fflush(stdout);
+	int errnum = EXIT_SUCCESS;
 	if (argc == 1) {
 		fprintf(stderr,
 				"\nNo input file. Please give one of the output file you need to analyse as a parameter when you call %s",
 				argv[0]);
-		return EXIT_FAILURE;
+		errnum = EXIT_FAILURE;
 	} else {
-		// find the output file
-		FILE * file;
-		int errnum;
-
-		// try to open the file in read mode
-		file = fopen(argv[1], "r");
-		errnum = errno;
-		if (file == NULL) {
-			// error while opening the file
-			fprintf(stderr, "Error while opening the file %s : %s", argv[1], strerror(errnum));
+		// declaring the parameters
+		enum valueTreatedEnum valueTreated;
+		long int matrixSize, numberOfIterations, precisionMaxTreated;
+		enum roundingModeEnum roundingMode;
+		enum matrixTypeEnum matrixType;
+		// extracting the params from the filename
+		char * fileName = argv[1];
+		// gkgk2_ms=5000_ni=60_pre=200_rm=STOCHASTIC_mt=EXPONENTIAL.dat
+		errnum = extractParamsFromFileName(fileName, &valueTreated, &matrixSize,
+				&numberOfIterations, &precisionMaxTreated, &roundingMode, &matrixType);
+		if (errnum == EXIT_FAILURE) {
+			fprintf(stderr, "Exiting...\n");
+			return EXIT_FAILURE;
 		} else {
-			// successfully opened the file
-			// declaring the parameters
-			enum valueTreatedEnum valueTreated;
-			long int matrixSize, numberOfIterations, precisionMaxTreated;
-			enum roundingModeEnum roundingMode;
-			enum matrixTypeEnum matrixType;
-			// extracting the params from the filename
-			// gkgk2_ms=5000_ni=60_pre=200_rm=STOCHASTIC_mt=EXPONENTIAL.dat
-			errnum = extractParamsFromFileName(argv[1], &valueTreated, &matrixSize,
-					&numberOfIterations, &precisionMaxTreated, &roundingMode, &matrixType);
-			if (errnum == EXIT_FAILURE) {
-				fprintf(stderr, "Exiting...\n");
-				return EXIT_FAILURE;
-			} else {
-				// we have everything
+			// we have everything
+			// now we can actually read the file
+			long int numberOfPrecisionTreated = precisionMaxTreated - MPFR_PREC_MIN + 1;
+			mpfr_t (*valueTreatedArray)[numberOfPrecisionTreated][numberOfIterations];
 
-				// final print
-				parametersPrint(roundingMode, matrixType, valueTreated, matrixSize,
-						numberOfIterations, precisionMaxTreated);
+			// initialization
+			arr_alloc_2d(numberOfPrecisionTreated, numberOfIterations, &valueTreatedArray);
+			// we don't call createMatrix because we want different precisions for each subarray
+			for (int precision = MPFR_PREC_MIN ; precision <= precisionMaxTreated ; ++precision) {
+				// looping to call _createArray instead
+				mpfr_t (*ptr)[numberOfIterations];
+				ptr = &((*valueTreatedArray) [ precision - MPFR_PREC_MIN ]);
+				_createArray(numberOfIterations, &ptr,
+						precision);
 			}
 
-			fclose(file);
+			// reading from file...
+
+			// find the output file, opening it, reading it, and putting its content in valueTreatedArray if everything's fine
+			errnum = readFromFormattedOutputFile(fileName, precisionMaxTreated, numberOfIterations,
+					*valueTreatedArray);
+
+			if (errnum != EXIT_FAILURE) {
+				// sucessfull read
+				// get the last valueTreated value for each precision
+				mpfr_t (*lastElements)[numberOfPrecisionTreated];
+				getLastElements(numberOfPrecisionTreated, &lastElements, numberOfIterations,
+						valueTreatedArray);
+				assert(lastElements != NULL);
+
+				// max
+				size_t maxIndex;
+				maxIndex = getMaxIndex(numberOfPrecisionTreated, *lastElements);
+				mpfr_t maxValue;
+				m_init2(maxValue, precisionMaxTreated);
+				mpfr_set(maxValue, (*lastElements)[maxIndex], MPFR_RNDN);
+
+				mpfr_printf(
+						"\nThe maximum value for %s is %RF. It has been found at precision %zu\n",
+						getStringFromValueTreatedEnum(valueTreated), maxValue,
+						maxIndex + MPFR_PREC_MIN);
+
+				// min
+				size_t minIndex;
+				minIndex = getMinIndex(numberOfPrecisionTreated, *lastElements);
+				mpfr_t minValue;
+				m_init2(minValue, precisionMaxTreated);
+				mpfr_set(minValue, (*lastElements)[minIndex], MPFR_RNDN);
+
+				mpfr_printf("\nThe minimum value for %s is %RF. ",
+						getStringFromValueTreatedEnum(valueTreated), minValue);
+
+				size_t * minIndexes;
+				int nbMin = getAllMinIndexes(&minIndexes, numberOfPrecisionTreated, *lastElements);
+				assert(nbMin != 0);
+				if (nbMin > 1) {
+					printMinimums(nbMin, minIndexes);
+				} else if (nbMin == 1) {
+					printf("It has been found at precision %zu\n", minIndex + MPFR_PREC_MIN);
+				}
+				int step = 0;
+				char * simplifiedOutputFileName;
+				char * fileNameWithoutPath = removePath(fileName);
+				simplifiedOutputFileName = malloc(
+						sizeof(char)
+								* (strlen(fileNameWithoutPath)
+										+ strlen(SIMPLIFIED_OUTPUT_FILE_NAME_PREFIX)));
+				strcpy(simplifiedOutputFileName, SIMPLIFIED_OUTPUT_FILE_NAME_PREFIX);
+				strcat(simplifiedOutputFileName, fileNameWithoutPath);
+
+				mpfr_t (*precisions)[numberOfPrecisionTreated];
+				_createArray(numberOfPrecisionTreated, &precisions, 18);
+				for (long int i = MPFR_PREC_MIN ; i <= precisionMaxTreated ; ++i) {
+					mpfr_set_si((*precisions)[i-MPFR_PREC_MIN], i, MPFR_RNDN);
+				}
+				mpfr_t (*data)[2][numberOfPrecisionTreated];
+
+//				writeData
+				writeArray(*lastElements, numberOfPrecisionTreated, simplifiedOutputFileName,
+						"Simplified Gkgk2");
+
+				// ------------------------------------------------------------------
+				// just for the lulz, trying to write it again for comparison
+				eraseFile("test.dat");
+				for (size_t i = 0 ; i < numberOfPrecisionTreated ; ++i) {
+					writeArray((*valueTreatedArray)[i], numberOfIterations, "test.dat",
+							"Gkgk2 Test");
+				}
+				// ------------------------------------------------------------------
+
+				freeArray(*lastElements, numberOfPrecisionTreated);
+				free(minIndexes);
+				free(simplifiedOutputFileName);
+			}
+
+			// final print
+			parametersPrint(roundingMode, matrixType, valueTreated, matrixSize, numberOfIterations,
+					precisionMaxTreated);
 		}
 	}
-	return EXIT_SUCCESS;
+
+	if (errnum == EXIT_SUCCESS) {
+		printf("\nProgram completed.\n");
+	} else {
+		printf("\nAn error occured. End of program...\n");
+	}
+	return errnum;
+}
+
+/* -------------------------------------------------------------------------------------------------------------------------- */
+/* -------------------------------------------------------------------------------------------------------------------------- */
+
+int getLastElements(size_t m, mpfr_t (**lastElements)[m], size_t n, mpfr_t (*array)[m][n]) {
+	int res = EXIT_SUCCESS;
+
+	(*lastElements) = malloc(sizeof(mpfr_t[m]));
+
+	assert((*lastElements) != NULL /* Error while allocating last elements array */);
+	for (size_t i = 0 ; i < m ; ++i) {
+		m_init2((**lastElements)[i], mpfr_get_prec((*array)[i][n - 1]));
+		mpfr_set((**lastElements)[i], (*array)[i][n - 1], MPFR_RNDN);
+	}
+
+	return res;
 }
 
 /**
@@ -75,10 +188,10 @@ int extractParamsFromFileName(const char * fileName, enum valueTreatedEnum * val
 
 	// test if the string contains `=` sign
 	if (strchr(fileName, '=') == NULL) {
-		// the string does not contain an "=" : error
+		// the string does not contain an "=" : errorprecisionMaxTreated
 		fprintf(stderr, "\nThe given filename `%s` does not contain any `=` sign. Cannot read.\n",
 				fileName);
-		return EXIT_FAILURE;
+		res = EXIT_FAILURE;
 	} else {
 		assert(
 				strlen(strrchr(fileName,'.'))==strlen(EXTENSION) && "Wrong format. The file does not end with `.dat`");
@@ -89,8 +202,7 @@ int extractParamsFromFileName(const char * fileName, enum valueTreatedEnum * val
 		char * toFree = fileNameWithoutExtension;
 		if (strchr(fileName, '/') != NULL) {
 			// removing the early path
-			fileNameWithoutExtension = strrchr(fileNameWithoutExtension, '/');
-			fileNameWithoutExtension++; // removing the /
+			fileNameWithoutExtension = removePath(fileNameWithoutExtension);
 		}
 		// splitting with `_`
 		char ** splittedString = str_split(fileNameWithoutExtension, '_');
@@ -206,6 +318,22 @@ int extractParamsFromFileName(const char * fileName, enum valueTreatedEnum * val
 		free(toFree);
 	}
 	return res;
+}
+
+void printMinimums(int nbMin, size_t minIndexes[nbMin]) {
+	printf("This minimum has been found at precisions ");
+	printf(" %zu", minIndexes[0]);
+	for (int i = 1 ; i < nbMin - 1 ; ++i) {
+		printf(", %zu", minIndexes[i] + MPFR_PREC_MIN);
+	}
+	printf(" and %zu.\n", minIndexes[nbMin - 1] + MPFR_PREC_MIN);
+}
+
+char* removePath(char* fileName) {
+	// removing the early path
+	fileName = strrchr(fileName, '/');
+	fileName++; // removing the /
+	return fileName;
 }
 
 void parametersPrint(enum roundingModeEnum roundingMode, enum matrixTypeEnum matrixType,
