@@ -27,7 +27,7 @@
 #define OUTPUT 0
 
 void initGkgk2_global(const size_t nbPrecisions, const size_t nbIterations) {
-	arr_alloc(nbPrecisions, nbIterations, &gkgk2_global);
+	arr_alloc_2d(nbPrecisions, nbIterations, &gkgk2_global);
 }
 
 void * customConjuguateGradientDescentThreadWrapper(void * precision) {
@@ -36,7 +36,8 @@ void * customConjuguateGradientDescentThreadWrapper(void * precision) {
 	const enum matrixTypeEnum M_TYPE = getParamFromParamEnum(MATRIX_TYPE)->currentValue.mte;
 	const enum roundingModeEnum RME = getParamFromParamEnum(ROUNDING_MODE)->currentValue.rme;
 
-	conjuguateGradientDescent((mpfr_prec_t) precision, M_SIZE, NB_GRAD, M_TYPE,
+	long int *prec = precision;
+	conjuguateGradientDescent(*prec, M_SIZE, NB_GRAD, M_TYPE,
 			RME/*, metaGkgk2save[nbGradientIterations]*/);
 
 	return NULL;
@@ -207,8 +208,8 @@ int conjuguateGradientDescent(const mpfr_prec_t precision, const size_t matrixSi
 //			// error
 //			res = error;
 //		}
-		sprintf(logBuffer, "\tEcriture de gkgk2 dans un fichier (output/gkgk.dat)\n");
-		m_log(precision, logBuffer);
+//		sprintf(logBuffer, "\tEcriture de gkgk2 dans un fichier (output/gkgk.dat)\n");
+//		m_log(precision, logBuffer);
 		// écriture de gkgk2 dans un fichier gkgk.dat (une seule ligne)
 //		error = writeGkArrayInFile(gkgk2save, nbGradientIterations, precision);
 //		if (error != 0) {
@@ -242,6 +243,8 @@ int conjuguateGradientDescent(const mpfr_prec_t precision, const size_t matrixSi
 	vectorCopy(gkgk2_global[precision - MPFR_PREC_MIN], gkgk2save, nbGradientIterations);
 
 	freeArray(gkgk2save, nbGradientIterations);
+
+	closeLogFromPrecision(precision);
 
 //	printf("\nStochastic rounding has been called %ld times.\n", NB_STOCH_ROUND);
 	return res;
@@ -371,7 +374,7 @@ int writeGkgk2_global(const size_t nbPrecisionsTreated, const size_t nbIteration
 
 	eraseFile(fileName);
 
-	for (size_t i = 0 ; i < nbPrecisionsTreated ; ++i) {
+	for (size_t i = 0 ; i <= nbPrecisionsTreated ; ++i) {
 		writeArray(gkgk2_global[i], nbIterations, fileName, "Gkgk2");
 	}
 

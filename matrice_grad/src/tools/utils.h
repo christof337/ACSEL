@@ -4,7 +4,7 @@
 #include <gmp.h>
 #include <mpfr.h>
 
-char * toUpperCase(char * str, const size_t size);
+char * toUpperCase(const char * str, const size_t size);
 
 char** str_split(char* a_str, const char a_delim);
 

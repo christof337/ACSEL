@@ -13,12 +13,18 @@
 
 #define RM mpfr_get_default_rounding_mode()
 
-void arr_alloc(const size_t x, const size_t y, mpfr_t (**aptr)[x][y]) {
+/**
+ * https://stackoverflow.com/questions/42094465/correctly-allocating-multi-dimensional-arrays
+ * @param x
+ * @param y
+ * @param aptr
+ */
+void arr_alloc_2d(const size_t x, const size_t y, mpfr_t (**aptr)[x][y]) {
 	*aptr = malloc(sizeof(mpfr_t[x][y])); // allocate a true 2D array
 	assert(*aptr != NULL);
 }
 
-void arr_fill(const size_t x, const size_t y, mpfr_t array[x][y], mpfr_prec_t precision) {
+void arr_fill_2d(const size_t x, const size_t y, mpfr_t array[x][y], mpfr_prec_t precision) {
 	for (size_t i = 0 ; i < x ; i++) {
 		for (size_t j = 0 ; j < y ; j++) {
 			m_init2(array[i][j], precision);
@@ -39,8 +45,8 @@ void arr_fill(const size_t x, const size_t y, mpfr_t array[x][y], mpfr_prec_t pr
 //void createMatrix(mpfr_t *** a, const int m, const int n, mpfr_prec_t precision) {
 void createMatrix(const size_t m, const size_t n, mpfr_t (**a)[m][n], mpfr_prec_t precision) {
 
-	arr_alloc(m, n, a);
-	arr_fill(m, n, **a, precision);
+	arr_alloc_2d(m, n, a);
+	arr_fill_2d(m, n, **a, precision);
 //	mpfr_t tmp;
 //	m_init2(tmp, precision);
 //	mpfr_t * values = calloc(n * m, sizeof(tmp));

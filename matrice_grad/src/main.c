@@ -17,7 +17,7 @@
 
 #define DEBUG 1
 
-#define PARALLEL 1
+#define PARALLEL 0
 
 #if defined (Linux)
 #  include <unistd.h>
@@ -97,20 +97,21 @@ int main(int argc, char *argv[]) {
 				int threadState;
 				int nbThreads = 0;
 
-				initGkgk2_global(RANGE_PRECISION - PRECISION_MIN, NB_ITER);
+				initGkgk2_global(RANGE_PRECISION - PRECISION_MIN+1, NB_ITER);
 
 				if ( PARALLEL) {
+					// parallelize
 					printf("\nLancement des threads");
 					printProgressBarLine(RANGE_PRECISION - PRECISION_MIN);
 					printf("|");
 
 					// DEBUT BOUCLE ( entièrement parralélisable )
 //#pragma acc parallel loop
-					for (int pre = PRECISION_MIN ; pre <= RANGE_PRECISION ; ++pre) {
+					for (long int pre = PRECISION_MIN ; pre <= RANGE_PRECISION ; ++pre) {
 						threadState = pthread_create(&threads[nbThreads], NULL,
-								customConjuguateGradientDescentThreadWrapper, (void*) pre);
+								customConjuguateGradientDescentThreadWrapper, &pre);
 						if (threadState) {
-							fprintf(stderr, "\n[%d]Thread error : %s", pre, strerror(threadState));
+							fprintf(stderr, "\n[%ld]Thread error : %s", pre, strerror(threadState));
 							exit(EXIT_FAILURE);
 						} else {
 							printf(".");
@@ -135,26 +136,29 @@ int main(int argc, char *argv[]) {
 					}
 					printf("|\n");
 					fflush(stdout);
-					printLine();
-					printf("--------End of iterations.--------");
-					printLine();
 				} else {
+					// not parallelized
+					// sequential loop over the precisions
 					for (mpfr_prec_t pre = PRECISION_MIN ; pre <= RANGE_PRECISION ; ++pre) {
 						conjuguateGradientDescent(pre, M_SIZE, NB_GRAD, M_TYPE,
 								RME/*, metaGkgk2save[nbGradientIterations]*/);
+						printf("Fin de la descente de gradient de précision `%ld`.\n",pre);
 					}
 				}
+				printLine();
+				printf("--------End of iterations--------");
+				printLine();
 
 				// when everything's good, writing gkgk2_global to a file
 				printf("Writing gkgk2 to a file...\n");
 				writeGkgk2_global(RANGE_PRECISION - MPFR_PREC_MIN, NB_GRAD);
 
 				int closeSuccess;
-				closeSuccess = closeLogFiles();
+				closeSuccess = closeLogFiles(); // shouldn't work now but doesn't matter
 				if (closeSuccess != 0) {
 					printErrorMessage("Error while closing log files");
 				}
-				state += closeSuccess;
+//				state += closeSuccess;
 
 				double runtime = GetTimer();
 

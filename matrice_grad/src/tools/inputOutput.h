@@ -19,4 +19,6 @@ char * getFileNameFromPrecision(const char * prefix, const char * suffix, const 
 
 char * buildSuffix();
 
+int readFromFormattedOutputFile(char* fileName, long int precisionMaxTreated, long int nbIterations, mpfr_t arrayToFill[precisionMaxTreated][nbIterations]);
+
 #endif /* INPUT_OUTPUT_H */

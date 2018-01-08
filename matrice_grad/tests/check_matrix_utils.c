@@ -21,15 +21,15 @@
  * @brief      Test de l'utilitaire "matrixUtils.c" Exécuter avec `make test`
  */
 
-// const int SIZE = 10;
-mpfr_t ** matrixTest;
+// const size_t size = 10;
+mpfr_t (*matrixTest)[DEFAULT_NB_ROWS][DEFAULT_NB_COLUMNS];
 
 void setup(void) {
-	createMatrix(&matrixTest, DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS, DEFAULT_PRECISION); // hope the function works
+	createMatrix(DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS, &matrixTest, DEFAULT_PRECISION); // hope the function works
 }
 
 void teardown(void) {
-	freeMatrix(matrixTest, DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS);
+	freeMatrix(DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS, matrixTest);
 }
 
 START_TEST(test_create_matrix)
@@ -41,15 +41,15 @@ START_TEST(test_create_matrix)
 		mpfr_t t;
 		m_init2(t, DEFAULT_PRECISION);
 
-		mpfr_t ** matrix;
-		createMatrix(&matrix, m, n, DEFAULT_PRECISION);
+		mpfr_t (*matrix)[m][n];
+		createMatrix(m, n, &matrix, DEFAULT_PRECISION);
 
 		// write
 		for (int i = 0 ; i < m ; ++i) {
 			for (int j = 0 ; j < n ; ++j) {
 				mpfr_set_d(t, (i - 1) / (j + 1), RM);
 				//matrix[i][j] = (i-1)/(j+1);
-				mpfr_set(matrix[i][j], t, RM);
+				mpfr_set((*matrix)[i][j], t, RM);
 			}
 		}
 
@@ -57,12 +57,12 @@ START_TEST(test_create_matrix)
 		for (int i = 0 ; i < m ; ++i) {
 			for (int j = 0 ; j < n ; ++j) {
 				mpfr_set_d(t, (i - 1) / (j + 1), RM);
-				ck_assert(mpfr_cmp(matrix[i][j],t) == 0);
+				ck_assert(mpfr_cmp((*matrix)[i][j],t) == 0);
 			}
 		}
 
 		m_clear(t);
-		freeMatrix(matrix, m, n);
+		freeMatrix(m, n, matrix);
 	}END_TEST
 
 START_TEST(test_fill_matrix_exponentially)
@@ -72,7 +72,7 @@ START_TEST(test_fill_matrix_exponentially)
 		mpfr_set_d(t, -0.05, RM);
 		mpfr_set_d(exp, 2.0, RM);
 
-		fillMatrixExponentially(matrixTest, DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS,RME);
+		fillMatrixExponentially(DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS, *matrixTest, RME);
 
 		for (long int i = 0 ; i < DEFAULT_NB_ROWS ; ++i) {
 			for (long int j = 0 ; j < DEFAULT_NB_COLUMNS ; ++j) {
@@ -81,7 +81,7 @@ START_TEST(test_fill_matrix_exponentially)
 				m_pow(u, s, exp, RME);
 				m_mul(u, u, t, RM);
 				mpfr_exp(s, u, RM);
-				ck_assert(mpfr_cmp(matrixTest[i][j],s) == 0);
+				ck_assert(mpfr_cmp((*matrixTest)[i][j],s) == 0);
 			}
 		}
 		mpfr_clears(s, t, u, exp, (mpfr_ptr) NULL);
@@ -89,21 +89,22 @@ START_TEST(test_fill_matrix_exponentially)
 
 START_TEST(test_matrix_mult)
 	{
-		const int p = 13;
-		mpfr_t ** matrix1;
-		mpfr_t ** matrix2;
+		const size_t p = 13;
+		mpfr_t (*matrix1)[DEFAULT_NB_ROWS][p];
+		mpfr_t (*matrix2)[p][DEFAULT_NB_COLUMNS];
 		mpfr_t t;
 		m_init2(t, DEFAULT_PRECISION);
 
-		createMatrix(&matrix1, DEFAULT_NB_ROWS, p, DEFAULT_PRECISION);
-		createMatrix(&matrix2, p, DEFAULT_NB_COLUMNS, DEFAULT_PRECISION);
+		createMatrix(DEFAULT_NB_ROWS, p, &matrix1, DEFAULT_PRECISION);
+		createMatrix(p, DEFAULT_NB_COLUMNS, &matrix2, DEFAULT_PRECISION);
 
-		fillMatrixRandomly(matrix1, DEFAULT_NB_ROWS, p); // not pure test but still
-		fillMatrixExponentially(matrix2, p, DEFAULT_NB_COLUMNS,RME);
+		fillMatrixRandomly(DEFAULT_NB_ROWS, p, *matrix1); // not pure test but still
+		fillMatrixExponentially(p, DEFAULT_NB_COLUMNS, *matrix2, RME);
 
-		mpfr_t ** multipliedMatrix;
-		createMatrix(&multipliedMatrix, DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS, DEFAULT_PRECISION);
-		matrixMult(multipliedMatrix, matrix1, DEFAULT_NB_ROWS, p, matrix2, p, DEFAULT_NB_COLUMNS,RME);
+		mpfr_t (*multipliedMatrix)[DEFAULT_NB_ROWS][DEFAULT_NB_COLUMNS];
+		createMatrix(DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS, &multipliedMatrix, DEFAULT_PRECISION);
+		matrixMult(DEFAULT_NB_ROWS, p, *matrix1, p, DEFAULT_NB_COLUMNS, *matrix2, *multipliedMatrix,
+				RME);
 
 		mpfr_t sum;
 		m_init2(sum, DEFAULT_PRECISION);
@@ -113,19 +114,19 @@ START_TEST(test_matrix_mult)
 			for (int j = 0 ; j < DEFAULT_NB_COLUMNS ; ++j) {
 				for (int k = 0 ; k < p ; ++k) {
 					// sum = sum + matrix1[i][k]*matrix2[k][j];
-					m_mul(t, matrix1[i][k], matrix2[k][j], RME);
+					m_mul(t, (*matrix1)[i][k], (*matrix2)[k][j], RME);
 					mpfr_add(sum, sum, t, RME);
 				}
-				ck_assert(mpfr_cmp(multipliedMatrix[i][j],sum) == 0);
+				ck_assert(mpfr_cmp((*multipliedMatrix)[i][j],sum) == 0);
 				mpfr_set_d(sum, 0.0, RM); // sum = 0
 			}
 		}
 
 		m_clear(t);
 		m_clear(sum);
-		freeMatrix(matrix1, DEFAULT_NB_ROWS, p);
-		freeMatrix(matrix2, p, DEFAULT_NB_COLUMNS);
-		freeMatrix(multipliedMatrix, DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS);
+		freeMatrix(DEFAULT_NB_ROWS, p, matrix1);
+		freeMatrix(p, DEFAULT_NB_COLUMNS, matrix2);
+		freeMatrix(DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS, multipliedMatrix);
 	}END_TEST
 
 START_TEST(test_matrix_mult_vector)
@@ -133,19 +134,17 @@ START_TEST(test_matrix_mult_vector)
 		mpfr_t t;
 		m_init2(t, DEFAULT_PRECISION);
 
-		mpfr_t ** matrix;
-		createMatrix(&matrix, DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS, DEFAULT_PRECISION);
 		mpfr_t * vector;
 		createArray(&vector, DEFAULT_NB_COLUMNS, DEFAULT_PRECISION);
 
-		fillMatrixExponentially(matrix, DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS,RME);
+		fillMatrixExponentially(DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS, *matrixTest, RME);
 		fillArrayLinearly(vector, DEFAULT_NB_COLUMNS);
 
 		mpfr_t * multipliedVector;
 		createArray(&multipliedVector, DEFAULT_NB_ROWS, DEFAULT_PRECISION);
 
-		matrixMultVector(multipliedVector, matrix, DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS, vector,
-				DEFAULT_NB_COLUMNS,RME);
+		matrixMultVector(multipliedVector, DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS, *matrixTest, vector,
+		DEFAULT_NB_COLUMNS, RME);
 
 		mpfr_t sum;
 		m_init2(sum, DEFAULT_PRECISION);
@@ -154,7 +153,7 @@ START_TEST(test_matrix_mult_vector)
 		for (int i = 0 ; i < DEFAULT_NB_ROWS ; ++i) {
 			for (int j = 0 ; j < DEFAULT_NB_COLUMNS ; ++j) {
 				//sum = sum + matrix[i][j]*vector[j];
-				m_mul(t, matrix[i][j], vector[j], RME);
+				m_mul(t, (*matrixTest)[i][j], vector[j], RME);
 				mpfr_add(sum, sum, t, RME);
 			}
 			ck_assert(mpfr_cmp(multipliedVector[i],sum)==0);
@@ -163,7 +162,7 @@ START_TEST(test_matrix_mult_vector)
 
 		m_clear(t);
 		m_clear(sum);
-		freeMatrix(matrix, DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS);
+//		freeMatrix(DEFAULT_NB_ROWS, DEFAULT_NB_COLUMNS, matrix);
 		freeArray(vector, DEFAULT_NB_COLUMNS);
 		freeArray(multipliedVector, DEFAULT_NB_COLUMNS);
 	}END_TEST
@@ -191,6 +190,7 @@ Suite * matrix_utils_suite(void) {
 
 	/* Multiplication test case */
 	tc_mult = tcase_create("Multiplication_Test_Case");
+	tcase_add_checked_fixture(tc_fill, setup, teardown);
 	tcase_add_test(tc_mult, test_matrix_mult);
 	tcase_add_test(tc_mult, test_matrix_mult_vector);
 	suite_add_tcase(s, tc_mult);

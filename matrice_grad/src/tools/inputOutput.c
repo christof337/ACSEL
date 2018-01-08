@@ -6,8 +6,10 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 
 #include "customMath.h"
+#include "utils.h"
 
 #ifndef RM
 #define RM mpfr_get_default_rounding_mode()
@@ -175,3 +177,94 @@ char * buildSuffix() {
 	return suffix;
 }
 
+/**
+ * Read from a given formatted output file and put the read lines in arrayToFill.
+ * @param fileName
+ * @param precisionMaxTreated
+ * @param nbIterations
+ * @param arrayToFill
+ * @return
+ */
+int readFromFormattedOutputFile(char* fileName, long int precisionMaxTreated, long int nbIterations, mpfr_t arrayToFill[precisionMaxTreated][nbIterations]) {
+	// reading from file...
+	// find the output file
+	FILE* file;
+	int errnum = EXIT_SUCCESS;
+	// try to open the file in read mode
+	file = fopen(fileName, "r");
+	//			errnum = errno;
+	if (file == NULL) {
+		// error while opening the file
+		fprintf(stderr, "Error while opening the file %s : %s", fileName, strerror(errnum));
+		errnum = EXIT_FAILURE;
+	} else {
+		// successfully opened the file
+		char* line = NULL;
+		size_t len = 0;
+		ssize_t read;
+		char** splittedLine = NULL;
+		char precisionString[10];
+		long int it;
+		for (long int precision = MPFR_PREC_MIN ; precision <= precisionMaxTreated ; ++precision) {
+			it = 0;
+			// reading all the lines for this precision until meeting an empty line
+			while ((read = getline(&line, &len, file)) != -1 && strcmp(line, "\n") != 0) {
+				// non empty line
+				splittedLine = str_split(line, '\t');
+				if (splittedLine == NULL) {
+					// impossible to split : error?
+					fprintf(stderr, "\nImpossible to split the line %s [%ld].\n", line, precision);
+					/* Split fail */
+					assert(0 /* Split fail */);
+					errnum = EXIT_FAILURE;
+				} else {
+					assert(splittedLine[2]!=NULL && "Wrong file format");
+					long int thirdColumn;
+					sscanf(splittedLine[2], "%ld", &thirdColumn);
+					//							sprintf(precisionString, "%ld", precision);
+					//							if (splittedLine[2] == NULL
+					//									|| strcmp(splittedLine[2], precisionString) != 0) {
+					if (thirdColumn != precision) {
+						fprintf(stderr,
+								"\nError while reading line %s (for precision %ld).\nThe input file does not have a correct format.\nCheck that the precision is the third column and that a line has been jumped between each precision block.",
+								line, precision);
+						assert(0 /* Read fail */);
+						errnum = EXIT_FAILURE;
+					} else {
+						// the third column actually is the right precision
+						// is the first one the number of iterations?
+						long int firstColumn;
+						sscanf(splittedLine[0], "%ld", &firstColumn);
+						if (firstColumn != it) {
+							fprintf(stderr,
+									"\nError while reading line %s (for precision %ld).\nThe input file does not have a correct format.\nCheck that the first column is in the right order",
+									line, precision);
+							assert(0 /* Read fail */);
+							errnum = EXIT_FAILURE;
+						} else {
+							// all seem nice, we are actually at the line corresponding to the precision `precision`
+							// and to the iteration number `it`
+							mpfr_t secondColumn;
+							m_init2(secondColumn, precision);
+							m_init2(arrayToFill[precision - MPFR_PREC_MIN][it], precision);
+							assert(
+									mpfr_set_str(secondColumn, splittedLine[1], 10 /* base 10 */,
+											MPFR_RNDN) == 0);
+							mpfr_set(arrayToFill[precision - MPFR_PREC_MIN][it],
+									secondColumn, MPFR_RNDN);
+							m_clear(secondColumn);
+						}
+					}
+				}
+				free(splittedLine);
+				++it;
+			}
+			// going to the next precision
+		}
+		fclose(file);
+		if (line) {
+			free(line);
+		}
+	}
+	return errnum;
+}

@@ -110,7 +110,9 @@ int closeLogFiles() {
 	long int nbPrec = getParamFromParamEnum(MAX_PREC)->currentValue.li - MPFR_PREC_MIN;
 
 	for (long int i = 0 ; i < nbPrec ; ++i) {
-		res += closeLog(logFiles[i]);
+		if ( logFiles[i] != NULL ) {
+			res += closeLog(logFiles[i]);
+		}
 	}
 
 	return res;
@@ -153,6 +155,7 @@ void m_log_err(const long int currentPrecision, const char * str) {
 	}
 }
 
+// TODO : fermer le fichier à chaque fin de boucle!
 int closeLog(FILE * fileToClose) {
 	if (fileToClose != NULL) {
 		fclose(fileToClose);
@@ -161,6 +164,15 @@ int closeLog(FILE * fileToClose) {
 		errorHandling();
 		return -1;
 	}
+}
+
+int closeLogFromPrecision(long int precision) {
+	int res = closeLog(logFiles[precision-MPFR_PREC_MIN]);
+	if (res == 0 ) {
+		// success closing
+		logFiles[precision-MPFR_PREC_MIN] = NULL;
+	}
+	return res;
 }
 
 int allocateLogFilesArray(const long int nbPrecisionTreated) {
@@ -179,3 +191,4 @@ int allocateLogFilesArray(const long int nbPrecisionTreated) {
 size_t getLogFileIndexFromCurrentPrecision(long int precision) {
 	return precision - MPFR_PREC_MIN;
 }
+

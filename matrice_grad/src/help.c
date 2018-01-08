@@ -1,7 +1,9 @@
 #include "help.h"
-#include "parameters.h"
 
 #include <stdio.h>
+
+#include "parameters.h"
+#include "utils.c"
 
 /*
  * help.c

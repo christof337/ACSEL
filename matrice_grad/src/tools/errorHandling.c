@@ -6,6 +6,12 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+#define handle_error_en(en, msg) \
+        do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
+
+#define handle_error(msg) \
+        do { perror(msg); exit(EXIT_FAILURE); } while (0)
+
 int errorHandling() {
 	int errnum;
 
@@ -22,8 +28,9 @@ void printError(int errnum) {
 }
 
 void printErrorWithMessage(int errnum, char * message) {
-	perror("\nError : ");
-	fprintf(stderr, "\n%s : %s\n", message, strerror(errnum));
+	handle_error_en(errnum,message);
+//	perror("\nError : ");
+//	fprintf(stderr, "\n%s : %s\n", message, strerror(errnum));
 }
 
 void printCustomError(enum ERRORS err, int nbParams, ...) {

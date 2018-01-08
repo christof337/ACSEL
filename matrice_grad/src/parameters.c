@@ -24,6 +24,8 @@ struct Param *P_MATRIX_SIZE, *P_NB_ITER, *P_MAX_PREC, *P_ROUNDING_MODE, *P_MATRI
 
 struct Param _p_m_s, _p_n_i, _p_m_p, _p_r_m, _p_m_t, _p_e;
 
+/* TODO : tout remplacer par `getopt` */
+
 /**
  * @brief      Init the parameters
  *
@@ -204,6 +206,8 @@ int assignValueToParam(struct Param * param, char * strValue) {
 			param->currentValue.mte = EXPONENTIAL;
 		} else if (strcmp(valueUp, "HILBERT") == 0) {
 			param->currentValue.mte = HILBERT;
+		} else if (strcmp(valueUp,"RANDOM")==0) {
+			param->currentValue.mte = RANDOM;
 		} else {
 			// error
 			err = -1;

@@ -33,4 +33,6 @@ int allocateLogFilesArray(const long int nbPrecisionTreated);
 
 size_t getLogFileIndexFromCurrentPrecision(long int precision);
 
+int closeLogFromPrecision(long int precision);
+
 #endif /* LOG_H_ */

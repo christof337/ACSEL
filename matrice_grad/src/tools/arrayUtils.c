@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <assert.h>
 
 #include "customMath.h"
 
@@ -24,12 +25,40 @@
  */
 
 /**
- * 
+ * https://stackoverflow.com/questions/42094465/correctly-allocating-multi-dimensional-arrays
+ * @param x
+ * @param y
+ * @param aptr
  */
+void arr_alloc(const size_t x, mpfr_t (**aptr)[x]) {
+	*aptr = malloc(sizeof(mpfr_t[x])); // allocate a true array
+	assert(*aptr != NULL);
+}
+
+void arr_fill(const size_t x, mpfr_t array[x], mpfr_prec_t precision) {
+	for (size_t i = 0 ; i < x ; i++) {
+		m_init2(array[i], precision);
+	}
+}
+
+/**
+ * Create a matrix and allocate memory for it. DO NOT initialize the space
+ * needed for mpfr
+ *
+ * @param      a          trust me about the ***. Pointer to a two dimensionnal array of mpfr_t (**)
+ * @param[in]  m          number of rows
+ * @param[in]  n          number of columns
+ * @param[in]  precision  The precision
+ * @param      matrix  The matrix
+ */
+void _createArray(const size_t n, mpfr_t (**a)[n], mpfr_prec_t precision) {
+	arr_alloc(n, a);
+	arr_fill(n, **a, precision);
+}
 
 /**
  * @brief      Initialize an array with the given precision.
- *
+ * @deprecated
  * @param      result     The resulting array
  * @param[in]  n          size of the array to create
  * @param[in]  precision  The precision
@@ -330,4 +359,64 @@ void freeArray(mpfr_t * array, const size_t size) {
 		m_clear(array[i]);
 	}
 	free(array);
+}
+
+size_t getMaxIndex(const size_t size, const mpfr_t array[size]) {
+	size_t indexMax;
+	mpfr_t max;
+	assert(size > 0 /* Impossible to get max index from empty array */);
+	indexMax = size - 1;
+	m_init2(max, mpfr_get_prec(array[indexMax]));
+	mpfr_set(max, array[0], MPFR_RNDN);
+	for (size_t i = 0 ; i < size ; ++i) {
+		if ( mpfr_cmp(array[i],max) > 0) {
+			mpfr_set(max, array[i], MPFR_RNDN);
+			indexMax = i;
+		}
+	}
+	m_clear(max);
+	return indexMax;
+}
+
+size_t getMinIndex(const size_t size, const mpfr_t array[size]) {
+	size_t indexMin;
+	mpfr_t min;
+	assert(size > 0 /* Impossible to get max index from empty array */);
+	indexMin = size - 1;
+	m_init2(min, mpfr_get_prec(array[indexMin]));
+	mpfr_set(min, array[0], MPFR_RNDN);
+	for (size_t i = 0 ; i < size ; ++i) {
+		if ( mpfr_cmp(array[i],min) < 0) {
+			mpfr_set(min, array[i], MPFR_RNDN);
+			indexMin = i;
+		}
+	}
+	m_clear(min);
+	return indexMin;
+}
+
+int getAllMinIndexes(size_t ** indexArray, const size_t size, const mpfr_t array[size]) {
+	size_t indexMin;
+	indexMin = getMinIndex(size, array);
+	mpfr_t minValue;
+	m_init2(minValue, mpfr_get_prec(array[size - 1]));
+	mpfr_set(minValue, array[indexMin], MPFR_RNDN);
+	// counting the number of concerned values
+	long int nbMin = 0;
+	for (size_t i = 0 ; i < size ; ++i) {
+		if (mpfr_cmp(minValue,array[i]) == 0) {
+			++nbMin;
+		}
+	}
+	assert(nbMin!=0 /* impossible */);
+	*indexArray = malloc(sizeof(size_t) * nbMin);
+	size_t indexMinArray = 0;
+	for (size_t i = 0 ; i < size ; ++i) {
+		if (mpfr_cmp(minValue,array[i]) == 0) {
+			(*indexArray)[indexMinArray] = i;
+			++indexMinArray;
+		}
+	}
+	m_clear(minValue);
+	return nbMin;
 }
