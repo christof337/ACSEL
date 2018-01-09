@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 				int threadState;
 				int nbThreads = 0;
 
-				initGkgk2_global(RANGE_PRECISION - PRECISION_MIN+1, NB_ITER);
+				initGkgk2_global(RANGE_PRECISION - PRECISION_MIN + 1, NB_ITER);
 
 				if ( PARALLEL) {
 					// parallelize
@@ -105,9 +105,10 @@ int main(int argc, char *argv[]) {
 					printProgressBarLine(RANGE_PRECISION - PRECISION_MIN);
 					printf("|");
 
-					// DEBUT BOUCLE ( entièrement parralélisable )
+					// DEBUT BOUCLE ( entièrement parralélisée )
 //#pragma acc parallel loop
 					for (long int pre = PRECISION_MIN ; pre <= RANGE_PRECISION ; ++pre) {
+						// CONJUGUATE GRADIENT DESCENT METHOD
 						threadState = pthread_create(&threads[nbThreads], NULL,
 								customConjuguateGradientDescentThreadWrapper, &pre);
 						if (threadState) {
@@ -118,9 +119,6 @@ int main(int argc, char *argv[]) {
 							fflush(stdout);
 							nbThreads++;
 						}
-						// CONJUGUATE GRADIENT DESCENT METHOD
-//					/*state += */conjuguateGradientDescent(pre, M_SIZE, NB_GRAD, M_TYPE,
-//							RME/*, metaGkgk2save*/);
 					}
 					printf("|\n");
 					// fin boucle principale (pre)
@@ -140,9 +138,8 @@ int main(int argc, char *argv[]) {
 					// not parallelized
 					// sequential loop over the precisions
 					for (mpfr_prec_t pre = PRECISION_MIN ; pre <= RANGE_PRECISION ; ++pre) {
-						conjuguateGradientDescent(pre, M_SIZE, NB_GRAD, M_TYPE,
-								RME/*, metaGkgk2save[nbGradientIterations]*/);
-						printf("Fin de la descente de gradient de précision `%ld`.\n",pre);
+						conjuguateGradientDescent(pre, M_SIZE, NB_GRAD, M_TYPE, RME);
+						printf("Fin de la descente de gradient de précision `%ld`.\n", pre);
 					}
 				}
 				printLine();

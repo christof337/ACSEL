@@ -84,8 +84,8 @@ int writeMatrix(const size_t n, const size_t m, mpfr_t matrix[m][n], const char 
  *
  * @return     0 en cas de succès, la valeur de l'erreur sinon
  */
-int writeData(mpfr_t * data[], const int size, const char * fileName, const char * labels[],
-		const int n_array) {
+int writeData(const size_t size, const char * fileName, const size_t n_array,
+		const char * labels[n_array], mpfr_t * data[n_array]) {
 	FILE * pf;
 	int errnum;
 	pf = fopen(fileName, "a");
@@ -104,7 +104,7 @@ int writeData(mpfr_t * data[], const int size, const char * fileName, const char
 		for (size_t j = 0 ; j < size ; ++j) {
 			for (size_t i = 0 ; i < n_array ; ++i) {
 				//fprintf(pf,"%12G\t",data[i][j]);
-				mpfr_out_str(pf, 10, 12, data[i][j], RM);
+				mpfr_out_str(pf, 10, 0, data[i][j], RM);
 				fprintf(pf, "\t");
 			}
 			fprintf(pf, "\n");
@@ -163,17 +163,17 @@ void eraseFile(const char * fileName) {
 }
 
 char * getFileNameFromPrecision(const char * prefix, const char * suffix, const long int precision) {
-	char * fileName = malloc(sizeof(char)*(strlen(prefix)+strlen(suffix)+5));
+	char * fileName = malloc(sizeof(char) * (strlen(prefix) + strlen(suffix) + 5));
 
-	sprintf(fileName,"%s(%ld)%s",prefix,precision,suffix);
+	sprintf(fileName, "%s(%ld)%s", prefix, precision, suffix);
 
 	return fileName;
 }
 
 char * buildSuffix() {
 	char * suffix;
-	suffix = malloc(sizeof(char)*strlen(DATA_SUFFIX));
-	strcpy(suffix,DATA_SUFFIX);
+	suffix = malloc(sizeof(char) * strlen(DATA_SUFFIX));
+	strcpy(suffix, DATA_SUFFIX);
 	return suffix;
 }
 
@@ -185,7 +185,8 @@ char * buildSuffix() {
  * @param arrayToFill
  * @return
  */
-int readFromFormattedOutputFile(char* fileName, long int precisionMaxTreated, long int nbIterations, mpfr_t arrayToFill[precisionMaxTreated][nbIterations]) {
+int readFromFormattedOutputFile(const char* fileName, long int precisionMaxTreated,
+		long int nbIterations, mpfr_t (*arrayToFill)[precisionMaxTreated][nbIterations]) {
 	// reading from file...
 	// find the output file
 	FILE* file;
@@ -205,6 +206,7 @@ int readFromFormattedOutputFile(char* fileName, long int precisionMaxTreated, lo
 		char** splittedLine = NULL;
 		char precisionString[10];
 		long int it;
+		mpfr_t secondColumn;
 		for (long int precision = MPFR_PREC_MIN ; precision <= precisionMaxTreated ; ++precision) {
 			it = 0;
 			// reading all the lines for this precision until meeting an empty line
@@ -244,14 +246,14 @@ int readFromFormattedOutputFile(char* fileName, long int precisionMaxTreated, lo
 						} else {
 							// all seem nice, we are actually at the line corresponding to the precision `precision`
 							// and to the iteration number `it`
-							mpfr_t secondColumn;
 							m_init2(secondColumn, precision);
-							m_init2(arrayToFill[precision - MPFR_PREC_MIN][it], precision);
-							assert(
-									mpfr_set_str(secondColumn, splittedLine[1], 10 /* base 10 */,
-											MPFR_RNDN) == 0);
-							mpfr_set(arrayToFill[precision - MPFR_PREC_MIN][it],
-									secondColumn, MPFR_RNDN);
+							size_t prec = precision - MPFR_PREC_MIN;
+							m_init2((*arrayToFill)[prec][it], precision);
+							int tmp = mpfr_set_str(secondColumn, splittedLine[1], 10 /* base 10 */,
+									MPFR_RNDN);
+							assert(tmp == 0 /* mpfr_set_str fail*/);
+							mpfr_set((*arrayToFill)[prec][it], secondColumn,
+									MPFR_RNDN);
 							m_clear(secondColumn);
 						}
 					}

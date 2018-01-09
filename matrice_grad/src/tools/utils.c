@@ -123,3 +123,16 @@ void printProgressBarLine(const int nbThreads) {
 	}
 	printf("Fin |\n");
 }
+
+void strreplace(char string[], char search[], char replace[]){
+    char buffer[100];
+    char*p = string;
+    while((p=strstr(p, search))){
+        strncpy(buffer, string, p-string);
+        buffer[p-string] = '\0';
+        strcat(buffer, replace);
+        strcat(buffer, p+strlen(search));
+        strcpy(string, buffer);
+        p++;
+    }
+}

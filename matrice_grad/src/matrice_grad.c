@@ -316,7 +316,7 @@ int writeDataInFile(mpfr_t * x, mpfr_t * solgc, const size_t size, mpfr_prec_t p
 
 	char fileName[20];
 
-	const char * labels[] = { "i", "x", "solgc" };
+	const char * labels[3] = { "i", "x", "solgc" };
 	const int n_array = (sizeof(labels) / sizeof(const char *));
 
 	// i 
@@ -324,7 +324,7 @@ int writeDataInFile(mpfr_t * x, mpfr_t * solgc, const size_t size, mpfr_prec_t p
 	createArray(&iArray, size, precision);
 	fillArrayLinearly(iArray, size);
 
-	mpfr_t * data[] = { iArray, x, solgc };
+	mpfr_t * data[3] = { iArray, x, solgc };
 
 	sprintf(fileName, "%s%ld%s", DATA_FILE_NAME, precision, DATA_EXTENSION);
 
@@ -332,7 +332,7 @@ int writeDataInFile(mpfr_t * x, mpfr_t * solgc, const size_t size, mpfr_prec_t p
 	eraseFile(fileName);
 //	}
 
-	res = writeData(data, size, fileName, labels, n_array);
+	res = writeData(size, fileName, n_array, labels, data);
 
 	freeArray(iArray, size);
 

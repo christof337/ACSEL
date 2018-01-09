@@ -18,4 +18,6 @@ void printLine();
 
 void printProgressBarLine(const int nbThreads) ;
 
+void strreplace(char string[], char search[], char replace[]);
+
 #endif /* UTILS_H */
