@@ -49,15 +49,26 @@ void parametersPrint(enum roundingModeEnum roundingMode, enum matrixTypeEnum mat
 		enum valueTreatedEnum valueTreated, long int matrixSize, long int numberOfIterations,
 		long int precisionMaxTreated);
 
+int fillProgressivePrecisionArrayFromFile(const char * fileName, const size_t m, const size_t n,
+		mpfr_t (**arrayToFill)[m][n], const mpfr_prec_t precisionMax);
+
 int getLastElements(size_t m, mpfr_t (**lastElements)[m], size_t n, mpfr_t (*array)[m][n]);
 
 void printMinimums(int nbMin, size_t minIndexes[nbMin]);
 
-char* removePath(char* fileName) ;
+char* removePath(const char* fileName);
+
+char * getRNDNFileNameFromStochasticFileName(const char * stochasticFileName);
+
+int writeDifferenceStochasticToRndnInFile(const size_t numberOfPrecisionTreated,
+		const size_t numberOfIterations,
+		const mpfr_t (*stochasticArray)[numberOfPrecisionTreated][numberOfIterations],
+		const mpfr_t (*RNDNArray)[numberOfPrecisionTreated][numberOfIterations],
+		const char * stochasticFileName, const mpfr_prec_t precisionMax);
 
 char * getStringFromRoundingModeEnum(const enum roundingModeEnum rme);
 
-char * getStringFromMatrixTypeEnum(const enum matrixTypeEnum mte) ;
+char * getStringFromMatrixTypeEnum(const enum matrixTypeEnum mte);
 
 char * getStringFromValueTreatedEnum(const enum valueTreatedEnum vte);
 

@@ -27,6 +27,8 @@
 
 #define GKGK2_TRESHOLD "10.0"
 
+#define DIFFERENCE_STOCHASTIC_TO_RNDN 0
+
 int main(int argc, char *argv[]) {
 	printf("\nProgram start...\n");
 	fflush(stdout);
@@ -56,22 +58,8 @@ int main(int argc, char *argv[]) {
 			long int numberOfPrecisionTreated = precisionMaxTreated - MPFR_PREC_MIN + 1;
 			mpfr_t (*valueTreatedArray)[numberOfPrecisionTreated][numberOfIterations];
 
-			// initialization
-			arr_alloc_2d(numberOfPrecisionTreated, numberOfIterations, &valueTreatedArray);
-			// we don't call createMatrix because we want different precisions for each subarray
-			for (int precision = MPFR_PREC_MIN ; precision <= precisionMaxTreated ; ++precision) {
-				// looping to call _createArray instead
-				mpfr_t (*ptr)[numberOfIterations];
-				ptr = &((*valueTreatedArray) [ precision - MPFR_PREC_MIN ]);
-				_createArray(numberOfIterations, &ptr,
-						precision);
-			}
-
-			// reading from file...
-
-			// find the output file, opening it, reading it, and putting its content in valueTreatedArray if everything's fine
-			errnum = readFromFormattedOutputFile(fileName, precisionMaxTreated, numberOfIterations,
-					*valueTreatedArray);
+			errnum = fillProgressivePrecisionArrayFromFile(fileName, numberOfPrecisionTreated,
+					numberOfIterations, &valueTreatedArray, precisionMaxTreated);
 
 			if (errnum != EXIT_FAILURE) {
 				// sucessfull read
@@ -122,15 +110,19 @@ int main(int argc, char *argv[]) {
 				strcat(simplifiedOutputFileName, fileNameWithoutPath);
 
 				mpfr_t (*precisions)[numberOfPrecisionTreated];
-				_createArray(numberOfPrecisionTreated, &precisions, 18);
-				for (long int i = MPFR_PREC_MIN ; i <= precisionMaxTreated ; ++i) {
-					mpfr_set_si((*precisions)[i-MPFR_PREC_MIN], i, MPFR_RNDN);
-				}
-				mpfr_t (*data)[2][numberOfPrecisionTreated];
+				_createArray(numberOfPrecisionTreated, &precisions, mpfr_get_default_prec());
 
-//				writeData
-				writeArray(*lastElements, numberOfPrecisionTreated, simplifiedOutputFileName,
-						"Simplified Gkgk2");
+				for (long int i = MPFR_PREC_MIN ; i <= precisionMaxTreated ; ++i) {
+					long int index = i - MPFR_PREC_MIN;
+					mpfr_set_si((*precisions)[index], i, MPFR_RNDN);
+				}
+				mpfr_t * data[2] = { precisions, lastElements };
+				const char * labels[2] = { "Precision", "Gkgk2 final" };
+
+				eraseFile(simplifiedOutputFileName);
+				writeData(numberOfPrecisionTreated, simplifiedOutputFileName, 2, labels, data);
+//				writeArray(*lastElements, numberOfPrecisionTreated, simplifiedOutputFileName,
+//						"Simplified Gkgk2");
 
 				// ------------------------------------------------------------------
 				// just for the lulz, trying to write it again for comparison
@@ -141,14 +133,40 @@ int main(int argc, char *argv[]) {
 				}
 				// ------------------------------------------------------------------
 
+				if ( DIFFERENCE_STOCHASTIC_TO_RNDN) {
+					// we should write the difference between a stochastic file and a RNDN file
+					mpfr_t (*RNDNArray)[numberOfPrecisionTreated][numberOfIterations];
+
+					char * RNDNFileName;
+					RNDNFileName = getRNDNFileNameFromStochasticFileName(fileName);
+
+					errnum = fillProgressivePrecisionArrayFromFile(RNDNFileName,
+							numberOfPrecisionTreated, numberOfIterations, &RNDNArray,
+							precisionMaxTreated);
+
+					writeDifferenceStochasticToRndnInFile(numberOfPrecisionTreated,
+							numberOfIterations, valueTreatedArray, RNDNArray, fileName,
+							precisionMaxTreated);
+
+					free(RNDNFileName);
+					freeMatrix(numberOfPrecisionTreated, numberOfIterations, RNDNArray);
+				}
+
+				// freeMatrix(2,numberOfPrecisionTreated,&data);
 				freeArray(*lastElements, numberOfPrecisionTreated);
+				freeArray(*precisions, numberOfPrecisionTreated);
 				free(minIndexes);
 				free(simplifiedOutputFileName);
+//				free(fileNameWithoutPath);
+				m_clear(minValue);
+				m_clear(maxValue);
 			}
 
 			// final print
 			parametersPrint(roundingMode, matrixType, valueTreated, matrixSize, numberOfIterations,
 					precisionMaxTreated);
+
+			freeMatrix(numberOfPrecisionTreated, numberOfIterations, valueTreatedArray);
 		}
 	}
 
@@ -162,6 +180,26 @@ int main(int argc, char *argv[]) {
 
 /* -------------------------------------------------------------------------------------------------------------------------- */
 /* -------------------------------------------------------------------------------------------------------------------------- */
+
+int fillProgressivePrecisionArrayFromFile(const char * fileName, const size_t m, const size_t n,
+		mpfr_t (**arrayToFill)[m][n], const mpfr_prec_t precisionMax) {
+	int errnum = EXIT_SUCCESS;
+
+	// initialization
+	// we don't call createMatrix because we want different precisions for each subarray+
+	arr_alloc_2d(m, n, arrayToFill);
+
+//	for (long int precision = MPFR_PREC_MIN ; precision <= precisionMax ; ++precision) {
+//		// looping to call arr_fill instead
+//		arr_fill(n, (**arrayToFill)[precision], precision);
+//	}
+
+	// reading from file...
+	// find the output file, opening it, reading it, and putting its content in valueTreatedArray if everything's fine
+	errnum = readFromFormattedOutputFile(fileName, precisionMax, n, *arrayToFill);
+
+	return errnum;
+}
 
 int getLastElements(size_t m, mpfr_t (**lastElements)[m], size_t n, mpfr_t (*array)[m][n]) {
 	int res = EXIT_SUCCESS;
@@ -177,6 +215,115 @@ int getLastElements(size_t m, mpfr_t (**lastElements)[m], size_t n, mpfr_t (*arr
 	return res;
 }
 
+
+void printMinimums(int nbMin, size_t minIndexes[nbMin]) {
+	printf("This minimum has been found at precisions ");
+	printf(" %zu", minIndexes[0]);
+	for (int i = 1 ; i < nbMin - 1 ; ++i) {
+		printf(", %zu", minIndexes[i] + MPFR_PREC_MIN);
+	}
+	printf(" and %zu.\n", minIndexes[nbMin - 1] + MPFR_PREC_MIN);
+}
+
+char* removePath(const char* fileName) {
+	char * tmp;
+	tmp = malloc(sizeof(char) * strlen(fileName));
+	// removing the early path
+	tmp = strrchr(fileName, '/');
+	tmp++; // removing the /
+	return tmp;
+}
+
+int writeDifferenceStochasticToRndnInFile(const size_t numberOfPrecisionTreated,
+		const size_t numberOfIterations,
+		const mpfr_t (*stochasticArray)[numberOfPrecisionTreated][numberOfIterations],
+		const mpfr_t (*RNDNArray)[numberOfPrecisionTreated][numberOfIterations],
+		const char * stochasticFileName, const mpfr_prec_t precisionMax) {
+	int errnum = EXIT_SUCCESS;
+	char * substractedFileName;
+	FILE * file;
+	mpfr_t tmpVal;
+
+	substractedFileName = removePath(stochasticFileName);
+	strreplace(substractedFileName, "rm=STOCHASTIC", "SUBSTRACTED");
+
+	eraseFile(substractedFileName);
+
+	file = fopen(substractedFileName, "w");
+
+	if (file != NULL) {
+		// we should compute the difference between stochasticArray and RNDNArray and put it in a file
+		for (size_t i = 0 ; i < numberOfPrecisionTreated ; ++i) {
+			mpfr_prec_t prec = i + MPFR_PREC_MIN;
+
+			for (size_t j = 0 ; j < numberOfIterations ; ++j) {
+				long int it = j;
+
+				m_init2(tmpVal, prec);
+
+				mpfr_sub(tmpVal, (*stochasticArray)[i][j], (*RNDNArray)[i][j], MPFR_RNDN);
+				mpfr_add_si(tmpVal,tmpVal,1L,MPFR_RNDN); // add 1
+
+				fprintf(file, "%ld\t", it);
+				mpfr_out_str(file, 10, 0, tmpVal, MPFR_RNDN);
+				fprintf(file, "\t%ld\n", prec);
+
+				m_clear(tmpVal);
+			}
+			fprintf(file, "\n");
+		}
+		printf("\nSuccessfully write substraction into file : %s.\n",substractedFileName);
+		fclose(file);
+	} else {
+		fprintf(stderr, "\nFailed to open the file %s", substractedFileName);
+		errnum = EXIT_FAILURE;
+	}
+
+//	free(substractedFileName);
+	return errnum;
+}
+
+/**
+ * Extract "STOCHASTIC" from the given path and replace it with "RNDN"
+ */
+char * getRNDNFileNameFromStochasticFileName(const char * stochasticFileName) {
+	char * RFN = NULL; // RNDN file name
+
+	char replace[] = "RNDN";
+	char search[] = "STOCHASTIC";
+
+	RFN = malloc(sizeof(char) * strlen(stochasticFileName));
+	strcpy(RFN, stochasticFileName);
+
+	strreplace(RFN, search, replace);
+
+	return RFN;
+}
+
+void parametersPrint(enum roundingModeEnum roundingMode, enum matrixTypeEnum matrixType,
+		enum valueTreatedEnum valueTreated, long int matrixSize, long int numberOfIterations,
+		long int precisionMaxTreated) {
+	// we have everything
+	// final print
+	char* roundingModeString = getStringFromRoundingModeEnum(roundingMode);
+	assert(roundingModeString!=NULL && "Incorrect rounding mode?");
+	char* matrixTypeString = getStringFromMatrixTypeEnum(matrixType);
+	assert(matrixTypeString!=NULL && "Incorrect matrix type?");
+	char* valueTreatedString = getStringFromValueTreatedEnum(valueTreated);
+	assert(valueTreatedString!=NULL && "Incorrect treated value?");
+
+	printf("\nThe values are :\n");
+	printf("\t- Value treated : %s\n", valueTreatedString);
+	printf("\t- Matrix size : %ld\n", matrixSize);
+	printf("\t- Number of iterations : %ld\n", numberOfIterations);
+	printf("\t- Precision max treated : %ld\n", precisionMaxTreated);
+	printf("\t- Rounding mode : %s\n", roundingModeString);
+	printf("\t- Matrix type : %s\n", matrixTypeString);
+
+	free(roundingModeString);
+	free(matrixTypeString);
+	free(valueTreatedString);
+}
 /**
  * Put in valueTreated, matrixSize, numberOfIterations; precisionMaxTreated, roundingMode and matrixType,
  * the corresponding value from the fileName given as input.
@@ -318,47 +465,6 @@ int extractParamsFromFileName(const char * fileName, enum valueTreatedEnum * val
 		free(toFree);
 	}
 	return res;
-}
-
-void printMinimums(int nbMin, size_t minIndexes[nbMin]) {
-	printf("This minimum has been found at precisions ");
-	printf(" %zu", minIndexes[0]);
-	for (int i = 1 ; i < nbMin - 1 ; ++i) {
-		printf(", %zu", minIndexes[i] + MPFR_PREC_MIN);
-	}
-	printf(" and %zu.\n", minIndexes[nbMin - 1] + MPFR_PREC_MIN);
-}
-
-char* removePath(char* fileName) {
-	// removing the early path
-	fileName = strrchr(fileName, '/');
-	fileName++; // removing the /
-	return fileName;
-}
-
-void parametersPrint(enum roundingModeEnum roundingMode, enum matrixTypeEnum matrixType,
-		enum valueTreatedEnum valueTreated, long int matrixSize, long int numberOfIterations,
-		long int precisionMaxTreated) {
-	// we have everything
-	// final print
-	char* roundingModeString = getStringFromRoundingModeEnum(roundingMode);
-	assert(roundingModeString!=NULL && "Incorrect rounding mode?");
-	char* matrixTypeString = getStringFromMatrixTypeEnum(matrixType);
-	assert(matrixTypeString!=NULL && "Incorrect matrix type?");
-	char* valueTreatedString = getStringFromValueTreatedEnum(valueTreated);
-	assert(valueTreatedString!=NULL && "Incorrect treated value?");
-
-	printf("\nThe values are :\n");
-	printf("\t- Value treated : %s\n", valueTreatedString);
-	printf("\t- Matrix size : %ld\n", matrixSize);
-	printf("\t- Number of iterations : %ld\n", numberOfIterations);
-	printf("\t- Precision max treated : %ld\n", precisionMaxTreated);
-	printf("\t- Rounding mode : %s\n", roundingModeString);
-	printf("\t- Matrix type : %s\n", matrixTypeString);
-
-	free(roundingModeString);
-	free(matrixTypeString);
-	free(valueTreatedString);
 }
 
 /**
