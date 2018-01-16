@@ -19,12 +19,15 @@
 
 #define DEFAULT_ROUNDING_MODE RNDN
 #define DEFAULT_MATRIX_TYPE EXPONENTIAL
+#define DEFAULT_MODEL CGD
 
-#define HELP_CAPTION "HELP"
+#define DEFAULT_SIGMA 10
+#define DEFAULT_RO 28
+#define DEFAULT_BETA 2.6667
 
-struct Param *P_MATRIX_SIZE, *P_NB_ITER, *P_MAX_PREC, *P_ROUNDING_MODE, *P_MATRIX_TYPE, *P_ERROR;
+struct Param *P_MODEL, *P_MATRIX_SIZE, *P_NB_ITER, *P_MAX_PREC, *P_ROUNDING_MODE, *P_MATRIX_TYPE, *P_SIGMA, *P_RO, *P_BETA, *P_ERROR;
 
-struct Param _p_m_s, _p_n_i, _p_m_p, _p_r_m, _p_m_t, _p_e;
+struct Param _p_m, _p_m_s, _p_n_i, _p_m_p, _p_r_m, _p_m_t, _p_s, _p_r, _p_b, _p_e;
 
 /* TODO : tout remplacer par `getopt` */
 
@@ -39,6 +42,15 @@ int initParams(char * appName) {
 	paramAdressInit();
 
 	char tmp[200];
+	// MODEL
+	strcpy(P_MODEL->name, "model");
+	strcpy(P_MODEL->shortName, "mo");
+	P_MODEL->typ_defaultValue = MODELENUM;
+	P_MODEL->defaultValue.me = DEFAULT_MODEL;
+	strcpy(P_MODEL->description, "Define the algorithm that will be processed.");
+	P_MODEL->error = 0;
+	P_MODEL->isDefault = 1;
+	P_MODEL->currentValue.me = DEFAULT_MODEL;
 
 	// MATRIX_SIZE
 	strcpy(P_MATRIX_SIZE->name, "matrixSize");
@@ -93,6 +105,36 @@ int initParams(char * appName) {
 	P_MATRIX_TYPE->isDefault = 1;
 	P_MATRIX_TYPE->currentValue.mte = DEFAULT_MATRIX_TYPE;
 
+	// SIGMA
+	strcpy(P_SIGMA->name, "sigma");
+	strcpy(P_SIGMA->shortName, "si");
+	P_SIGMA->typ_defaultValue = DOUBLE;
+	P_SIGMA->defaultValue.d = DEFAULT_SIGMA;
+	strcpy(P_SIGMA->description, "Define the value of Sigma in Lorenz Attractor algorithm.");
+	P_SIGMA->error = 0;
+	P_SIGMA->isDefault = 1;
+	P_SIGMA->currentValue.d = DEFAULT_SIGMA;
+
+	// RO
+	strcpy(P_RO->name, "ro");
+	strcpy(P_RO->shortName, "ro");
+	P_RO->typ_defaultValue = DOUBLE;
+	P_RO->defaultValue.d = DEFAULT_RO;
+	strcpy(P_RO->description, "Define the value of Ro in Lorenz Attractor algorithm.");
+	P_RO->error = 0;
+	P_RO->isDefault = 1;
+	P_RO->currentValue.d = DEFAULT_RO;
+
+	// BETA
+	strcpy(P_BETA->name, "beta");
+	strcpy(P_BETA->shortName, "be");
+	P_BETA->typ_defaultValue = DOUBLE;
+	P_BETA->defaultValue.d = DEFAULT_BETA;
+	strcpy(P_BETA->description, "Define the value of Beta in Lorenz Attractor algorithm.");
+	P_BETA->error = 0;
+	P_BETA->isDefault = 1;
+	P_BETA->currentValue.d = DEFAULT_BETA;
+
 	// ERROR
 	strcpy(P_ERROR->name, "Error");
 	P_ERROR->error = -1;
@@ -116,22 +158,22 @@ int handleParams(int argc, char *argv[]) {
 		char c;
 		int option_index = 0;
 		static struct option long_options[] = {
-				{ "model", 1, 0, 0 },
-				{ "matrixSize", 1, 0, 0 },
-				{ "nbIter", 1, 0, 0 },
-				{ "maxPrecision", 1, 0, 0 },
-				{ "roundingMode", 1, 0, 0},
-				{ "matrixType", 1, 0, 0 },
-				{ "mo", 1, 0, 0 },
-				{ "ms", 1, 0, 0 },
-				{ "ni", 1, 0, 0 },
-				{ "mp", 1, 0, 0 },
-				{ "rm", 1, 0, 0},
-				{ "mt", 1, 0, 0 },
-				{ "help", 2, 0, 'h' },
+				{ "model", required_argument, 0, 0 },
+				{ "matrixSize", required_argument, 0, 0 },
+				{ "nbIter", required_argument, 0, 0 },
+				{ "maxPrecision", required_argument, 0, 0 },
+				{ "roundingMode", required_argument, 0, 0},
+				{ "matrixType", required_argument, 0, 0 },
+				{ "mo", required_argument, 0, 0 },
+				{ "ms", required_argument, 0, 0 },
+				{ "ni", required_argument, 0, 0 },
+				{ "mp", required_argument, 0, 0 },
+				{ "rm", required_argument, 0, 0},
+				{ "mt", required_argument, 0, 0 },
+				{ "help", optional_argument, 0, 0 },
 				{ 0, 0, 0, 0 } };
 
-		while ((c = getopt_long(argc, argv, "+h", long_options, &option_index)) != -1) {
+		while ((c = getopt_long(argc, argv, "", long_options, &option_index)) != -1) {
 
 			switch (c) {
 			case 0:
@@ -169,6 +211,7 @@ int handleParams(int argc, char *argv[]) {
 				if(optarg) {
 					printNeededHelp(optarg);
 				}
+				return EXIT_FAILURE;
 				break;
 			default:
 				fprintf(stderr, "Unknow option %c.\n", c);
@@ -349,6 +392,9 @@ enum roundingModeEnum stringToRoundingModeEnum(char * string, const size_t size)
 struct Param * getParamFromParamEnum(enum ParamEnum pe) {
 	struct Param * askedParam;
 	switch (pe) {
+	case MODEL:
+		askedParam = P_MODEL;
+		break;
 	case MATRIX_SIZE:
 		askedParam = P_MATRIX_SIZE;
 		break;
@@ -363,6 +409,15 @@ struct Param * getParamFromParamEnum(enum ParamEnum pe) {
 		break;
 	case MATRIX_TYPE:
 		askedParam = P_MATRIX_TYPE;
+		break;
+	case SIGMA:
+		askedParam = P_SIGMA;
+		break;
+	case RO:
+		askedParam = P_RO;
+		break;
+	case BETA:
+		askedParam = P_BETA;
 		break;
 	case PARAM_ENUM_ERROR:
 	default:
@@ -460,11 +515,15 @@ char * getParamValueString(const struct Param * param) {
  * @brief      schhht
  */
 void paramAdressInit() {
+	P_MODEL = &_p_m;
 	P_MATRIX_SIZE = &_p_m_s;
 	P_NB_ITER = &_p_n_i;
 	P_MAX_PREC = &_p_m_p;
 	P_ROUNDING_MODE = &_p_r_m;
 	P_MATRIX_TYPE = &_p_m_t;
+	P_SIGMA = &_p_s;
+	P_RO = &_p_r;
+	P_BETA = &_p_b;
 	P_ERROR = &_p_e;
 }
 

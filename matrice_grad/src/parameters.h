@@ -16,6 +16,11 @@ enum matrixTypeEnum {
 	HILBERT
 };
 
+enum modelEnum {
+	CGD /** Conjuguate Gradient Descent **/,
+	LORENZ /** Lorenz Attractor **/
+};
+
 /**
  * @brief      Union used to access the default value, which can have different type depending on the parameter used
  */
@@ -25,6 +30,7 @@ union defaultValueUnion {
 	long int li;
 	size_t s;
 	enum roundingModeEnum rme;
+	enum modelEnum me;
 };
 
 /**
@@ -35,7 +41,8 @@ enum type {
 	MATRIXTYPEENUM,
 	LONGINT,
 	SIZE_T,
-	ROUNDINGMODEENUM
+	ROUNDINGMODEENUM,
+	MODELENUM
 };
 
 /**
@@ -60,12 +67,16 @@ struct Param {
  */
 enum ParamEnum {
 	param_min,
-	MATRIX_SIZE = param_min,
+	MODEL = param_min,
+	MATRIX_SIZE,
 	NB_ITER,
 	MAX_PREC,
 	ROUNDING_MODE, // add params before this comment
 	MATRIX_TYPE,
-	param_max = MATRIX_TYPE,
+	SIGMA,
+	RO,
+	BETA,
+	param_max = BETA,
 	PARAM_ENUM_ERROR
 };
 

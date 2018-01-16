@@ -27,11 +27,13 @@ int isHelp(const char * option) {
 	int isHelp = 0;
 
 	char * optionUpper = toUpperCase(option,strlen(option)+1);
+	char * helpUpper = toUpperCase(HELP_CAPTION,strlen(HELP_CAPTION)+1);
 
-	if ( strcmp(optionUpper, HELP_CAPTION) == 0) {
+	if ( strcmp(optionUpper, helpUpper) == 0) {
 		isHelp = 1;
 	}
 	free(optionUpper);
+	free(helpUpper);
 	return isHelp;
 }
 
@@ -42,7 +44,7 @@ void printHelp() {
 	printLine();
 	printf("\tHELP");
 	printf(
-			"\n\t - Please use `%s [--<parameter> <value>] [--<parameterShortName> <value>] [...]` to run the program. ",
+			"\n\t - Please use `%s [--<parameter>=<value>] [--<parameterShortName>=<value>] [...]` to run the program. ",
 			globalAppName);
 	printf("If a parameter is omitted, the default value will be used.");
 	printf("\n\t - Type `%s --help` to print this message", globalAppName);
@@ -75,20 +77,40 @@ void printParamHelp(enum ParamEnum param) {
 	printf("Parameter help:");
 	printParamEnum(param);
 	switch (param) {
+	case MODEL:
+		// TODO MODEL param help caption
+		printf("Help hasn't been implemented for model yet.");
+		break;
 	case MATRIX_SIZE:
 		// TODO matrix size param help caption
+		printf("Help hasn't been implemented for matrix size yet.");
 		break;
 	case NB_ITER:
 		// TODO nb iterations param help caption
+		printf("Help hasn't been implemented for nb iterations yet.");
 		break;
 	case MAX_PREC:
 		// TODO max precision param help caption
+		printf("Help hasn't been implemented for max precision yet.");
 		break;
 	case ROUNDING_MODE:
 		printRoundingModeHelp(*getParamFromParamEnum(param));
 		break;
 	case MATRIX_TYPE:
 		// TODO matrix type param help caption
+		printf("Help hasn't been implemented for matrix type yet.");
+		break;
+	case SIGMA:
+		// TODO sigma param help caption
+		printf("Help hasn't been implemented for sigma yet.");
+		break;
+	case RO:
+		// TODO RO param help caption
+		printf("Help hasn't been implemented for ro yet.");
+		break;
+	case BETA:
+		// TODO BETA param help caption
+		printf("Help hasn't been implemented for beta yet.");
 		break;
 	case PARAM_ENUM_ERROR:
 		//error
