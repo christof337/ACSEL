@@ -5,6 +5,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <mpfr.h>
+#include <unistd.h>
+#include <getopt.h>
 
 #include "tools/utils.h"
 #include "tools/errorHandling.h"
@@ -20,7 +22,7 @@
 
 #define HELP_CAPTION "HELP"
 
-struct Param *P_MATRIX_SIZE, *P_NB_ITER, *P_MAX_PREC, *P_ROUNDING_MODE, *P_MATRIX_TYPE,*P_ERROR;
+struct Param *P_MATRIX_SIZE, *P_NB_ITER, *P_MAX_PREC, *P_ROUNDING_MODE, *P_MATRIX_TYPE, *P_ERROR;
 
 struct Param _p_m_s, _p_n_i, _p_m_p, _p_r_m, _p_m_t, _p_e;
 
@@ -60,7 +62,7 @@ int initParams(char * appName) {
 
 	// MAX_PREC
 	strcpy(P_MAX_PREC->name, "maxPrecision");
-	strcpy(P_MAX_PREC->shortName, "pre");
+	strcpy(P_MAX_PREC->shortName, "mp");
 	P_MAX_PREC->typ_defaultValue = LONGINT;
 	P_MAX_PREC->defaultValue.li = DEFAULT_MAX_PREC;
 	strcpy(P_MAX_PREC->description,
@@ -92,7 +94,7 @@ int initParams(char * appName) {
 	P_MATRIX_TYPE->currentValue.mte = DEFAULT_MATRIX_TYPE;
 
 	// ERROR
-	strcpy(P_ERROR->name,"Error");
+	strcpy(P_ERROR->name, "Error");
 	P_ERROR->error = -1;
 
 	return 0;
@@ -107,84 +109,105 @@ int initParams(char * appName) {
  * @return     0 if the arguments were correctly handled, 1 if only the help caption was asked, and a value < 0 if a problem has occured
  */
 int handleParams(int argc, char *argv[]) {
-	int err = 0;
+	int err = EXIT_SUCCESS;
 	if (argc > 1) {
 		globalAppName = argv[0];
 		// one or more argument passed
-		char * firstArgTmp = toUpperCase(argv[1], strlen(argv[1]) + 1);
-		if (strcmp(firstArgTmp, HELP_CAPTION) == 0) {
-			// HELP
-			err = 1;
-			if (argc == 2) {
-				// casual help
-				printHelp();
-			} else if (argc == 3) {
-				// parameter help
-				char * paramName = argv[2];
-				// on essaie de récupérer le paramètre correspondant à la chaine écrite
-				enum ParamEnum pe = getParamEnumFromString(paramName);
-				if (pe != PARAM_ENUM_ERROR) {
-					printParamHelp(pe);
-				} else {
-					err = ERROR_WHILE_HANDLING_INPUT_PARAMETERS;
-					printCustomError(err, 1, globalAppName);
-				}
-			} else {
-				// typo while asking for help
-				err = ERROR_WHILE_HANDLING_INPUT_PARAMETERS;
-				printCustomError(err, 1, globalAppName);
-			}
-		} else {
-			int i = 1;
-			while (err == 0 && i < argc) {
-				char * currentStr = argv[i];
-				if (strchr(currentStr, '=') == NULL) {
-					// the string does not contain an "=" : error
-					err = ERROR_NO_EQUAL_SIGN_IN_PARAMETER;
-					printCustomError(err, 2, globalAppName, currentStr);
-				} else {
-					// test if the string contains =
-					char ** tmp = str_split(currentStr, '=');
-					char * parameterStr = tmp[0];
-					char * value = tmp[1];
-					enum ParamEnum pe = getParamEnumFromString(parameterStr);
-					if (pe == PARAM_ENUM_ERROR) {
-						// error
-						err = ERROR_WRONG_PARAMETER_GIVEN;
-						printCustomError(err, 2, globalAppName, parameterStr);
+		char c;
+		int option_index = 0;
+		static struct option long_options[] = {
+				{ "model", 1, 0, 0 },
+				{ "matrixSize", 1, 0, 0 },
+				{ "nbIter", 1, 0, 0 },
+				{ "maxPrecision", 1, 0, 0 },
+				{ "roundingMode", 1, 0, 0},
+				{ "matrixType", 1, 0, 0 },
+				{ "mo", 1, 0, 0 },
+				{ "ms", 1, 0, 0 },
+				{ "ni", 1, 0, 0 },
+				{ "mp", 1, 0, 0 },
+				{ "rm", 1, 0, 0},
+				{ "mt", 1, 0, 0 },
+				{ "help", 2, 0, 'h' },
+				{ 0, 0, 0, 0 } };
+
+		while ((c = getopt_long(argc, argv, "+h", long_options, &option_index)) != -1) {
+
+			switch (c) {
+			case 0:
+				// long option
+				if (isHelp(long_options[option_index].name)) {
+					if(optarg) {
+						printNeededHelp(optarg);
 					} else {
-						struct Param * param = getParamFromParamEnum(pe);
-						int hasAssigned = assignValueToParam(param, value);
-						if (hasAssigned == -1) {
-							// wrong value
-							err = ERROR_WRONG_VALUE_GIVEN;
-							printCustomError(err, 3, globalAppName, param->name, value);
-						} else {
-							// value assigned : everything's fine
-							printf("\n\t`%s`=`%s`.",
-									param->name, value);
-							param->isDefault = 0;
-						}
+						printHelp();
 					}
-
-					free(tmp);
+					return 1;
+				} else {
+					if (optarg) {
+						err = setParam(long_options[option_index].name, optarg);
+						if (err == EXIT_FAILURE) {
+							// error
+							return err;
+						}
+					} else {
+						fprintf(stderr, "Please give a value after the option %s.\n",
+								long_options[option_index].name);
+						return EXIT_FAILURE;
+					}
 				}
-
-				++i;
+				break;
+			case 'h':
+				if (optarg) {
+					printNeededHelp(optarg);
+				} else {
+					printHelp();
+				}
+				return 1;
+			case '?':
+				printHelp();
+				if(optarg) {
+					printNeededHelp(optarg);
+				}
+				break;
+			default:
+				fprintf(stderr, "Unknow option %c.\n", c);
+				return EXIT_FAILURE;
+				break;
 			}
+			option_index = 0;
 		}
-		free(firstArgTmp);
 	} else {
 		// no argument given
 		// default values will be used
 		err = 0;
 	}
 
+	// arguments without options :
+    if (optind < argc) {
+    	fprintf(stderr,"Error : too many arguments given. ");
+        while (optind < argc) {
+            fprintf(stderr, "`%s` ", argv[optind++]);
+        }
+    	fprintf(stderr," are unrecognized.\n");
+    	printHelp();
+    	err = EXIT_FAILURE;
+    }
+
 	return err;
 }
 
-int assignValueToParam(struct Param * param, char * strValue) {
-	int err = 0;
+int setParam(const char * paramName, const char * paramValue) {
+	int err = EXIT_SUCCESS;
+
+	err = assignValueToParam(getParamFromParamEnum(getParamEnumFromString(paramName)),
+			paramValue);
+
+	return err;
+}
+
+int assignValueToParam(struct Param * param, const char * strValue) {
+	int err = EXIT_SUCCESS;
 	int res;
 	double dou;
 	long int li;
@@ -206,7 +229,7 @@ int assignValueToParam(struct Param * param, char * strValue) {
 			param->currentValue.mte = EXPONENTIAL;
 		} else if (strcmp(valueUp, "HILBERT") == 0) {
 			param->currentValue.mte = HILBERT;
-		} else if (strcmp(valueUp,"RANDOM")==0) {
+		} else if (strcmp(valueUp, "RANDOM") == 0) {
 			param->currentValue.mte = RANDOM;
 		} else {
 			// error
@@ -214,7 +237,7 @@ int assignValueToParam(struct Param * param, char * strValue) {
 		}
 		break;
 	case SIZE_T:
-		res = sscanf(strValue,"%zu",&s);
+		res = sscanf(strValue, "%zu", &s);
 		if (res == EOF) {
 			// error
 			err = -1;
@@ -232,22 +255,27 @@ int assignValueToParam(struct Param * param, char * strValue) {
 		}
 		break;
 	case ROUNDINGMODEENUM:
-		err = stringToRoundingModeEnum(valueUp,strlen(valueUp)+1);
-		if ( err != -1 ) {
-			param->currentValue.rme = err;
+		res = stringToRoundingModeEnum(valueUp, strlen(valueUp) + 1);
+		if (res != -1) {
+			param->currentValue.rme = res;
+		} else {
+			err = res;
 		}
 		break;
 	default:
 		//erreur
-		err = -1;
+		err = EXIT_FAILURE;
 		break;
+	}
+	if (err == EXIT_SUCCESS) {
+		param->isDefault = 0;
 	}
 	free(valueUp);
 	return err;
 }
 
 /* MAPPERS */
-enum ParamEnum getParamEnumFromString(char * paramName) {
+enum ParamEnum getParamEnumFromString(const char * paramName) {
 	enum ParamEnum res = PARAM_ENUM_ERROR;
 	char * paramNameUpper = toUpperCase(paramName, strlen(paramName) + 1);
 	enum ParamEnum pe = param_min;
@@ -346,7 +374,7 @@ struct Param * getParamFromParamEnum(enum ParamEnum pe) {
 }
 
 char * getStringFromMatrixTypeEnum(const enum matrixTypeEnum mte) {
-	char * res = malloc(sizeof(char)*strlen("EXPONENTIAL"));
+	char * res = malloc(sizeof(char) * strlen("EXPONENTIAL"));
 	switch (mte) {
 	case HILBERT:
 		strcpy(res, "HILBERT");
@@ -364,8 +392,8 @@ char * getStringFromMatrixTypeEnum(const enum matrixTypeEnum mte) {
 }
 
 char * getStringFromRoundingModeEnum(const enum roundingModeEnum rme) {
-	char * res = malloc(sizeof(char)*strlen("STOCHASTIC"));
-	switch(rme) {
+	char * res = malloc(sizeof(char) * strlen("STOCHASTIC"));
+	switch (rme) {
 	case RNDN:
 		strcpy(res, "RNDN");
 		break;
@@ -391,31 +419,31 @@ char * getStringFromRoundingModeEnum(const enum roundingModeEnum rme) {
 }
 
 char * getParamValueString(const struct Param * param) {
-	char * value = malloc(sizeof(char)*20);
+	char * value = malloc(sizeof(char) * 20);
 	char * tmpStr;
-	switch(param->typ_defaultValue) {
+	switch (param->typ_defaultValue) {
 	case DOUBLE:
-		sprintf(value,"%f",param->currentValue.d);
+		sprintf(value, "%f", param->currentValue.d);
 		break;
 	case MATRIXTYPEENUM:
 		tmpStr = getStringFromMatrixTypeEnum(param->currentValue.mte);
-		strcpy(value,tmpStr);
-		if(value == NULL) {
+		strcpy(value, tmpStr);
+		if (value == NULL) {
 			printErrorMessage("Unknow matrix type.");
 			return NULL;
 		}
 		free(tmpStr);
 		break;
 	case LONGINT:
-		sprintf(value,"%ld",param->currentValue.li);
+		sprintf(value, "%ld", param->currentValue.li);
 		break;
 	case SIZE_T:
-		sprintf(value,"%zu",param->currentValue.s);
+		sprintf(value, "%zu", param->currentValue.s);
 		break;
 	case ROUNDINGMODEENUM:
 		tmpStr = getStringFromRoundingModeEnum(param->currentValue.rme);
-		strcpy(value,tmpStr);
-		if(value == NULL) {
+		strcpy(value, tmpStr);
+		if (value == NULL) {
 			printErrorMessage("Unknow rounding mode.");
 			return NULL;
 		}
@@ -465,7 +493,7 @@ void printParametersShort() {
 	printf("\nParameters list : ");
 	for (int p = param_min ; p <= param_max ; ++p) {
 		struct Param param = *getParamFromParamEnum(p);
-		printf("\n\t`%s`(`%s`)", param.name, param.shortName);
+		printf("\n\t`--%s`(`--%s`)", param.name, param.shortName);
 	}
 	printf("\n");
 }

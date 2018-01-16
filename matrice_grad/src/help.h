@@ -11,8 +11,11 @@
 #include "parameters.h"
 
 // HELP
+int isHelp(const char * option);
 
 void printHelp();
+
+int printNeededHelp(const char * helpForParam);
 
 void printParamHelp(enum ParamEnum param);
 

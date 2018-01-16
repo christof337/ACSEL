@@ -73,11 +73,13 @@ int initParams(char * appName);
 
 int handleParams(int argc, char *argv[]);
 
-int assignValueToParam(struct Param * param, char * strValue);
+int setParam(const char * paramName, const char * paramValue);
+
+int assignValueToParam(struct Param * param, const char * strValue);
 
 struct Param * getParamFromParamEnum(enum ParamEnum pe);
 
-enum ParamEnum getParamEnumFromString(char * paramName);
+enum ParamEnum getParamEnumFromString(const char * paramName);
 
 void paramAdressInit();
 

@@ -19,7 +19,7 @@
 
 #define PARALLEL 0
 
-#define LORENTZ 1
+#define LORENTZ 0
 
 #if defined (Linux)
 #  include <unistd.h>
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
 			printErrorMessage("Error while initializing application parameters.\n");
 			state = -1;
 		} else {
-			printf("\nHandling parameters...");
+			printf("\nHandling parameters...\n");
 			fflush(stdout);
 			state = handleParams(argc, argv);
 			if (state != 0 && state != 1) {
