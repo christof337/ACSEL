@@ -20,4 +20,7 @@ void printProgressBarLine(const int nbThreads) ;
 
 void strreplace(char string[], char search[], char replace[]);
 
+void cfree(void * ptr);
+
 #endif /* UTILS_H */
+

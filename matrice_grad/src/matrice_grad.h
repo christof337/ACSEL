@@ -26,7 +26,9 @@ int conjuguateGradientDescent(const mpfr_prec_t precision, const size_t matrixSi
 		const int nbGradientIterations, const enum matrixTypeEnum matrixType,
 		const enum roundingModeEnum roundingModeEnum/*,mpfr_t *metaGkgk2save[nbGradientIterations]*/);
 
-int askTailleMatrice();
+int llorenzAttractor(const mpfr_prec_t precision, const long int nbIterations,
+		const enum roundingModeEnum rme, const char * sigmaStr, const char * roStr,
+		const char * betaStr);
 
 int customMatrixMultVector(mpfr_t * result, const size_t size, mpfr_t matrix[size][size],
 		mpfr_t * vector, const enum roundingModeEnum rme);
@@ -40,5 +42,8 @@ int writeDataInFile(mpfr_t * x, mpfr_t * solgc, const size_t size, mpfr_prec_t p
 int writeGkgk2_global(const size_t nbPrecisionsTreated, const size_t nbIterations);
 
 void printFinalErrorStatement();
+
+/* DEPRECATED */
+int askTailleMatrice();
 
 #endif /* MATRICE_GRAD_H */

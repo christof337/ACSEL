@@ -19,6 +19,8 @@
 
 #define PARALLEL 0
 
+#define LORENTZ 1
+
 #if defined (Linux)
 #  include <unistd.h>
 #  define psleep(sec) sleep ((sec))
@@ -31,6 +33,16 @@
 // long run : src/main ms=3000 ni=100 rm=STOCHASTIC
 
 int main(int argc, char *argv[]) {
+	if ( LORENTZ) {
+		/*
+		 int llorenzAttractor(const mpfr_prec_t precision, const long int nbIterations,
+		 const enum roundingModeEnum rme, const char * sigmaStr, const char * roStr,
+		 const char * betaStr) {*/
+		//		llorenzAttractor(128, 100000L, RNDN, "9", "26", "2.6");
+		llorenzAttractor(128, 100000L, RNDN, NULL, NULL, NULL);
+
+		return 0;
+	}
 	NB_STOCH_ROUND = 0;
 	int state = EXIT_SUCCESS;
 	if (DEBUG == 3) {

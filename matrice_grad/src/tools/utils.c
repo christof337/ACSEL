@@ -102,6 +102,22 @@ void setRandomValue(mpfr_t * val) {
 	mpfr_urandomb(*val, randState);
 }
 
+// TEST setRandomValue :
+/*
+ * 	StartTimer();
+	mpfr_t val;
+	m_init2(val,mpfr_get_default_prec());
+	for(int i = 0 ; i < 100 ; ++i ) {
+		setRandomValue(val);
+		mpfr_printf("[%d] - %RF\n",i,val);
+	}
+	clearRandState();
+	double runtime = GetTimer();
+
+	printf(" \n\nTotal time ellapsed: %f s\n", runtime / 1000);
+	return 0;
+ */
+
 void clearRandState() {
 	if (isRandstateInitialized) {
 		gmp_randclear(randState);
@@ -135,4 +151,10 @@ void strreplace(char string[], char search[], char replace[]){
         strcpy(string, buffer);
         p++;
     }
+}
+
+void cfree(void * ptr) {
+	if(ptr) {
+		free(ptr);
+	}
 }

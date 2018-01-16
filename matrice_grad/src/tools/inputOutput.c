@@ -204,7 +204,6 @@ int readFromFormattedOutputFile(const char* fileName, long int precisionMaxTreat
 		size_t len = 0;
 		ssize_t read;
 		char** splittedLine = NULL;
-		char precisionString[10];
 		long int it;
 		mpfr_t secondColumn;
 		for (long int precision = MPFR_PREC_MIN ; precision <= precisionMaxTreated ; ++precision) {
@@ -223,9 +222,6 @@ int readFromFormattedOutputFile(const char* fileName, long int precisionMaxTreat
 					assert(splittedLine[2]!=NULL && "Wrong file format");
 					long int thirdColumn;
 					sscanf(splittedLine[2], "%ld", &thirdColumn);
-					//							sprintf(precisionString, "%ld", precision);
-					//							if (splittedLine[2] == NULL
-					//									|| strcmp(splittedLine[2], precisionString) != 0) {
 					if (thirdColumn != precision) {
 						fprintf(stderr,
 								"\nError while reading line %s (for precision %ld).\nThe input file does not have a correct format.\nCheck that the precision is the third column and that a line has been jumped between each precision block.",
@@ -252,21 +248,92 @@ int readFromFormattedOutputFile(const char* fileName, long int precisionMaxTreat
 							int tmp = mpfr_set_str(secondColumn, splittedLine[1], 10 /* base 10 */,
 									MPFR_RNDN);
 							assert(tmp == 0 /* mpfr_set_str fail*/);
-							mpfr_set((*arrayToFill)[prec][it], secondColumn,
-									MPFR_RNDN);
+							mpfr_set((*arrayToFill)[prec][it], secondColumn, MPFR_RNDN);
 							m_clear(secondColumn);
-						}
-					}
-				}
+						} // endif firstColumn = it
+					} // endif third column != precision
+				} // endif splitted line == NULL
 				free(splittedLine);
 				++it;
+				// going to the next iteration
 			}
 			// going to the next precision
 		}
 		fclose(file);
-		if (line) {
-			free(line);
+		cfree(line);
+	}
+	return errnum;
+}
+
+/**
+ * Read from a given formatted simple output file and put the read lines in arrayToFill.
+ * @param fileName
+ * @param precisionMaxTreated
+ * @param nbIterations
+ * @param arrayToFill
+ * @return
+ */
+int readFromSimpleFormattedOutputFile(const char* fileName, const long int precisionMaxTreated,
+		const long int nbIterations, mpfr_t (*arrayToFill)[precisionMaxTreated]) {
+	// reading from file...
+	// find the output file
+	FILE* file;
+	int errnum = EXIT_SUCCESS;
+	// try to open the file in read mode
+	file = fopen(fileName, "r");
+	errnum = errno;
+	if (file == NULL) {
+		// error while opening the file
+		fprintf(stderr, "Error while opening the file %s : %s", fileName, strerror(errnum));
+		errnum = EXIT_FAILURE;
+	} else {
+		// successfully opened the file
+		char* line = NULL;
+		size_t len = 0;
+		ssize_t read;
+		char** splittedLine = NULL;
+		mpfr_t secondColumn;
+		mpfr_prec_t precision = MPFR_PREC_MIN;
+		// reading all the lines for this precision until meeting an empty line
+		// header line
+		getline(&line, &len, file);
+		while ((read = getline(&line, &len, file)) != -1 && strcmp(line, "\n") != 0) {
+			// non empty line
+			splittedLine = str_split(line, '\t');
+			if (splittedLine == NULL) {
+				// impossible to split : error?
+				fprintf(stderr, "\nImpossible to split the line %s [%ld].\n", line, precision);
+				/* Split fail */
+				assert(0 /* Split fail */);
+				errnum = EXIT_FAILURE;
+			} else {
+				assert(splittedLine[0]!=NULL && "Wrong file format");
+				float firstColumn;
+				sscanf(splittedLine[0], "%f", &firstColumn);
+				if ((long)firstColumn != precision) {
+					fprintf(stderr,
+							"\nError while reading line %s (for precision %ld).\nThe input file does not have a correct format.\nCheck that the precision is the third column and that a line has been jumped between each precision block.",
+							line, precision);
+					assert(0 /* Read fail */);
+					errnum = EXIT_FAILURE;
+				} else {
+					// all seem nice, we are actually at the line corresponding to the precision `precision`
+					m_init2(secondColumn, precision);
+					size_t index = precision - MPFR_PREC_MIN;
+					m_init2((*arrayToFill)[index], precision);
+					int tmp = mpfr_set_str(secondColumn, splittedLine[1], 10 /* base 10 */,
+							MPFR_RNDN);
+					assert(tmp == 0 /* mpfr_set_str fail*/);
+					mpfr_set((*arrayToFill)[index], secondColumn, MPFR_RNDN);
+					m_clear(secondColumn);
+				}
+			}
+			cfree(splittedLine);
+			++precision;
+			// going to the next precision
 		}
+		fclose(file);
+		cfree(line);
 	}
 	return errnum;
 }

@@ -250,18 +250,197 @@ int conjuguateGradientDescent(const mpfr_prec_t precision, const size_t matrixSi
 	return res;
 }
 
-/**
- * @brief      Ask for the matrix size up until a positive value is input
- * @deprecated
- * @return     The input int value
- */
-int askTailleMatrice() {
-	int tailleMatrice = 0;
-	do {
-		printf("\nTaille Matrice ?\n");
-		tailleMatrice = askForInt();
-	} while (tailleMatrice <= 0);
-	return tailleMatrice;
+int llorenzAttractor(const mpfr_prec_t precision, const long int nbIterations,
+		const enum roundingModeEnum rme, const char * sigmaStr, const char * roStr,
+		const char * betaStr) {
+	int err = EXIT_SUCCESS;
+	/*
+	 * FORTRAN CODE :
+	 */
+	// declarations
+	mpfr_t x0, y0, z0;
+	mpfr_t x1, y1, z1;
+	mpfr_t xm1, ym1, zm1;
+	mpfr_t xtt, ytt, ztt;
+	mpfr_t xnu, tmpVal, tmpVal2, dt, one;
+	mpfr_t sigma, ro, beta;
+	mpfr_t alp;
+
+	const int irkMax = 4;
+
+	const size_t arraySize = nbIterations + 1;
+	mpfr_t (*x1Array)[arraySize], (*y1Array)[arraySize], (*z1Array)[arraySize];
+
+	// allocations
+	mpfr_inits2(precision, x0, y0, z0, (mpfr_ptr) NULL);
+	mpfr_inits2(precision, x1, y1, z1, (mpfr_ptr) NULL);
+	mpfr_inits2(precision, xm1, ym1, zm1, (mpfr_ptr) NULL);
+	mpfr_inits2(precision, xtt, ytt, ztt, (mpfr_ptr) NULL);
+	mpfr_inits2(precision, tmpVal, tmpVal2, xnu, dt, one, (mpfr_ptr) NULL);
+	mpfr_inits2(precision, sigma, ro, beta, (mpfr_ptr) NULL);
+	mpfr_inits2(precision, alp, (mpfr_ptr) NULL);
+
+	_createArray(arraySize, &x1Array, precision);
+	_createArray(arraySize, &y1Array, precision);
+	_createArray(arraySize, &z1Array, precision);
+
+	// initializations
+	mpfr_set_str(x0, "-10", 10, MPFR_RNDN);
+	mpfr_set_str(y0, "20", 10, MPFR_RNDN);
+	mpfr_set_str(z0, "-5", 10, MPFR_RNDN);
+	mpfr_set(x1, x0, MPFR_RNDN);
+	mpfr_set(y1, y0, MPFR_RNDN);
+	mpfr_set(z1, z0, MPFR_RNDN);
+	mpfr_set(xm1, x0, MPFR_RNDN);
+	mpfr_set(ym1, y0, MPFR_RNDN);
+	mpfr_set(zm1, z0, MPFR_RNDN);
+	mpfr_set_str(xnu, "2e-4", 10, MPFR_RNDN);
+	mpfr_set_str(dt, "1e-3", 10, MPFR_RNDN);
+	mpfr_set_str(one, "1", 10, MPFR_RNDN);
+	if (sigmaStr != NULL) {
+		err = mpfr_set_str(sigma, sigmaStr, 10, MPFR_RNDN);
+		if (err != 0) {
+			fprintf(stderr, "Error while parsing sigma. %s is not a valid number.\n", sigmaStr);
+		}
+	} else {
+		mpfr_set_str(sigma, "10", 10, MPFR_RNDN);
+	}
+	if (roStr != NULL) {
+		err = mpfr_set_str(ro, roStr, 10, MPFR_RNDN);
+		if (err != 0) {
+			fprintf(stderr, "Error while parsing ro. %s is not a valid number.\n", roStr);
+		}
+	} else {
+		mpfr_set_str(ro, "28", 10, MPFR_RNDN);
+	}
+	if (betaStr != NULL) {
+		err = mpfr_set_str(beta, betaStr, 10, MPFR_RNDN);
+		if (err != 0) {
+			fprintf(stderr, "Error while parsing beta. %s is not a valid number.\n", betaStr);
+		}
+	} else {
+		mpfr_set_str(beta, "2.6667", 10, MPFR_RNDN);
+	}
+
+	// writing x1, y1 and z1 to a file "lorentz.dat"
+	assert(nbIterations > 0);
+	mpfr_set((*x1Array)[0], x1, MPFR_RNDN);
+	mpfr_set((*y1Array)[0], y1, MPFR_RNDN);
+	mpfr_set((*z1Array)[0], z1, MPFR_RNDN);
+
+	// COMPUTATIONS
+	// 10000 iterations (minimum)
+	for (long int kt = 1L ; kt <= nbIterations ; ++kt) {
+		for (int irk = 1L ; irk <= irkMax ; ++irk) {
+			// alp = 1/(irkmax+1-irk)
+			mpfr_add_si(tmpVal, one, irkMax, MPFR_RNDN);
+			mpfr_sub_si(tmpVal, tmpVal, irk, MPFR_RNDN);
+			m_div(alp, one, tmpVal, rme);
+
+			// tmpVal = dt**2*xnu
+			mpfr_pow_si(tmpVal, dt, 2L, MPFR_RNDN);
+
+			//      xtt=(x1-2*x0+xm1)/dt**2*xnu
+			m_mul_si(tmpVal2, x0, 2L, rme);
+			m_sub(tmpVal2, x1, tmpVal2, rme);
+			m_add(tmpVal2, tmpVal2, xm1, rme);
+			m_div(xtt, tmpVal2, tmpVal, rme);
+			m_mul(xtt, xtt, xnu, rme);
+			//      ytt=(y1-2*y0+ym1)/dt**2*xnu
+			m_mul_si(tmpVal2, y0, 2L, rme);
+			m_sub(tmpVal2, y1, tmpVal2, rme);
+			m_add(tmpVal2, tmpVal2, ym1, rme);
+			m_div(ytt, tmpVal2, tmpVal, rme);
+			m_mul(ytt, ytt, xnu, rme);
+			//      ztt=(z1-2*z0+zm1)/dt**2*xnu
+			m_mul_si(tmpVal2, z0, 2L, rme);
+			m_sub(tmpVal2, z1, tmpVal2, rme);
+			m_add(tmpVal2, tmpVal2, zm1, rme);
+			m_div(ztt, tmpVal2, tmpVal, rme);
+			m_mul(ztt, ztt, xnu, rme);
+
+			//      x1=x0+dt*alp*(sigma*(y1-x1)+xtt)
+			m_sub(tmpVal, y1, x1, rme);
+			m_mul(tmpVal, sigma, tmpVal, rme);
+			m_add(tmpVal, tmpVal, xtt, rme);
+			m_mul(tmpVal, tmpVal, alp, rme);
+			m_mul(tmpVal, tmpVal, dt, rme);
+			m_add(x1, x0, tmpVal, rme);
+
+			//      y1=y0+dt*alp*(ro*x1-y1-x1*z1+ytt)
+			m_mul(tmpVal, ro, x1, rme);
+			m_sub(tmpVal, tmpVal, y1, rme);
+			m_mul(tmpVal2, x1, z1, rme);
+			m_sub(tmpVal, tmpVal, tmpVal2, rme);
+			m_add(tmpVal, tmpVal, ytt, rme);
+			m_mul(tmpVal, alp, tmpVal, rme);
+			m_mul(tmpVal, dt, tmpVal, rme);
+			m_add(y1, y0, tmpVal, rme);
+
+			//      z1=z0+dt*alp*(x1*y1-beta*z1+ztt)
+			m_mul(tmpVal, x1, y1, rme);
+			m_mul(tmpVal2, beta, z1, rme);
+			m_sub(tmpVal, tmpVal, tmpVal2, rme);
+			m_add(tmpVal, tmpVal, ztt, rme);
+			m_mul(tmpVal, alp, tmpVal, rme);
+			m_mul(tmpVal, dt, tmpVal, rme);
+			m_add(z1, z0, tmpVal, rme);
+		}
+		mpfr_set(xm1, x0, MPFR_RNDN);
+		mpfr_set(ym1, y0, MPFR_RNDN);
+		mpfr_set(zm1, z0, MPFR_RNDN);
+		mpfr_set(x0, x1, MPFR_RNDN);
+		mpfr_set(y0, y1, MPFR_RNDN);
+		mpfr_set(z0, z1, MPFR_RNDN);
+		// write x1,y1 and z1
+		mpfr_set((*x1Array)[kt], x1, MPFR_RNDN);
+		mpfr_set((*y1Array)[kt], y1, MPFR_RNDN);
+		mpfr_set((*z1Array)[kt], z1, MPFR_RNDN);
+	}
+
+	for (size_t i = 0 ; i < arraySize ; ++i) {
+		mpfr_printf("%30.8RF\t%30.8RF\t%30.8RF\n", (*x1Array)[i], (*y1Array)[i], (*z1Array)[i]);
+	}
+//
+//    open(1,file='lorentz.dat',status='unknown')
+//      write(1,*) x1,y1,z1
+//    do kt=1,10000
+//     do irk=1,irkmax
+//      alp=1./(irkmax+1-irk)
+//
+//      xtt=(x1-2*x0+xm1)/dt**2*xnu
+//      ytt=(y1-2*y0+ym1)/dt**2*xnu
+//      ztt=(z1-2*z0+zm1)/dt**2*xnu
+//
+//      x1=x0+dt*alp*(sigma*(y1-x1)+xtt)
+//      y1=y0+dt*alp*(ro*x1-y1-x1*z1+ytt)
+//      z1=z0+dt*alp*(x1*y1-beta*z1+ztt)
+//     enddo
+//      xm1=x0
+//      ym1=y0
+//      zm1=z0
+//      x0=x1
+//      y0=y1
+//      z0=z1
+//      write(1,*) x1,y1,z1
+//    enddo
+//    close(1)
+//
+//    stop
+//    end
+	mpfr_clears(x0, y0, z0, (mpfr_ptr) NULL);
+	mpfr_clears(x1, y1, z1, (mpfr_ptr) NULL);
+	mpfr_clears(xm1, ym1, zm1, (mpfr_ptr) NULL);
+	mpfr_clears(xtt, ytt, ztt, (mpfr_ptr) NULL);
+	mpfr_clears(tmpVal, tmpVal2, xnu, dt, one, (mpfr_ptr) NULL);
+	mpfr_clears(sigma, ro, beta, (mpfr_ptr) NULL);
+	mpfr_clears(alp, (mpfr_ptr) NULL);
+
+	freeArray(*x1Array, arraySize);
+	freeArray(*y1Array, arraySize);
+	freeArray(*z1Array, arraySize);
+
+	return 0;
 }
 
 /**
@@ -391,5 +570,21 @@ int writeGkgk2_global(const size_t nbPrecisionsTreated, const size_t nbIteration
  */
 void printFinalErrorStatement() {
 	fprintf(stderr, "\nUne erreur est survenue.\nFin du programme...\n");
+}
+
+/* DEPRECATED */
+
+/**
+ * @brief      Ask for the matrix size up until a positive value is input
+ * @deprecated
+ * @return     The input int value
+ */
+int askTailleMatrice() {
+	int tailleMatrice = 0;
+	do {
+		printf("\nTaille Matrice ?\n");
+		tailleMatrice = askForInt();
+	} while (tailleMatrice <= 0);
+	return tailleMatrice;
 }
 

@@ -22,4 +22,7 @@ char * buildSuffix();
 int readFromFormattedOutputFile(const char* fileName, long int precisionMaxTreated,
 		long int nbIterations, mpfr_t (*arrayToFill)[precisionMaxTreated][nbIterations]);
 
+int readFromSimpleFormattedOutputFile(const char* fileName, const long int precisionMaxTreated,
+		const long int nbIterations, mpfr_t (*arrayToFill)[precisionMaxTreated]);
+
 #endif /* INPUT_OUTPUT_H */
