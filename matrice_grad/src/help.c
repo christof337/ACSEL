@@ -44,7 +44,7 @@ void printHelp() {
 	printLine();
 	printf("\tHELP");
 	printf(
-			"\n\t - Please use `%s [--<parameter>=<value>] [--<parameterShortName>=<value>] [...]` to run the program. ",
+			"\n\t - Please use `%s [--<parameter>=<value>] [--<parameterShortName>=<value>] [--parallel] [...]` to run the program. ",
 			globalAppName);
 	printf("If a parameter is omitted, the default value will be used.");
 	printf("\n\t - Type `%s --help` to print this message", globalAppName);
@@ -111,6 +111,10 @@ void printParamHelp(enum ParamEnum param) {
 	case BETA:
 		// TODO BETA param help caption
 		printf("Help hasn't been implemented for beta yet.");
+		break;
+	case PARALLEL:
+		// TODO PARALLEL param help caption
+		printf("Help hasn't been implementend for parallel yet.");
 		break;
 	case PARAM_ENUM_ERROR:
 		//error

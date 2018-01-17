@@ -251,8 +251,8 @@ int conjuguateGradientDescent(const mpfr_prec_t precision, const size_t matrixSi
 }
 
 int llorenzAttractor(const mpfr_prec_t precision, const long int nbIterations,
-		const enum roundingModeEnum rme, const char * sigmaStr, const char * roStr,
-		const char * betaStr) {
+		const enum roundingModeEnum rme, double sigmaD, double roD,
+		double betaD) {
 	int err = EXIT_SUCCESS;
 	/*
 	 * FORTRAN CODE :
@@ -297,30 +297,10 @@ int llorenzAttractor(const mpfr_prec_t precision, const long int nbIterations,
 	mpfr_set_str(xnu, "2e-4", 10, MPFR_RNDN);
 	mpfr_set_str(dt, "1e-3", 10, MPFR_RNDN);
 	mpfr_set_str(one, "1", 10, MPFR_RNDN);
-	if (sigmaStr != NULL) {
-		err = mpfr_set_str(sigma, sigmaStr, 10, MPFR_RNDN);
-		if (err != 0) {
-			fprintf(stderr, "Error while parsing sigma. %s is not a valid number.\n", sigmaStr);
-		}
-	} else {
-		mpfr_set_str(sigma, "10", 10, MPFR_RNDN);
-	}
-	if (roStr != NULL) {
-		err = mpfr_set_str(ro, roStr, 10, MPFR_RNDN);
-		if (err != 0) {
-			fprintf(stderr, "Error while parsing ro. %s is not a valid number.\n", roStr);
-		}
-	} else {
-		mpfr_set_str(ro, "28", 10, MPFR_RNDN);
-	}
-	if (betaStr != NULL) {
-		err = mpfr_set_str(beta, betaStr, 10, MPFR_RNDN);
-		if (err != 0) {
-			fprintf(stderr, "Error while parsing beta. %s is not a valid number.\n", betaStr);
-		}
-	} else {
-		mpfr_set_str(beta, "2.6667", 10, MPFR_RNDN);
-	}
+
+	mpfr_set_d(sigma, sigmaD, MPFR_RNDN);
+	mpfr_set_d(ro, roD, MPFR_RNDN);
+	mpfr_set_d(beta, betaD, MPFR_RNDN);
 
 	// writing x1, y1 and z1 to a file "lorentz.dat"
 	assert(nbIterations > 0);
@@ -397,6 +377,7 @@ int llorenzAttractor(const mpfr_prec_t precision, const long int nbIterations,
 		mpfr_set((*y1Array)[kt], y1, MPFR_RNDN);
 		mpfr_set((*z1Array)[kt], z1, MPFR_RNDN);
 	}
+
 
 	for (size_t i = 0 ; i < arraySize ; ++i) {
 		mpfr_printf("%30.8RF\t%30.8RF\t%30.8RF\n", (*x1Array)[i], (*y1Array)[i], (*z1Array)[i]);

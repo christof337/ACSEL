@@ -27,8 +27,8 @@ int conjuguateGradientDescent(const mpfr_prec_t precision, const size_t matrixSi
 		const enum roundingModeEnum roundingModeEnum/*,mpfr_t *metaGkgk2save[nbGradientIterations]*/);
 
 int llorenzAttractor(const mpfr_prec_t precision, const long int nbIterations,
-		const enum roundingModeEnum rme, const char * sigmaStr, const char * roStr,
-		const char * betaStr);
+		const enum roundingModeEnum rme, double sigmaStr, double roStr,
+		double betaStr);
 
 int customMatrixMultVector(mpfr_t * result, const size_t size, mpfr_t matrix[size][size],
 		mpfr_t * vector, const enum roundingModeEnum rme);

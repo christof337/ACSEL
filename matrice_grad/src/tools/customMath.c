@@ -488,3 +488,25 @@ void m_print_wm(const mpfr_t valueToPrint, const char * msg) {
 		m_print(valueToPrint);
 	}
 }
+
+/**
+ * Simple test of the stochastic rounding.
+ */
+void quickTestStochasticRounding() {
+	// test
+	mpfr_t number;
+	mpfr_prec_t numberPrecision = 8;
+	double value = 1.234375;
+	//		double desiredValue1 = 1.234;
+	//		double desiredValue2 = 1.235;
+	mpfr_prec_t desiredPrecision = 5;
+	m_init2(number, numberPrecision);
+	//m_init2(*test,numberPrecision);
+	mpfr_set_d(number, value, MPFR_RNDN);
+	printf("\nAffichage du nombre avant opération :\n\t");
+	m_print(number);
+	stochasticRounding(&number, desiredPrecision);
+	printf("\nAffichage du nombre APRES opération : \n\t");
+	m_print(number);
+	m_clear(number);
+}

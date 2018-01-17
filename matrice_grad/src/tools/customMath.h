@@ -17,8 +17,6 @@ enum roundingModeEnum {
 	RNDA  // round away from zero.
 };
 
-long int NB_STOCH_ROUND;
-
 int m_mul(mpfr_t product, const mpfr_t factor1, const mpfr_t factor2, const enum roundingModeEnum roundingMode);
 
 int m_mul_si(mpfr_t product, const mpfr_t factor1, long int factor2, const enum roundingModeEnum roundingMode);
@@ -61,5 +59,7 @@ mpfr_rnd_t roundingModeEnumToMpfrRndT(enum roundingModeEnum e);
 void m_print(const mpfr_t v);
 
 void m_print_wm(const mpfr_t v, const char * msg);
+
+void quickTestStochasticRounding();
 
 #endif // CUSTOM_MATH_H

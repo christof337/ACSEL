@@ -76,7 +76,8 @@ enum ParamEnum {
 	SIGMA,
 	RO,
 	BETA,
-	param_max = BETA,
+	PARALLEL,
+	param_max = PARALLEL,
 	PARAM_ENUM_ERROR
 };
 
@@ -90,16 +91,16 @@ int assignValueToParam(struct Param * param, const char * strValue);
 
 struct Param * getParamFromParamEnum(enum ParamEnum pe);
 
-enum ParamEnum getParamEnumFromString(const char * paramName);
+char * getStringFromModelEnum(const enum modelEnum me);
+char * getStringFromMatrixTypeEnum(const enum matrixTypeEnum mte);
+char * getStringFromRoundingModeEnum(const enum roundingModeEnum rme);
 
-void paramAdressInit();
+enum ParamEnum getParamEnumFromString(const char * paramName);
 
 char * getParamValueString(const struct Param * param);
 
 // ROUNDING MODE
 enum roundingModeEnum stringToRoundingModeEnum(char * string, const size_t size);
-
-// mpfr_rnd_t m_getRoundingMode();
 
 // DISPLAY
 void printParam(struct Param param);
@@ -111,5 +112,12 @@ void printParametersShort();
 void printParamEnum(enum ParamEnum pe);
 
 void printDefaultValue(enum type dvtype, union defaultValueUnion dv);
+
+// RANDOM
+int isParallel(const char * option);
+
+void paramAdressInit();
+
+long int getDefaultNbIterValue();
 
 #endif /* PARAMETERS_H */

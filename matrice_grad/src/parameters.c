@@ -25,11 +25,11 @@
 #define DEFAULT_RO 28
 #define DEFAULT_BETA 2.6667
 
-struct Param *P_MODEL, *P_MATRIX_SIZE, *P_NB_ITER, *P_MAX_PREC, *P_ROUNDING_MODE, *P_MATRIX_TYPE, *P_SIGMA, *P_RO, *P_BETA, *P_ERROR;
+#define DEFAULT_LORENZ_NB_ITER 100000L
 
-struct Param _p_m, _p_m_s, _p_n_i, _p_m_p, _p_r_m, _p_m_t, _p_s, _p_r, _p_b, _p_e;
+#define DEFAULT_PARALLEL 0
 
-/* TODO : tout remplacer par `getopt` */
+struct Param *P_MODEL, *P_MATRIX_SIZE, *P_NB_ITER, *P_MAX_PREC, *P_ROUNDING_MODE, *P_MATRIX_TYPE, *P_SIGMA, *P_RO, *P_BETA, *P_PARALLEL, *P_ERROR;
 
 /**
  * @brief      Init the parameters
@@ -67,7 +67,7 @@ int initParams(char * appName) {
 	strcpy(P_NB_ITER->shortName, "ni");
 	P_NB_ITER->typ_defaultValue = LONGINT;
 	P_NB_ITER->defaultValue.li = DEFAULT_NB_ITER;
-	strcpy(P_NB_ITER->description, "Define the number of iterations made to minimize the matrix.");
+	strcpy(P_NB_ITER->description, "Define the number of iterations made to minimize the matrix or to run lorenz attractor.");
 	P_NB_ITER->error = 0;
 	P_NB_ITER->isDefault = 1;
 	P_NB_ITER->currentValue.li = DEFAULT_NB_ITER;
@@ -135,6 +135,16 @@ int initParams(char * appName) {
 	P_BETA->isDefault = 1;
 	P_BETA->currentValue.d = DEFAULT_BETA;
 
+	// PARALLEL run
+	strcpy(P_PARALLEL->name,"parallel");
+	strcpy(P_PARALLEL->shortName,"pa");
+	P_PARALLEL->typ_defaultValue = LONGINT;
+	P_PARALLEL->defaultValue.li = DEFAULT_PARALLEL;
+	strcpy(P_PARALLEL->description,"Define wether the program should parallelize its runs or not.");
+	P_PARALLEL->error = 0;
+	P_PARALLEL->isDefault = 1;
+	P_PARALLEL->currentValue.li = DEFAULT_PARALLEL;
+
 	// ERROR
 	strcpy(P_ERROR->name, "Error");
 	P_ERROR->error = -1;
@@ -164,12 +174,14 @@ int handleParams(int argc, char *argv[]) {
 				{ "maxPrecision", required_argument, 0, 0 },
 				{ "roundingMode", required_argument, 0, 0},
 				{ "matrixType", required_argument, 0, 0 },
+				{ "parallel",no_argument,0,0 },
 				{ "mo", required_argument, 0, 0 },
 				{ "ms", required_argument, 0, 0 },
 				{ "ni", required_argument, 0, 0 },
 				{ "mp", required_argument, 0, 0 },
 				{ "rm", required_argument, 0, 0},
 				{ "mt", required_argument, 0, 0 },
+				{ "pa", no_argument, 0, 0},
 				{ "help", optional_argument, 0, 0 },
 				{ 0, 0, 0, 0 } };
 
@@ -179,12 +191,16 @@ int handleParams(int argc, char *argv[]) {
 			case 0:
 				// long option
 				if (isHelp(long_options[option_index].name)) {
+					// the user asked for help
 					if(optarg) {
 						printNeededHelp(optarg);
 					} else {
 						printHelp();
 					}
 					return 1;
+				} else if (isParallel(long_options[option_index].name)) {
+					// the option is parallel
+					setParam(long_options[option_index].name,"1");
 				} else {
 					if (optarg) {
 						err = setParam(long_options[option_index].name, optarg);
@@ -258,6 +274,16 @@ int assignValueToParam(struct Param * param, const char * strValue) {
 	size_t s;
 	char * valueUp = toUpperCase(strValue, strlen(strValue) + 1);
 	switch (param->typ_defaultValue) {
+	case MODELENUM:
+		if(strcmp(valueUp,"CGD") == 0 ) {
+			param->currentValue.me = CGD;
+		} else if (strcmp(valueUp,"LORENZ") == 0 ) {
+			param->currentValue.me = LORENZ;
+		} else {
+			// error
+			err = -1;
+		}
+		break;
 	case DOUBLE:
 		res = sscanf(strValue, "%lf", &dou);
 		if (res == EOF) {
@@ -419,6 +445,9 @@ struct Param * getParamFromParamEnum(enum ParamEnum pe) {
 	case BETA:
 		askedParam = P_BETA;
 		break;
+	case PARALLEL:
+		askedParam = P_PARALLEL;
+		break;
 	case PARAM_ENUM_ERROR:
 	default:
 		askedParam = P_ERROR;
@@ -473,6 +502,21 @@ char * getStringFromRoundingModeEnum(const enum roundingModeEnum rme) {
 	return res;
 }
 
+char * getStringFromModelEnum(const enum modelEnum me) {
+	char * res = malloc(sizeof(char) * strlen("LORENZ"));
+	switch (me) {
+	case CGD:
+		strcpy(res, "CGD");
+		break;
+	case LORENZ:
+		strcpy(res, "LORENZ");
+		break;
+	default:
+		res = NULL;
+	}
+	return res;
+}
+
 char * getParamValueString(const struct Param * param) {
 	char * value = malloc(sizeof(char) * 20);
 	char * tmpStr;
@@ -504,12 +548,24 @@ char * getParamValueString(const struct Param * param) {
 		}
 		free(tmpStr);
 		break;
+	case MODELENUM:
+		tmpStr = getStringFromModelEnum(param->currentValue.me);
+		strcpy(value,tmpStr);
+		if(value == NULL) {
+			printErrorMessage("Unknow model.");
+			return NULL;
+		}
+		free(tmpStr);
+		break;
 	default:
 		printErrorMessage("Unknow param type.");
 		return NULL;
 	}
 	return value;
 }
+
+/* Not for use */
+struct Param _p_m, _p_m_s, _p_n_i, _p_m_p, _p_r_m, _p_m_t, _p_s, _p_r, _p_b, _p_p, _p_e;
 
 /**
  * @brief      schhht
@@ -524,6 +580,7 @@ void paramAdressInit() {
 	P_SIGMA = &_p_s;
 	P_RO = &_p_r;
 	P_BETA = &_p_b;
+	P_PARALLEL = &_p_p;
 	P_ERROR = &_p_e;
 }
 
@@ -604,9 +661,47 @@ void printDefaultValue(enum type dvtype, union defaultValueUnion dv) {
 			break;
 		}
 		break;
+	case MODELENUM:
+		switch(dv.me) {
+		case CGD:
+			printf("Conjuguate gradient descent");
+			break;
+		case LORENZ:
+			printf("Lorenz Attractor");
+			break;
+		default:
+			printErrorMessage("\nDefault model not yet implemented (!?).");
+			break;
+		}
+		break;
 	default:
 		printErrorMessage("\nUnknow param default value type.");
 		break;
 	}
 	printf("`");
+}
+
+/**
+ * Return 1 is option is `parallel`, 0 if not
+ * @param option the option to test
+ * @return 1 if `parallel`, 0 if not
+ */
+int isParallel(const char * option) {
+	int isParallel = 0;
+
+	char * optionUpper = toUpperCase(option,strlen(option)+1);
+	char * parallelUpper = toUpperCase(P_PARALLEL->name,strlen(P_PARALLEL->name)+1);
+	char * shortParallelUpper = toUpperCase(P_PARALLEL->shortName,strlen(P_PARALLEL->shortName)+1);
+
+	if ( strcmp(optionUpper, parallelUpper) == 0 || strcmp(optionUpper, shortParallelUpper) == 0) {
+		isParallel = 1;
+	}
+	free(optionUpper);
+	free(parallelUpper);
+	free(shortParallelUpper);
+	return isParallel;
+}
+
+long int getDefaultNbIterValue() {
+	return DEFAULT_LORENZ_NB_ITER;
 }
