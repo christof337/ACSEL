@@ -10,16 +10,27 @@
 
 #include "customMath.h"
 
+/**
+ * @brief      List the different parameters used by this program.
+ * param_min and param_max are used to loop through the enum
+ */
 enum parameterOrderEnum {
-	param_min = 0,
+	param_min,
 	VALUE_TREATED = param_min,
 	MATRIX_SIZE,
-	NB_ITER,
-	MAX_PREC,
-	ROUNDING_MODE, // add params before this comment
 	MATRIX_TYPE,
-	param_max = MATRIX_TYPE,
-	PARAM_ENUM_ERROR
+	MAX_PREC,
+	NB_ITER,
+	ROUNDING_MODE, // add params before this comment
+	SIGMA,
+	RO,
+	BETA,
+	param_max = BETA,
+	PARAM_ENUM_ERROR,
+	param_min_cgd = MATRIX_SIZE,
+	param_max_cgd = ROUNDING_MODE,
+	param_min_lorenz = MAX_PREC,
+	param_max_lorenz = BETA
 };
 
 enum matrixTypeEnum {
@@ -38,12 +49,15 @@ enum matrixTypeEnum {
 //};
 
 enum valueTreatedEnum {
-	GKGK2
+	vte_GKGK2,
+	vte_SIMPLE_GKGK2,
+	vte_LORENZ
 };
 
 int extractParamsFromFileName(const char * fileName, enum valueTreatedEnum * valueTreated,
 		long int * matrixSize, long int * numberOfIterations, long int * precisionMaxTreated,
-		enum roundingModeEnum * roundingMode, enum matrixTypeEnum * matrixType);
+		enum roundingModeEnum * roundingMode, enum matrixTypeEnum * matrixType, double * sigma,
+		double * ro, double * beta);
 
 void parametersPrint(enum roundingModeEnum roundingMode, enum matrixTypeEnum matrixType,
 		enum valueTreatedEnum valueTreated, long int matrixSize, long int numberOfIterations,
@@ -51,6 +65,9 @@ void parametersPrint(enum roundingModeEnum roundingMode, enum matrixTypeEnum mat
 
 int fillProgressivePrecisionArrayFromFile(const char * fileName, const size_t m, const size_t n,
 		mpfr_t (**arrayToFill)[m][n], const mpfr_prec_t precisionMax);
+
+int fillProgressivePrecisionArrayFromSimpleFile(const char * fileName, const size_t n,
+		mpfr_t (**arrayToFill)[n]);
 
 int getLastElements(size_t m, mpfr_t (**lastElements)[m], size_t n, mpfr_t (*array)[m][n]);
 
@@ -65,6 +82,11 @@ int writeDifferenceStochasticToRndnInFile(const size_t numberOfPrecisionTreated,
 		const mpfr_t (*stochasticArray)[numberOfPrecisionTreated][numberOfIterations],
 		const mpfr_t (*RNDNArray)[numberOfPrecisionTreated][numberOfIterations],
 		const char * stochasticFileName, const mpfr_prec_t precisionMax);
+
+int writeDifferenceStochasticToSimpleRndnInFile(const size_t numberOfPrecisionTreated,
+		const mpfr_t (*stochasticArray)[numberOfPrecisionTreated],
+		const mpfr_t (*RNDNArray)[numberOfPrecisionTreated], const char * stochasticFileName,
+		const mpfr_prec_t precisionMax);
 
 char * getStringFromRoundingModeEnum(const enum roundingModeEnum rme);
 
