@@ -9,6 +9,8 @@
 #include "tools/errorHandling.h"
 #include "tools/timer.h"
 #include "tools/utils.h"
+#include "tools/matrixUtils.h"
+#include "tools/arrayUtils.h"
 #include "matrice_grad.h"
 #include "parameters.h"
 #include "log.h"
@@ -70,25 +72,24 @@ int main(int argc, char *argv[]) {
 					printf("\nAppuyez sur une touche pour lancer le programme...");
 					getchar();
 
-					initLogFiles();
-
+					initLogFiles(MODEL_SELECTED);
 
 					printf("\nDébut boucle principale itérant sur les précisions\n");
 
-					//				mpfr_t * metaGkgk2save[NB_GRAD];
-					pthread_t threads[RANGE_PRECISION - PRECISION_MIN];
-					int threadState;
-					int nbThreads = 0;
+					initGkgk2_global(RANGE_PRECISION - PRECISION_MIN + 1, NB_GRAD);
 
-					initGkgk2_global(RANGE_PRECISION - PRECISION_MIN + 1, NB_ITER);
+					if (IS_PARALLEL) {
+						//				mpfr_t * metaGkgk2save[NB_GRAD];
+						pthread_t threads[RANGE_PRECISION - PRECISION_MIN];
+						int threadState;
+						int nbThreads = 0;
 
-					if ( IS_PARALLEL) {
 						// parallelize
 						printf("\nLancement des threads");
 						printProgressBarLine(RANGE_PRECISION - PRECISION_MIN);
 						printf("|");
 
-						// DEBUT BOUCLE ( entièrement parralélisée )
+						// DEBUT BOUCLE ( entièrement parallélisée )
 						//#pragma acc parallel loop
 						for (long int pre = PRECISION_MIN ; pre <= RANGE_PRECISION ; ++pre) {
 							// CONJUGUATE GRADIENT DESCENT METHOD
@@ -132,7 +133,7 @@ int main(int argc, char *argv[]) {
 
 					// when everything's good, writing gkgk2_global to a file
 					printf("Writing gkgk2 to a file...\n");
-					writeGkgk2_global(RANGE_PRECISION - MPFR_PREC_MIN, NB_GRAD);
+					writeGkgk2_global(RANGE_PRECISION - MPFR_PREC_MIN, NB_GRAD, MODEL_SELECTED);
 
 					int closeSuccess;
 					closeSuccess = closeLogFiles(); // shouldn't work now but doesn't matter
@@ -141,7 +142,6 @@ int main(int argc, char *argv[]) {
 					}
 					//				state += closeSuccess;
 
-
 					printf("\nParameters reminder:");
 					printf("\n\tNombre d'itérations : %d", NB_GRAD);
 					printf("\n\tTaille de la matrice : %zu", M_SIZE);
@@ -149,25 +149,76 @@ int main(int argc, char *argv[]) {
 							RANGE_PRECISION);
 					printf("\nFin programme.");
 					fflush(stdout);
-				} else if ( MODEL_SELECTED == LORENZ) {
+				} else if (MODEL_SELECTED == LORENZ) {
 					/* LORENZ ATTRACTOR */
-					const double V_SIGMA = getParamFromParamEnum(SIGMA)->currentValue.d;
-					const double V_RO = getParamFromParamEnum(RO)->currentValue.d;
-					const double V_BETA = getParamFromParamEnum(BETA)->currentValue.d;
 
-					long int NB_ITERATIONS; // nombre d'itérations de llorenz
+					long int NB_ITERATIONS; // nombre d'itérations de lorenz
 					if (getParamFromParamEnum(NB_ITER)->isDefault) {
-						NB_ITERATIONS = getDefaultNbIterValue();
-					} else {
-						NB_ITERATIONS = getParamFromParamEnum(NB_ITER)->currentValue.li;
+						getParamFromParamEnum(NB_ITER)->currentValue.li = getDefaultNbIterValue();
 					}
+					NB_ITERATIONS = getParamFromParamEnum(NB_ITER)->currentValue.li;
 
-					if ( IS_PARALLEL ) {
+					if (IS_PARALLEL) {
 						// parallelize runs
+						pthread_t threads[RANGE_PRECISION - PRECISION_MIN];
+						int threadState;
+						int nbThreads = 0;
+
+						// parallelize
+						printf("\nLancement des threads");
+						printProgressBarLine(RANGE_PRECISION - PRECISION_MIN);
+						printf("|");
+
+						// DEBUT BOUCLE ( entièrement parallélisée )
+						//#pragma acc parallel loop
+						for (long int pre = PRECISION_MIN ; pre <= RANGE_PRECISION ; ++pre) {
+							// CONJUGUATE GRADIENT DESCENT METHOD
+							threadState = pthread_create(&threads[nbThreads], NULL,
+									customLorenzAttractorThreadWrapper, &pre);
+							if (threadState) {
+								fprintf(stderr, "\n[%ld]Thread error : %s", pre,
+										strerror(threadState));
+								exit(EXIT_FAILURE);
+							} else {
+								printf(".");
+								fflush(stdout);
+								nbThreads++;
+							}
+						}
+						printf("|\n");
+						// fin boucle principale (pre)
+						printf("\nRécupération des threads...");
+						printProgressBarLine(nbThreads);
+						printf("|");
+						fflush(stdout);
+						for (int i = 0 ; i < nbThreads ; i++) {
+							// in order to wait for everyone to finish
+							pthread_join(threads[i], NULL);
+							printf(".");
+							fflush(stdout);
+						}
+						printf("|\n");
+						fflush(stdout);
 					} else {
+						const double V_SIGMA = getParamFromParamEnum(SIGMA)->currentValue.d;
+						const double V_RO = getParamFromParamEnum(RO)->currentValue.d;
+						const double V_BETA = getParamFromParamEnum(BETA)->currentValue.d;
 						// not parallelized
-						for ( long int pre = PRECISION_MIN ; pre <= RANGE_PRECISION ; ++pre ) {
-							llorenzAttractor(pre,NB_ITERATIONS,RME,V_SIGMA,V_RO,V_BETA);
+						for (long int pre = PRECISION_MIN ; pre <= RANGE_PRECISION ; ++pre) {
+							printf("Lorenz [%ld] :\n", pre);
+
+							state = lorenzAttractor(pre, NB_ITERATIONS, RME, V_SIGMA, V_RO, V_BETA);
+
+							if (state == EXIT_FAILURE) {
+								// error
+								fprintf(stderr,
+										"Error while handling Lorenz Attractor for precision `%ld`.\n",
+										pre);
+								return state;
+							}
+//
+//							const mpfr_t * xyzLorenz[3] = { *xLorenz, *yLorenz, *zLorenz };
+//							writeLorenzMatrixInFile(NB_ITERATIONS, xyzLorenz, MODEL_SELECTED);
 						}
 					}
 				}
@@ -175,6 +226,7 @@ int main(int argc, char *argv[]) {
 				printf(" \n\nTotal time ellapsed: %f s\n", runtime / 1000);
 			}
 
+			freeParams();
 		}
 
 		if (state == 0) {

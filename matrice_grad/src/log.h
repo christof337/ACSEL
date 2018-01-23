@@ -4,6 +4,8 @@
 
 #include <stdio.h>
 
+#include "parameters.h"
+
 /*
  * log.h
  *
@@ -11,13 +13,13 @@
  *      Author: root
  */
 
-char * buildPrefixFromParams();
+char * buildPrefixFromParams(const enum modelEnum me);
 
-char * buildLogPrefixFromParams();
+char * buildLogPrefixFromParams(const enum modelEnum me);
 
 char * buildLogSuffix();
 
-int initLogFiles();
+int initLogFiles(const enum modelEnum me);
 
 int closeLogFiles();
 

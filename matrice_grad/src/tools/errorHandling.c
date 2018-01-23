@@ -73,7 +73,7 @@ void printCustomError(enum ERRORS err, int nbParams, ...) {
 	}
 	fprintf(stderr, "\n");
 
-	free(params);
+	cfree(params);
 	/* clean memory reserved for valist */
 	va_end(valist);
 }

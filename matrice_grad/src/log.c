@@ -27,37 +27,52 @@
 
 FILE ** logFiles = NULL;
 
-char * buildLogPrefixFromParams() {
-	char * logFileNamePrefix = buildPrefixFromParams();
+char * buildLogPrefixFromParams(const enum modelEnum me) {
+	char * logFileNamePrefix = buildPrefixFromParams(me);
 	if (logFileNamePrefix != NULL) {
-		char * tmp = malloc(sizeof(char)*100);
+		char * tmp = malloc(sizeof(char) * 100);
 		sprintf(tmp, "%s/%s%s", LOG_FOLDER, LOG_PREFIX, logFileNamePrefix);
-		strcpy(logFileNamePrefix,tmp);
-		free(tmp);
+		strcpy(logFileNamePrefix, tmp);
+		cfree(tmp);
 	} else {
 		printErrorMessage("Error while building log file prefix.");
 	}
 	return logFileNamePrefix;
 }
 
-char * buildPrefixFromParams() {
+char * buildPrefixFromParams(const enum modelEnum me) {
 	char * fileNamePrefix;
 
-	fileNamePrefix = malloc(sizeof(char)*100);
-	strcpy(fileNamePrefix,"");
-	if(fileNamePrefix != NULL) {
-		for (int p = param_min ; p <= param_max ; ++p) {
-			struct Param * param = getParamFromParamEnum(p);
+	fileNamePrefix = malloc(sizeof(char) * 100);
+	strcpy(fileNamePrefix, "");
+	if (fileNamePrefix != NULL) {
+		enum ParamEnum peMin, peMax;
+		switch (me) {
+		case CGD:
+			peMin = param_min_cgd;
+			peMax = param_max_cgd;
+			break;
+		case LORENZ:
+			peMin = param_min_lorenz;
+			peMax = param_max_lorenz;
+			break;
+		default:
+			printErrorMessage("Unknow model enum.");
+			return NULL;
+		}
+		while (peMin <= peMax) {
+			struct Param * param = getParamFromParamEnum(peMin);
 			sprintf(fileNamePrefix, "%s_%s=%s", fileNamePrefix, param->shortName,
 					getParamValueString(param));
+			++peMin;
 		}
 	}
 	return fileNamePrefix;
 }
 
 char * buildLogSuffix() {
-	char * suffix = malloc(sizeof(char)*strlen(LOG_SUFFIX));
-	strcpy(suffix,LOG_SUFFIX);
+	char * suffix = malloc(sizeof(char) * strlen(LOG_SUFFIX));
+	strcpy(suffix, LOG_SUFFIX);
 	return suffix;
 }
 
@@ -65,11 +80,11 @@ char * buildLogSuffix() {
  * Init log files from parameters value.
  * @return
  */
-int initLogFiles() {
+int initLogFiles(const enum modelEnum me) {
 	int res = 0;
 
 	// getting the number of files
-	long int nbPrec = getParamFromParamEnum(MAX_PREC)->currentValue.li - MPFR_PREC_MIN+1;
+	long int nbPrec = getParamFromParamEnum(MAX_PREC)->currentValue.li - MPFR_PREC_MIN + 1;
 
 	// getting the address of the log files array
 	if (allocateLogFilesArray(nbPrec) != 0) {
@@ -82,22 +97,22 @@ int initLogFiles() {
 		} else {
 			// building prefix and suffix
 			char * prefix;
-			prefix = buildLogPrefixFromParams();
+			prefix = buildLogPrefixFromParams(me);
 			char * suffix;
 			suffix = buildLogSuffix();
 
 			// opening all the logFiles
 			for (long int i = 0 ; i < nbPrec ; ++i) {
 				char * logFileName;
-				logFileName = getFileNameFromPrecision(prefix, suffix, i+MPFR_PREC_MIN);
+				logFileName = getFileNameFromPrecision(prefix, suffix, i + MPFR_PREC_MIN);
 				logFiles[i] = openLog(logFileName);
 				if (logFiles[i] == NULL) {
 					res = -1;
 				}
-				free(logFileName);
+				cfree(logFileName);
 			}
-			free(prefix);
-			free(suffix);
+			cfree(prefix);
+			cfree(suffix);
 		}
 	}
 
@@ -110,7 +125,7 @@ int closeLogFiles() {
 	long int nbPrec = getParamFromParamEnum(MAX_PREC)->currentValue.li - MPFR_PREC_MIN;
 
 	for (long int i = 0 ; i < nbPrec ; ++i) {
-		if ( logFiles[i] != NULL ) {
+		if (logFiles[i] != NULL) {
 			res += closeLog(logFiles[i]);
 		}
 	}
@@ -148,10 +163,10 @@ void m_log_err(const long int currentPrecision, const char * str) {
 	}
 	if ( DEBUG > 0) {
 		char logMsg[1000];
-		sprintf(logMsg,"(%ld)[ERROR] - %s",currentPrecision,str);
+		sprintf(logMsg, "(%ld)[ERROR] - %s", currentPrecision, str);
 		printErrorMessage(logMsg);
 		printf("\n4- log msg\n");
-		free(logMsg);
+		cfree(logMsg);
 	}
 }
 
@@ -167,10 +182,10 @@ int closeLog(FILE * fileToClose) {
 }
 
 int closeLogFromPrecision(long int precision) {
-	int res = closeLog(logFiles[precision-MPFR_PREC_MIN]);
-	if (res == 0 ) {
+	int res = closeLog(logFiles[precision - MPFR_PREC_MIN]);
+	if (res == 0) {
 		// success closing
-		logFiles[precision-MPFR_PREC_MIN] = NULL;
+		logFiles[precision - MPFR_PREC_MIN] = NULL;
 	}
 	return res;
 }

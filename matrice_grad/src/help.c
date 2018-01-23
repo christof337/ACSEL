@@ -32,8 +32,8 @@ int isHelp(const char * option) {
 	if ( strcmp(optionUpper, helpUpper) == 0) {
 		isHelp = 1;
 	}
-	free(optionUpper);
-	free(helpUpper);
+	cfree(optionUpper);
+	cfree(helpUpper);
 	return isHelp;
 }
 

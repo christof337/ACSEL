@@ -7,6 +7,8 @@
 
 void arr_alloc_2d(const size_t x, const size_t y, mpfr_t (**aptr)[x][y]);
 
+void _arr_alloc_2d(const size_t x, const size_t y, mpfr_t ***aptr);
+
 void arr_fill_2d(const size_t x, const size_t y, mpfr_t array[x][y], mpfr_prec_t precision);
 
 void createMatrix(const size_t m, const size_t n, mpfr_t (**a)[m][n], mpfr_prec_t precision);

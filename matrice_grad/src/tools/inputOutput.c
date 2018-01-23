@@ -85,7 +85,7 @@ int writeMatrix(const size_t n, const size_t m, mpfr_t matrix[m][n], const char 
  * @return     0 en cas de succès, la valeur de l'erreur sinon
  */
 int writeData(const size_t size, const char * fileName, const size_t n_array,
-		const char * labels[n_array], mpfr_t * data[n_array]) {
+		const char * labels[n_array], const mpfr_t * data[n_array]) {
 	FILE * pf;
 	int errnum;
 	pf = fopen(fileName, "a");
@@ -253,7 +253,7 @@ int readFromFormattedOutputFile(const char* fileName, long int precisionMaxTreat
 						} // endif firstColumn = it
 					} // endif third column != precision
 				} // endif splitted line == NULL
-				free(splittedLine);
+				cfree(splittedLine);
 				++it;
 				// going to the next iteration
 			}
@@ -310,7 +310,7 @@ int readFromSimpleFormattedOutputFile(const char* fileName, const long int preci
 				assert(splittedLine[0]!=NULL && "Wrong file format");
 				float firstColumn;
 				sscanf(splittedLine[0], "%f", &firstColumn);
-				if ((long)firstColumn != precision) {
+				if ((long) firstColumn != precision) {
 					fprintf(stderr,
 							"\nError while reading line %s (for precision %ld).\nThe input file does not have a correct format.\nCheck that the precision is the third column and that a line has been jumped between each precision block.",
 							line, precision);
@@ -336,4 +336,71 @@ int readFromSimpleFormattedOutputFile(const char* fileName, const long int preci
 		cfree(line);
 	}
 	return errnum;
+}
+
+/**
+ * Read exactly nColumns and nRows from the given file, and put it in matrix.
+ * @param[in] fileName The file to read the matrix from.
+ * @param[in] nColumns number of columns to read. The file must have at least this number of columns
+ * @param[in] nRows number of rows to read.
+ * @param[out] matrix The matrix to fill
+ * @param[in] precision
+ * @param[in] isHeader
+ * @return
+ */
+int readMatrixFromFile(const char * fileName, const size_t nColumns, const size_t nRows,
+		mpfr_t matrix[nColumns][nRows], const mpfr_prec_t precision, const int isHeader) {
+	int err = EXIT_SUCCESS;
+
+	FILE * file;
+
+	file = fopen(fileName, "r");
+	err = errno;
+	if (file == NULL) {
+		// error while opening the file
+		fprintf(stderr, "Error while opening the file `%s` : %s", fileName, strerror(err));
+		err = EXIT_FAILURE;
+	} else {
+		// successfully opened the file
+		char* line = NULL;
+		size_t len = 0;
+		ssize_t read;
+		char** splittedLine = NULL;
+		if (isHeader) {
+			// header line
+			getline(&line, &len, file);
+		}
+		while ((read = getline(&line, &len, file)) != -1) {
+			splittedLine = str_split(line, '\t');
+			if (splittedLine == NULL) {
+				// impossible to split : error?
+				fprintf(stderr, "\nImpossible to split the line %s [%ld].\n", line, precision);
+				/* Split fail */
+				assert(0 /* Split fail */);
+				err = EXIT_FAILURE;
+			} else {
+				for ( size_t i = 0 ; i < nColumns ; ++i ) {
+				assert(nColumns>0 && splittedLine[0]!=NULL && "Wrong file format");
+				float firstColumn;
+				sscanf(splittedLine[0], "%f", &firstColumn);
+					// all seem nice, we are actually at the line corresponding to the precision `precision`
+					m_init2(secondColumn, precision);
+					size_t index = precision - MPFR_PREC_MIN;
+					m_init2((*arrayToFill)[index], precision);
+					int tmp = mpfr_set_str(secondColumn, splittedLine[1], 10 /* base 10 */,
+							MPFR_RNDN);
+					assert(tmp == 0 /* mpfr_set_str fail*/);
+					mpfr_set((*arrayToFill)[index], secondColumn, MPFR_RNDN);
+					m_clear(secondColumn);
+				}
+			}
+			cfree(splittedLine);
+			++precision;
+			// going to the next precision
+		}
+		fclose(file);
+		cfree(line);
+	}
+
+	return err;
 }

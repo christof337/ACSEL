@@ -2,6 +2,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 #include "matrice_grad.h"
 
@@ -17,6 +18,7 @@
 #define DATA_FILE_NAME "output/solggc"
 #define GK_FILE_NAME "output/gkgk2"
 #define GK_LABEL "gkgk2"
+#define LORENZ_PREFIX "output/lorenz"
 
 #define MATRIX_EXTENSION ".dat"
 #define DATA_EXTENSION ".dat" 
@@ -27,7 +29,7 @@
 #define OUTPUT 0
 
 void initGkgk2_global(const size_t nbPrecisions, const size_t nbIterations) {
-	arr_alloc_2d(nbPrecisions, nbIterations, &gkgk2_global);
+	_arr_alloc_2d(nbPrecisions, nbIterations, &gkgk2_global);
 }
 
 void * customConjuguateGradientDescentThreadWrapper(void * precision) {
@@ -250,9 +252,23 @@ int conjuguateGradientDescent(const mpfr_prec_t precision, const size_t matrixSi
 	return res;
 }
 
-int llorenzAttractor(const mpfr_prec_t precision, const long int nbIterations,
-		const enum roundingModeEnum rme, double sigmaD, double roD,
-		double betaD) {
+void * customLorenzAttractorThreadWrapper(void * precision) {
+	const size_t M_SIZE = getParamFromParamEnum(MATRIX_SIZE)->currentValue.s;
+	const enum roundingModeEnum RME = getParamFromParamEnum(ROUNDING_MODE)->currentValue.rme;
+	const long int NB_ITERATIONS = getParamFromParamEnum(NB_ITER)->currentValue.li;
+
+	const double V_SIGMA = getParamFromParamEnum(SIGMA)->currentValue.d;
+	const double V_RO = getParamFromParamEnum(RO)->currentValue.d;
+	const double V_BETA = getParamFromParamEnum(BETA)->currentValue.d;
+
+	long int *prec = precision;
+	lorenzAttractor(*prec, NB_ITERATIONS, RME, V_SIGMA, V_RO, V_BETA);
+
+	return NULL;
+}
+
+int lorenzAttractor(const mpfr_prec_t precision, const long int nbIterations,
+		const enum roundingModeEnum rme, const double sigmaD, const double roD, const double betaD) {
 	int err = EXIT_SUCCESS;
 	/*
 	 * FORTRAN CODE :
@@ -378,37 +394,16 @@ int llorenzAttractor(const mpfr_prec_t precision, const long int nbIterations,
 		mpfr_set((*z1Array)[kt], z1, MPFR_RNDN);
 	}
 
-
 	for (size_t i = 0 ; i < arraySize ; ++i) {
-		mpfr_printf("%30.8RF\t%30.8RF\t%30.8RF\n", (*x1Array)[i], (*y1Array)[i], (*z1Array)[i]);
+//		mpfr_set((*xyz_global)[precision][0][i], (*x1Array)[i], MPFR_RNDN);
+//		mpfr_set((*xyz_global)[precision][1][i], (*y1Array)[i], MPFR_RNDN);
+//		mpfr_set((*xyz_global)[precision][2][i], (*z1Array)[i], MPFR_RNDN);
+//		mpfr_printf("%30.8RF\t%30.8RF\t%30.8RF\n", (*x1Array)[i], (*y1Array)[i], (*z1Array)[i]);
 	}
-//
-//    open(1,file='lorentz.dat',status='unknown')
-//      write(1,*) x1,y1,z1
-//    do kt=1,10000
-//     do irk=1,irkmax
-//      alp=1./(irkmax+1-irk)
-//
-//      xtt=(x1-2*x0+xm1)/dt**2*xnu
-//      ytt=(y1-2*y0+ym1)/dt**2*xnu
-//      ztt=(z1-2*z0+zm1)/dt**2*xnu
-//
-//      x1=x0+dt*alp*(sigma*(y1-x1)+xtt)
-//      y1=y0+dt*alp*(ro*x1-y1-x1*z1+ytt)
-//      z1=z0+dt*alp*(x1*y1-beta*z1+ztt)
-//     enddo
-//      xm1=x0
-//      ym1=y0
-//      zm1=z0
-//      x0=x1
-//      y0=y1
-//      z0=z1
-//      write(1,*) x1,y1,z1
-//    enddo
-//    close(1)
-//
-//    stop
-//    end
+
+	const mpfr_t * xyzLorenz[3] = { *x1Array, *y1Array, *z1Array };
+	writeLorenzMatrixInFile(arraySize, xyzLorenz, precision);
+
 	mpfr_clears(x0, y0, z0, (mpfr_ptr) NULL);
 	mpfr_clears(x1, y1, z1, (mpfr_ptr) NULL);
 	mpfr_clears(xm1, ym1, zm1, (mpfr_ptr) NULL);
@@ -484,7 +479,7 @@ int writeDataInFile(mpfr_t * x, mpfr_t * solgc, const size_t size, mpfr_prec_t p
 	createArray(&iArray, size, precision);
 	fillArrayLinearly(iArray, size);
 
-	mpfr_t * data[3] = { iArray, x, solgc };
+	const mpfr_t * data[3] = { iArray, x, solgc };
 
 	sprintf(fileName, "%s%ld%s", DATA_FILE_NAME, precision, DATA_EXTENSION);
 
@@ -497,6 +492,38 @@ int writeDataInFile(mpfr_t * x, mpfr_t * solgc, const size_t size, mpfr_prec_t p
 	freeArray(iArray, size);
 
 	return res;
+}
+
+int writeLorenzMatrixInFile(const size_t n, const mpfr_t * matrix[3], const mpfr_prec_t precision) {
+	int err = EXIT_SUCCESS;
+
+	const char * labels[3] = { "x", "y", "z" };
+
+	char * fileName = buildLorenzFileName(precision);
+
+	printf("\twriting matrix in file `%s` ...\n", fileName);
+
+	eraseFile(fileName);
+	writeData(n, fileName, 3, labels, matrix);
+
+	cfree(fileName);
+
+	return err;
+}
+
+char * buildLorenzFileName(const mpfr_prec_t precision) {
+	char * fileName = malloc(sizeof(char) * 200);
+
+	char tmp[10];
+	sprintf(tmp, "%li", precision);
+
+	strcpy(fileName, LORENZ_PREFIX);
+	strcat(fileName, "_prec=");
+	strcat(fileName, tmp);
+	strcat(fileName, buildPrefixFromParams(LORENZ));
+	strcat(fileName, DATA_EXTENSION);
+
+	return fileName;
 }
 
 /**
@@ -523,11 +550,12 @@ int writeDataInFile(mpfr_t * x, mpfr_t * solgc, const size_t size, mpfr_prec_t p
 //
 //	return writeArray(array, size, fileName, GK_LABEL);
 //}
-int writeGkgk2_global(const size_t nbPrecisionsTreated, const size_t nbIterations) {
+int writeGkgk2_global(const size_t nbPrecisionsTreated, const size_t nbIterations,
+		const enum modelEnum me) {
 	int res = 0;
 
 	char fileName[100];
-	char * prefix = buildPrefixFromParams();
+	char * prefix = buildPrefixFromParams(me);
 	char * suffix = buildSuffix();
 
 	sprintf(fileName, "%s%s%s", GK_FILE_NAME, prefix, suffix);
@@ -540,8 +568,8 @@ int writeGkgk2_global(const size_t nbPrecisionsTreated, const size_t nbIteration
 
 	//res = writeGkGlobalArrayInFile(nbPrecisionsTreated,nbIterations,gkgk2_global,fileName);
 
-	free(prefix);
-	free(suffix);
+	cfree(prefix);
+	cfree(suffix);
 
 	return res;
 }

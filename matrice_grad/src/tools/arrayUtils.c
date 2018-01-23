@@ -358,7 +358,7 @@ void freeArray(mpfr_t * array, const size_t size) {
 	for (size_t i = 0 ; i < size ; ++i) {
 		m_clear(array[i]);
 	}
-	free(array);
+	cfree(array);
 }
 
 size_t getMaxIndex(const size_t size, const mpfr_t array[size]) {

@@ -69,19 +69,25 @@ enum ParamEnum {
 	param_min,
 	MODEL = param_min,
 	MATRIX_SIZE,
-	NB_ITER,
-	MAX_PREC,
-	ROUNDING_MODE, // add params before this comment
 	MATRIX_TYPE,
+	MAX_PREC,
+	NB_ITER,
+	ROUNDING_MODE,
 	SIGMA,
 	RO,
 	BETA,
-	PARALLEL,
+	PARALLEL, // add params before this comment
 	param_max = PARALLEL,
-	PARAM_ENUM_ERROR
+	PARAM_ENUM_ERROR,
+	param_min_cgd = MATRIX_SIZE,
+	param_max_cgd = ROUNDING_MODE,
+	param_min_lorenz = MAX_PREC,
+	param_max_lorenz = BETA
 };
 
-int initParams(char * appName);
+int initParams();
+
+int freeParams();
 
 int handleParams(int argc, char *argv[]);
 
