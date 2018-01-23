@@ -370,6 +370,7 @@ int readMatrixFromFile(const char * fileName, const size_t nColumns, const size_
 			// header line
 			getline(&line, &len, file);
 		}
+		size_t row = 0;
 		while ((read = getline(&line, &len, file)) != -1) {
 			splittedLine = str_split(line, '\t');
 			if (splittedLine == NULL) {
@@ -379,23 +380,15 @@ int readMatrixFromFile(const char * fileName, const size_t nColumns, const size_
 				assert(0 /* Split fail */);
 				err = EXIT_FAILURE;
 			} else {
+				assert(nColumns>0 && splittedLine[0]!=NULL /*"Wrong file format"*/);
 				for ( size_t i = 0 ; i < nColumns ; ++i ) {
-				assert(nColumns>0 && splittedLine[0]!=NULL && "Wrong file format");
-				float firstColumn;
-				sscanf(splittedLine[0], "%f", &firstColumn);
-					// all seem nice, we are actually at the line corresponding to the precision `precision`
-					m_init2(secondColumn, precision);
-					size_t index = precision - MPFR_PREC_MIN;
-					m_init2((*arrayToFill)[index], precision);
-					int tmp = mpfr_set_str(secondColumn, splittedLine[1], 10 /* base 10 */,
-							MPFR_RNDN);
+					m_init2(matrix[row][i], precision);
+					int tmp = mpfr_set_str(matrix[row][i],splittedLine[i],10,MPFR_RNDN);
 					assert(tmp == 0 /* mpfr_set_str fail*/);
-					mpfr_set((*arrayToFill)[index], secondColumn, MPFR_RNDN);
-					m_clear(secondColumn);
 				}
 			}
 			cfree(splittedLine);
-			++precision;
+			++row;
 			// going to the next precision
 		}
 		fclose(file);

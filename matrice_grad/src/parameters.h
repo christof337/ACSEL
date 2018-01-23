@@ -122,8 +122,6 @@ void printDefaultValue(enum type dvtype, union defaultValueUnion dv);
 // RANDOM
 int isParallel(const char * option);
 
-void paramAdressInit();
-
 long int getDefaultNbIterValue();
 
 #endif /* PARAMETERS_H */

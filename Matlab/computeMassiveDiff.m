@@ -63,6 +63,9 @@ disp(StochasticDiff);
 disp(mean(RNDNDiff,'omitnan'));
 disp(mean(StochasticDiff,'omitnan'));
 
+dlmwrite('RNDN_dif_1.dat',RNDNDiff,'\t');
+dlmwrite('STOCHASTIC_dif_1.dat',StochasticDiff,'\t');
+
 clear fileNameFolder fileNamePrefix fileNameSuffix1 fileNameSuffix2 delimiterIn headerlinesIn i shouldContinue fileNameStochastic fileNameRNDN
 clear precisionStr fileIDRNDN fileIDStochastic A tmp1 tmp2 refArray referenceFileName RNDNArray RNDNStr StochasticArray StochasticStr tmp
 clear RNDNDiff StochasticDiff

@@ -24,6 +24,9 @@
 #  define psleep(sec) sleep ((sec))
 #endif
 
+// comment when you want a normal usage
+#define NB_STOCH_RUNS 1000
+
 // compilation : ../make
 // ce code est inspiré du programme "matrice_grad".
 // l'objectif est de faire varier la précision pour observer le comportement de réduction du gradient 
@@ -204,18 +207,28 @@ int main(int argc, char *argv[]) {
 						const double V_RO = getParamFromParamEnum(RO)->currentValue.d;
 						const double V_BETA = getParamFromParamEnum(BETA)->currentValue.d;
 						// not parallelized
-						for (long int pre = PRECISION_MIN ; pre <= RANGE_PRECISION ; ++pre) {
-							printf("Lorenz [%ld] :\n", pre);
+#ifdef NB_STOCH_RUNS
+						for (long int it = 0 ; it < NB_STOCH_RUNS ; ++it) {
+							printf("run %ld...\n", it);
+#endif
+							for (long int pre = PRECISION_MIN ; pre <= RANGE_PRECISION ; ++pre) {
+//							printf("Lorenz [%ld] :\n", pre);
 
-							state = lorenzAttractor(pre, NB_ITERATIONS, RME, V_SIGMA, V_RO, V_BETA);
+								state = lorenzAttractor(pre, NB_ITERATIONS, RME, V_SIGMA, V_RO,
+										V_BETA);
 
-							if (state == EXIT_FAILURE) {
-								// error
-								fprintf(stderr,
-										"Error while handling Lorenz Attractor for precision `%ld`.\n",
-										pre);
-								return state;
+								if (state == EXIT_FAILURE) {
+									// error
+									fprintf(stderr,
+											"Error while handling Lorenz Attractor for precision `%ld`.\n",
+											pre);
+									return state;
+								}
+
+#ifdef NB_STOCH_RUNS
+								changeLorenzFileName(pre, it);
 							}
+#endif
 //
 //							const mpfr_t * xyzLorenz[3] = { *xLorenz, *yLorenz, *zLorenz };
 //							writeLorenzMatrixInFile(NB_ITERATIONS, xyzLorenz, MODEL_SELECTED);

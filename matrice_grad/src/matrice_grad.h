@@ -50,6 +50,8 @@ int writeGkgk2_global(const size_t nbPrecisionsTreated, const size_t nbIteration
 
 void printFinalErrorStatement();
 
+int changeLorenzFileName(const mpfr_prec_t precision, const long int it);
+
 /* DEPRECATED */
 int askTailleMatrice();
 

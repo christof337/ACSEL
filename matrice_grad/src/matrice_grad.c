@@ -11,6 +11,7 @@
 #include "tools/arrayUtils.h"
 #include "tools/errorHandling.h"
 #include "tools/customMath.h"
+#include "tools/utils.h"
 #include "parameters.h"
 #include "log.h"
 
@@ -501,7 +502,7 @@ int writeLorenzMatrixInFile(const size_t n, const mpfr_t * matrix[3], const mpfr
 
 	char * fileName = buildLorenzFileName(precision);
 
-	printf("\twriting matrix in file `%s` ...\n", fileName);
+//	printf("\twriting matrix in file `%s` ...\n", fileName);
 
 	eraseFile(fileName);
 	writeData(n, fileName, 3, labels, matrix);
@@ -512,16 +513,24 @@ int writeLorenzMatrixInFile(const size_t n, const mpfr_t * matrix[3], const mpfr
 }
 
 char * buildLorenzFileName(const mpfr_prec_t precision) {
-	char * fileName = malloc(sizeof(char) * 200);
 
-	char tmp[10];
-	sprintf(tmp, "%li", precision);
+	char tmp[4];
+	sprintf(tmp, "%ld", precision);
+
+	char * prefix = buildPrefixFromParams(LORENZ);
+
+	char * fileName = malloc(
+			sizeof(char)
+					* (strlen(LORENZ_PREFIX) + strlen("_prec=") + strlen(tmp)
+							+ strlen(prefix) + strlen(DATA_EXTENSION)+1));
 
 	strcpy(fileName, LORENZ_PREFIX);
 	strcat(fileName, "_prec=");
 	strcat(fileName, tmp);
-	strcat(fileName, buildPrefixFromParams(LORENZ));
+	strcat(fileName, prefix);
 	strcat(fileName, DATA_EXTENSION);
+
+	cfree(prefix);
 
 	return fileName;
 }
@@ -595,5 +604,34 @@ int askTailleMatrice() {
 		tailleMatrice = askForInt();
 	} while (tailleMatrice <= 0);
 	return tailleMatrice;
+}
+
+int changeLorenzFileName(const mpfr_prec_t precision, const long int it) {
+	int err = 0;
+	char ext[] = ".dat";
+	char toAdd[7];
+	sprintf(toAdd, "(%ld)", it);
+	char * oldName = buildLorenzFileName(precision);
+	size_t namelen = strlen(oldName);
+	char * newName = malloc(sizeof(char) * (strlen(toAdd) + namelen + strlen(DATA_EXTENSION)+1));
+
+	strncpy(newName, oldName, namelen - strlen(ext));
+	newName[namelen-strlen(ext)]=0;
+	strcat(newName, toAdd);
+	strcat(newName, DATA_EXTENSION);
+//	strcat(newName, "\0");
+
+	err = rename(oldName, newName);
+	char * command = malloc(
+			(strlen("mv \"%s\" \"stochFiles/%s\"") + strlen(newName) * 2) * sizeof(char));
+	sprintf(command, "mv \"%s\" \"stochFiles/%s\"", newName, newName);
+	system(command);
+
+//	cfree(toAdd);
+	cfree(command);
+	cfree(oldName);
+	cfree(newName);
+
+	return err;
 }
 

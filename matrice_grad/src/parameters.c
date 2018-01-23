@@ -38,10 +38,9 @@ struct Param *P_MODEL, *P_MATRIX_SIZE, *P_NB_ITER, *P_MAX_PREC, *P_ROUNDING_MODE
  * @return     { description_of_the_return_value }
  */
 int initParams() {
-	paramAdressInit();
-
 	char tmp[200];
 	// MODEL
+	P_MODEL = malloc(sizeof(struct Param));
 	strcpy(P_MODEL->name, "model");
 	strcpy(P_MODEL->shortName, "mo");
 	P_MODEL->typ_defaultValue = MODELENUM;
@@ -52,6 +51,7 @@ int initParams() {
 	P_MODEL->currentValue.me = DEFAULT_MODEL;
 
 	// MATRIX_SIZE
+	P_MATRIX_SIZE = malloc(sizeof(struct Param));
 	strcpy(P_MATRIX_SIZE->name, "matrixSize");
 	strcpy(P_MATRIX_SIZE->shortName, "ms");
 	P_MATRIX_SIZE->typ_defaultValue = SIZE_T;
@@ -62,6 +62,7 @@ int initParams() {
 	P_MATRIX_SIZE->currentValue.s = DEFAULT_MATRIX_SIZE;
 
 	// NB_ITER
+	P_NB_ITER = malloc(sizeof(struct Param));
 	strcpy(P_NB_ITER->name, "nbIter");
 	strcpy(P_NB_ITER->shortName, "ni");
 	P_NB_ITER->typ_defaultValue = LONGINT;
@@ -73,6 +74,7 @@ int initParams() {
 	P_NB_ITER->currentValue.li = DEFAULT_NB_ITER;
 
 	// MAX_PREC
+	P_MAX_PREC = malloc(sizeof(struct Param));
 	strcpy(P_MAX_PREC->name, "maxPrecision");
 	strcpy(P_MAX_PREC->shortName, "mp");
 	P_MAX_PREC->typ_defaultValue = LONGINT;
@@ -84,6 +86,7 @@ int initParams() {
 	P_MAX_PREC->currentValue.li = DEFAULT_MAX_PREC;
 
 	// ROUNDING_MODE
+	P_ROUNDING_MODE = malloc(sizeof(struct Param));
 	strcpy(P_ROUNDING_MODE->name, "roundingMode");
 	strcpy(P_ROUNDING_MODE->shortName, "rm");
 	P_ROUNDING_MODE->typ_defaultValue = ROUNDINGMODEENUM;
@@ -95,6 +98,7 @@ int initParams() {
 	P_ROUNDING_MODE->currentValue.rme = DEFAULT_ROUNDING_MODE;
 
 	// MATRIX_TYPE
+	P_MATRIX_TYPE = malloc(sizeof(struct Param));
 	strcpy(P_MATRIX_TYPE->name, "matrixType");
 	strcpy(P_MATRIX_TYPE->shortName, "mt");
 	P_MATRIX_TYPE->typ_defaultValue = MATRIXTYPEENUM;
@@ -106,6 +110,7 @@ int initParams() {
 	P_MATRIX_TYPE->currentValue.mte = DEFAULT_MATRIX_TYPE;
 
 	// SIGMA
+	P_SIGMA = malloc(sizeof(struct Param));
 	strcpy(P_SIGMA->name, "sigma");
 	strcpy(P_SIGMA->shortName, "si");
 	P_SIGMA->typ_defaultValue = DOUBLE;
@@ -116,6 +121,7 @@ int initParams() {
 	P_SIGMA->currentValue.d = DEFAULT_SIGMA;
 
 	// RO
+	P_RO = malloc(sizeof(struct Param));
 	strcpy(P_RO->name, "ro");
 	strcpy(P_RO->shortName, "ro");
 	P_RO->typ_defaultValue = DOUBLE;
@@ -126,6 +132,7 @@ int initParams() {
 	P_RO->currentValue.d = DEFAULT_RO;
 
 	// BETA
+	P_BETA = malloc(sizeof(struct Param));
 	strcpy(P_BETA->name, "beta");
 	strcpy(P_BETA->shortName, "be");
 	P_BETA->typ_defaultValue = DOUBLE;
@@ -136,6 +143,7 @@ int initParams() {
 	P_BETA->currentValue.d = DEFAULT_BETA;
 
 	// PARALLEL run
+	P_PARALLEL = malloc(sizeof(struct Param));
 	strcpy(P_PARALLEL->name, "parallel");
 	strcpy(P_PARALLEL->shortName, "pa");
 	P_PARALLEL->typ_defaultValue = LONGINT;
@@ -147,6 +155,7 @@ int initParams() {
 	P_PARALLEL->currentValue.li = DEFAULT_PARALLEL;
 
 	// ERROR
+	P_ERROR = malloc(sizeof(struct Param));
 	strcpy(P_ERROR->name, "Error");
 	P_ERROR->error = -1;
 
@@ -158,7 +167,7 @@ int initParams() {
  * @return
  */
 int freeParams() {
-	for ( enum paramEnum pe = param_min ; pe < param_max ; ++pe ) {
+	for ( enum ParamEnum pe = param_min ; pe < param_max ; ++pe ) {
 		cfree(getParamFromParamEnum(pe));
 	}
 	return EXIT_SUCCESS;
@@ -564,26 +573,6 @@ char * getParamValueString(const struct Param * param) {
 		return NULL;
 	}
 	return value;
-}
-
-/* Not for use */
-struct Param _p_m, _p_m_s, _p_n_i, _p_m_p, _p_r_m, _p_m_t, _p_s, _p_r, _p_b, _p_p, _p_e;
-
-/**
- * @brief      schhht
- */
-void paramAdressInit() {
-	P_MODEL = &_p_m;
-	P_MATRIX_SIZE = &_p_m_s;
-	P_NB_ITER = &_p_n_i;
-	P_MAX_PREC = &_p_m_p;
-	P_ROUNDING_MODE = &_p_r_m;
-	P_MATRIX_TYPE = &_p_m_t;
-	P_SIGMA = &_p_s;
-	P_RO = &_p_r;
-	P_BETA = &_p_b;
-	P_PARALLEL = &_p_p;
-	P_ERROR = &_p_e;
 }
 
 // ---------------- PRINT ----------------
