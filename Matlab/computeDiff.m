@@ -11,19 +11,19 @@
 % plot([0,n],[m,m])
 % hold off
 % title('Mean of Random Uniform Data')
-difRNDN = 0;
-difStochastic = 0;
-refArray = table2array(lorentzRefpre200rmRNDN);
-RNDNArray = table2array(lorenzprec13mp200ni100000rmRNDNsi10);
-StochasticArray = table2array(lorenzprec13mp200ni100000rmSTOCHASTICsi10);
-nElements = size(refArray,1);
-nCol = size(refArray,2);
-for k = nElements
-    for l = 1:nCol
-        difStochastic = difStochastic + (refArray(k,l) - StochasticArray(k,l))^2;
-        difRNDN = difRNDN + (refArray(k,l) - RNDNArray(k,l))^2;
-    end
-end
 
-disp(difStochastic);
-disp(difRNDN);
+function res = computeDiff(refArray, testedArray) 
+	res = 0;
+	nElements = min(size(refArray.data,1),size(testedArray.data,1));
+	nCol = min(size(refArray.data,2),size(testedArray.data,2));
+	for k = 1:nElements
+	    for l = 1:nCol
+	        res = res + (refArray.data(k,l) - testedArray.data(k,l))^2;
+	    end
+    end
+
+    % disp(res);
+    
+    clear nElements nCol
+    
+end
