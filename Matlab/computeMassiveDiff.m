@@ -1,5 +1,5 @@
 
-fileNameFolder = 'output';
+fileNameFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/stochFiles/output';
 fileNamePrefix = 'lorenz_prec=';
 fileNameSuffix1 = '_mp=200_ni=100000_rm=';
 fileNameSuffix2 = '_si=10.000000_ro=28.000000_be=2.666700.dat';
