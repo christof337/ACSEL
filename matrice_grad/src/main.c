@@ -25,7 +25,7 @@
 #endif
 
 // comment when you want a normal usage
-#define NB_STOCH_RUNS 1000
+#define NB_STOCH_RUNS 200
 
 // compilation : ../make
 // ce code est inspiré du programme "matrice_grad".
@@ -162,53 +162,61 @@ int main(int argc, char *argv[]) {
 					NB_ITERATIONS = getParamFromParamEnum(NB_ITER)->currentValue.li;
 
 					if (IS_PARALLEL) {
-						// parallelize runs
-						pthread_t threads[RANGE_PRECISION - PRECISION_MIN];
-						int threadState;
-						int nbThreads = 0;
+#ifdef NB_STOCH_RUNS
+						for (long int it = 0 ; it < NB_STOCH_RUNS ; ++it) {
+							printf("run %ld...\n", it);
+#endif
+							// parallelize runs
+							pthread_t threads[RANGE_PRECISION - PRECISION_MIN];
+							int threadState;
+							int nbThreads = 0;
 
-						// parallelize
-						printf("\nLancement des threads");
-						printProgressBarLine(RANGE_PRECISION - PRECISION_MIN);
-						printf("|");
+							// parallelize
+//							printf("\nLancement des threads");
+//							printProgressBarLine(RANGE_PRECISION - PRECISION_MIN);
+//							printf("|");
 
-						// DEBUT BOUCLE ( entièrement parallélisée )
-						//#pragma acc parallel loop
-						for (long int pre = PRECISION_MIN ; pre <= RANGE_PRECISION ; ++pre) {
-							// CONJUGUATE GRADIENT DESCENT METHOD
-							threadState = pthread_create(&threads[nbThreads], NULL,
-									customLorenzAttractorThreadWrapper, &pre);
-							if (threadState) {
-								fprintf(stderr, "\n[%ld]Thread error : %s", pre,
-										strerror(threadState));
-								exit(EXIT_FAILURE);
-							} else {
-								printf(".");
-								fflush(stdout);
-								nbThreads++;
+							// DEBUT BOUCLE ( entièrement parallélisée )
+							//#pragma acc parallel loop
+							for (long int pre = PRECISION_MIN ; pre <= RANGE_PRECISION ; ++pre) {
+								// CONJUGUATE GRADIENT DESCENT METHOD
+								threadState = pthread_create(&threads[nbThreads], NULL,
+										customLorenzAttractorThreadWrapper, &pre);
+								if (threadState) {
+									fprintf(stderr, "\n[%ld]Thread error : %s", pre,
+											strerror(threadState));
+									exit(EXIT_FAILURE);
+								} else {
+//									printf(".");
+//									fflush(stdout);
+									nbThreads++;
+								}
 							}
+//							printf("|\n");
+							// fin boucle principale (pre)
+//							printf("\nRécupération des threads...");
+//							printProgressBarLine(nbThreads);
+//							printf("|");
+//							fflush(stdout);
+							for (int i = 0 ; i < nbThreads ; i++) {
+								// in order to wait for everyone to finish
+								pthread_join(threads[i], NULL);
+#ifdef NB_STOCH_RUNS
+								changeLorenzFileName(i + MPFR_PREC_MIN, it);
+							}
+#endif
+//								printf(".");
+//								fflush(stdout);
 						}
-						printf("|\n");
-						// fin boucle principale (pre)
-						printf("\nRécupération des threads...");
-						printProgressBarLine(nbThreads);
-						printf("|");
-						fflush(stdout);
-						for (int i = 0 ; i < nbThreads ; i++) {
-							// in order to wait for everyone to finish
-							pthread_join(threads[i], NULL);
-							printf(".");
-							fflush(stdout);
-						}
-						printf("|\n");
-						fflush(stdout);
+//							printf("|\n");
+//							fflush(stdout);
 					} else {
 						const double V_SIGMA = getParamFromParamEnum(SIGMA)->currentValue.d;
 						const double V_RO = getParamFromParamEnum(RO)->currentValue.d;
 						const double V_BETA = getParamFromParamEnum(BETA)->currentValue.d;
 						// not parallelized
 #ifdef NB_STOCH_RUNS
-						for (long int it = 0 ; it < NB_STOCH_RUNS ; ++it) {
+						for (long int it = 39 /* keep it runnin' */ ; it < NB_STOCH_RUNS ; ++it) {
 							printf("run %ld...\n", it);
 #endif
 							for (long int pre = PRECISION_MIN ; pre <= RANGE_PRECISION ; ++pre) {
@@ -228,10 +236,8 @@ int main(int argc, char *argv[]) {
 #ifdef NB_STOCH_RUNS
 								changeLorenzFileName(pre, it);
 							}
+							clearRandState();
 #endif
-//
-//							const mpfr_t * xyzLorenz[3] = { *xLorenz, *yLorenz, *zLorenz };
-//							writeLorenzMatrixInFile(NB_ITERATIONS, xyzLorenz, MODEL_SELECTED);
 						}
 					}
 				}

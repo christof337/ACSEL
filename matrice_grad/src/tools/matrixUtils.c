@@ -10,6 +10,7 @@
 #include <assert.h>
 
 #include "customMath.h"
+#include "utils.h"
 
 #define RM mpfr_get_default_rounding_mode()
 

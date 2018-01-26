@@ -121,6 +121,7 @@ void setRandomValue(mpfr_t * val) {
 void clearRandState() {
 	if (isRandstateInitialized) {
 		gmp_randclear(randState);
+		isRandstateInitialized = 0;
 	}
 }
 
