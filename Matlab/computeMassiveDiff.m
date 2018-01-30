@@ -39,11 +39,11 @@ while ( shouldContinue )
 		fclose(fileIDStochastic);
 		
 		RNDNArray = importdata(fileNameRNDN,delimiterIn,headerlinesIn);
-		tmp1 = [computeDiff(refArray,RNDNArray)];
+		tmp1 = [computeAbsoluteDiff(refArray,RNDNArray)];
 		RNDNDiff = [RNDNDiff;tmp1];
 
 		StochasticArray = importdata(fileNameStochastic,delimiterIn,headerlinesIn);
-		tmp2 = [computeDiff(refArray,StochasticArray)];
+		tmp2 = [computeAbsoluteDiff(refArray,StochasticArray)];
 		StochasticDiff = [StochasticDiff;tmp2];
         
 		disp(strcat('[',precisionStr,'] : RNDN       = ',num2str(tmp1)));
