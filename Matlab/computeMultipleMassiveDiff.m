@@ -1,4 +1,5 @@
 
+disp('début programme');
 
 stochasticFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/stochFiles/output';
 RNDNFolder = '/home/kito/Dev/Sources/ACSEL/Matlab/output';
@@ -12,14 +13,17 @@ StochasticStr = 'STOCHASTIC';
 delimiterIn = '\t';
 headerlinesIn = 1;
 
+INIT = 7;
+
 k = 2;
+% k = INIT; % override
 shouldContinue = 1;
 
 referenceFileName = 'lorenzRef_pre=200_rm=RNDN.dat';
 refArray = importdata(strcat(RNDNFolder,'/',referenceFileName),delimiterIn,headerlinesIn);
 
-RNDNDiff = [];
-StochasticDiff = [];
+RNDNDiff = zeros(200,2);
+StochasticDiff = zeros(200,2,200);
 
 while ( shouldContinue )
     precisionStr = int2str(k);
@@ -35,6 +39,7 @@ while ( shouldContinue )
         disp('End RNDN');
         disp(precisionStr);
     else
+        index = k-INIT+1;
         fclose(fileIDRNDN); % do not need it anymore
         
         % importing array
@@ -42,7 +47,8 @@ while ( shouldContinue )
         % computing the diff with the reference file
         tmp1 = [k computeRelativeDiff(refArray,RNDNArray)];
         % saving the result in RNDN Diff
-        RNDNDiff = [RNDNDiff;tmp1];
+        %RNDNDiff = [RNDNDiff;tmp1];
+        RNDNDiff(index,:) = tmp1;
         
         isStochFilesLeft = 1;
         l = 1;
@@ -61,6 +67,8 @@ while ( shouldContinue )
                 StochasticDiff(k-1,:,l) = tmp2;
                 
                 l = l + 1;
+                
+                %clear StochasticArray
             end
         end
         
@@ -81,8 +89,8 @@ end
 % disp(mean(RNDNDiff,'omitnan'));
 % disp(mean(StochasticDiff,'omitnan'));
 
-dlmwrite('RNDN_dif_1.dat',RNDNDiff,'\t');
-dlmwrite('STOCHASTIC_dif_correct_mean.dat', ...
+dlmwrite('RNDN_dif_2.dat',RNDNDiff,'\t');
+dlmwrite('STOCHASTIC_dif_correct_mean_2.dat', ...
 	[ StochasticDiff(:,1), 	... precision
 	mean(					...
 		StochasticDiff(  	...
@@ -99,7 +107,7 @@ dlmwrite('STOCHASTIC_dif_correct_mean.dat', ...
 % dlmwrite('STOCHASTIC_dif_mean_3.dat',mean(StochasticDiff,3),'\t');
 
 clear fileNamePrefix fileNameSuffix1 fileNameSuffix2 fileNameSuffix3 delimiterIn headerlinesIn k l shouldContinue
-clear fileNameStochastic fileNameRNDN stochasticFolder RNDNFolder isStochFilesLeft itStr
+clear fileNameStochastic fileNameRNDN stochasticFolder RNDNFolder isStochFilesLeft itStr INIT index
 clear precisionStr fileIDRNDN fileIDStochastic A tmp1 tmp2 refArray referenceFileName RNDNArray RNDNStr StochasticArray StochasticStr tmp
 % clear RNDNDiff StochasticDiff
 
