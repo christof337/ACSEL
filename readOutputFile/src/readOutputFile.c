@@ -204,6 +204,7 @@ int main(int argc, char *argv[]) {
 				printf("How about the values? sigma %lf ro %lf beta %lf\n", sigma, ro, beta);
 				// LORENZ file
 				// first, we read the reference file
+
 				// we store it in an array, then close it
 
 				// secondly, we iterate through the files of normal rounding then stochastic rounding
