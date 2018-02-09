@@ -25,7 +25,7 @@
 #endif
 
 // comment when you want a normal usage
-#define NB_STOCH_RUNS 200
+// #define NB_STOCH_RUNS 200
 
 // compilation : ../make
 // ce code est inspiré du programme "matrice_grad".
@@ -216,7 +216,7 @@ int main(int argc, char *argv[]) {
 						const double V_BETA = getParamFromParamEnum(BETA)->currentValue.d;
 						// not parallelized
 #ifdef NB_STOCH_RUNS
-						for (long int it = 39 /* keep it runnin' */ ; it < NB_STOCH_RUNS ; ++it) {
+						for (long int it = 0 ; it < NB_STOCH_RUNS ; ++it) {
 							printf("run %ld...\n", it);
 #endif
 							for (long int pre = PRECISION_MIN ; pre <= RANGE_PRECISION ; ++pre) {

@@ -183,7 +183,6 @@ int matrixMultVector(mpfr_t * result, const size_t m, const size_t n, mpfr_t mat
 	// multiplication matrice / vecteur
 	// 	res = matrixMult(resultTmp, matrix, m, n, matrixTemp, sizeVector, 1,rme);
 
-
 	res = matrixMult(m,n,matrix,sizeVector,1,*matrixTemp,*resultTmp,rme);
 //	res = matrixMult(m,n,resultTmp,sizeVector,1,matrixTemp,matrix,rme);
 //	res = matrixMult(m, n, resultTmp, matrix, matrixTemp, sizeVector, 1, rme);

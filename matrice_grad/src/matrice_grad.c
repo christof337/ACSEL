@@ -4,6 +4,8 @@
 #include <assert.h>
 #include <string.h>
 
+#include <mpfr.h>
+
 #include "matrice_grad.h"
 
 #include "tools/inputOutput.h"
@@ -266,6 +268,10 @@ void * customLorenzAttractorThreadWrapper(void * precision) {
 	lorenzAttractor(*prec, NB_ITERATIONS, RME, V_SIGMA, V_RO, V_BETA);
 
 	return NULL;
+}
+
+int isnan(mpfr_t number) {
+	return mpfr_nan_p(number);
 }
 
 int lorenzAttractor(const mpfr_prec_t precision, const long int nbIterations,
