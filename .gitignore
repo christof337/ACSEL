@@ -52,3 +52,15 @@ Mkfile.old
 dkms.conf
 check_custom_math
 check_matrix_utils
+gkgk2_ms=10_mt=EXPONENTIAL_mp=10_ni=10_rm=RNDN.dat
+gkgk2_ms=5000_ni=60_pre=200_rm=SUBSTRACTED_mt=EXPONENTIAL.dat
+gkgk2_ms=5000_ni=60_pre=99_rm=STOCHASTIC_mt=EXPONENTIAL.dat
+gkgk2_ms=5000_ni=60_pre=99_rm=STOCHASTIC_mt=EXPONENTIAL_old.dat
+gkgk2_ms=5000_ni=60_pre=99_SUBSTRACTED_mt=EXPONENTIAL.dat
+simple-gkgk2_ms=10_mt=EXPONENTIAL_mp=10_ni=10_rm=RNDN.dat
+simple-gkgk2_ms=5000_ni=60_pre=100_rm=STOCHASTIC_mt=EXPONENTIAL.dat
+simple-gkgk2_ms=5000_ni=60_pre=200_rm=STOCHASTIC_mt=EXPONENTIAL.dat
+simple-gkgk2_ms=5000_ni=60_pre=99_rm=RNDN_mt=EXPONENTIAL.dat
+simple-gkgk2_ms=5000_ni=60_pre=99_rm=STOCHASTIC_mt=EXPONENTIAL.dat
+simple-gkgk2_ms=5000_ni=60_pre=99_SUBSTRACTED_mt=EXPONENTIAL.dat
+test.dat
