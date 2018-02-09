@@ -13,10 +13,10 @@ StochasticStr = 'STOCHASTIC';
 delimiterIn = '\t';
 headerlinesIn = 1;
 
-INIT = 7;
+INIT = 2;
 
-k = 2;
-% k = INIT; % override
+% k = 2;
+k = INIT; % override
 shouldContinue = 1;
 
 referenceFileName = 'lorenzRef_pre=200_rm=RNDN.dat';

@@ -3,14 +3,14 @@ font = 'Helvetica';
 set(0,'defaultAxesFontName',font);
 set(0,'defaultTextFontName',font);
 
-STOCHASTICArray = STOCHASTIC_dif_correct_mean;
-RNDNArray = RNDN_dif_1;
+STOCHASTICArray = StochasticDiff;
+RNDNArray = RNDNDiff;
 x = linspace(0,200);
 
 p = plot(STOCHASTICArray(:,1),STOCHASTICArray(:,2), ...
     RNDNArray(:,1),RNDNArray(:,2), ...  % [0 200],[10^7 10^7],... 
     'LineWidth',1.5,...
-    'LineStyle','--',...
+    'LineStyle','-',...
     'Marker','o');
 
 % scriptWindow(gca)
