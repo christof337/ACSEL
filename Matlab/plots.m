@@ -1,40 +1,75 @@
-font = 'Helvetica';
 
-set(0,'defaultAxesFontName',font);
-set(0,'defaultTextFontName',font);
+% -----------------------------------
+% VARIABLES
+fileNameNumVal = 3;
+nbIterations = 100;
 
-STOCHASTICArray = StochasticDiff;
-RNDNArray = RNDNDiff;
-x = linspace(0,200);
+% -----------------------------------
+% getting the wanted arrays
+fileExtension = '.dat';
+dataFolder = 'data';
 
+StochasticFileName = strcat('STOCHASTIC_dif_correct_mean_', ...
+    int2str(fileNameNumVal),fileExtension);
+RNDNFileName = strcat('RNDN_dif_',int2str(fileNameNumVal),fileExtension);
+
+delimiterInS = ',';
+delimiterInR = '\t';
+headerlinesIn = 0;
+
+STOCHASTICArray = importdata(strcat(dataFolder,'/',StochasticFileName), ...
+    delimiterInS,headerlinesIn);
+RNDNArray = importdata(strcat(dataFolder,'/',RNDNFileName), ...
+    delimiterInR,headerlinesIn);
+
+% -----------------------------------
+% plotting
 p = plot(STOCHASTICArray(:,1),STOCHASTICArray(:,2), ...
     RNDNArray(:,1),RNDNArray(:,2), ...  % [0 200],[10^7 10^7],... 
-    'LineWidth',1.5,...
+    'LineWidth',2,...
     'LineStyle','-',...
     'Marker','o');
 
-% scriptWindow(gca)
-%hold on
+% -----------------------------------
+% changing plot labels
+% title
+plotTitle = {'Deviation of RNDN rounding and mean Stochastic rounding compared to optimal'; ...
+    strcat('Lorenz Attractor run after ',int2str(nbIterations),' iterations for various floating point precisions')}; 
+t = title(plotTitle);
+% xaxis name
+h = xlabel('Significand precision');
+% yaxis name
+g = ylabel('Distance  compared to optimal Lorenz Attractor run (prec=200)');
+%legend
+legend({'Stochastic rounding mode','Round to Nearest'...
+   ... % ,'Not a number threshold' ... % unused now
+    });
 
-h = xlabel('Floating point precision', 'FontName', font);
-set(h,'FontSize',20);
+% -----------------------------------
+% changing plot parameters
+% x and y limits
+%xlim([3 inf]);
+%ylim([10^3 10^8+10^8*2]);
+% xticks(0:10:200)
+set(gca,'YScale','log');
 
-%get(h)
-% p1 = scatter(STOCHASTICArray);
-% hold on
-% p2 = scatter(RNDNArray(:,2));
-
-xAX = get(gca,'XAxis');
-set(gca,'FontSize',20);
+% -----------------------------------
+% changing plot font and size
+font = 'Helvetica';
+set(0,'defaultAxesFontName',font);
+set(0,'defaultTextFontName',font);
+set(h,'FontName',font);
+set(h,'FontSize',30);
+set(g,'FontName',font);
+set(g,'FontSize',30);
+set(gca,'FontSize',25);
 set(gca,'FontName',font);
-xLabelP = get(gca,'XLabel');
-%disp('xlabel');
-%get(xLabelP);
-%disp('gca');
-%get(gca);
-%set(xAX,'FontSize', 30)
+set(t,'FontSize',30);
 
-% disp(RNDNArray(:,2));
+% scriptWindow(gca)
+
+% printing vertical lines instead of NaN values ; never worked
+%x = linspace(0,200);
 isNanArray = isnan(RNDNArray(:,2));
 cpt = 0;
 for val = isNanArray
@@ -49,34 +84,8 @@ for val = isNanArray
 end
 % pl = line([0 200],[10^8 10^8],'Color','black');
 
-% yscale('log');
-set(gca,'YScale','log');
-set(gca,'FontSize',20);
-xlim([3 inf]);
-ylim([10^3 10^8+10^8*2]);
-% xticks(0:10:200)
+% p;
 
-g = ylabel('Relative error (compared to optimal Lorenz Attractor run (prec=200))', 'FontSize', 20);
-% set(g,'FontSize',30);
-
-legend({'Stochastic rounding mode','Round to Nearest'...
-    ,'Not a number threshold' ...
-    })
-
-title({'Deviation of RNDN rounding and Stochastic rounding compared to optimal';'Lorenz Attractor run (10^5 iterations) for various floating point precisions'}); 
-
-p;
-
-% p(1).DisplayName='Stochastic';
-% p(2).DisplayName='RNDN';
-
-% p(1).MarkerEdgeColor = 'b';
-% p(2).MarkerEdgeColor = 'g';
-
-% p(1).LineWidth = 1.5;
-% p(2).LineWidth = 1.5;
-
-% ax = gca;
-% ax.YScale = 'log';
-
-clear cpt font h x xAX xLabelP g p val;
+clear cpt font h x xAX xLabelP g p val dataFolder delimiterInR ...
+    delimiterInS fileExtension fileNameNumVal headerlinesIn isNanArray ...
+    nbIterations plotTitle t;

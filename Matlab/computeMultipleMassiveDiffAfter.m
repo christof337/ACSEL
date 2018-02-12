@@ -1,0 +1,119 @@
+function computeMultipleMassiveDiffAfter(NB_ITERATIONS)
+
+    disp('début programme');
+
+    stochasticFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/stochFiles/output';
+    RNDNFolder = '/home/kito/Dev/Sources/ACSEL/Matlab/output';
+    fileNamePrefix = 'lorenz_prec=';
+    fileNameSuffix1 = '_mp=200_ni=100000_rm=';
+    fileNameSuffix2 = '_si=10.000000_ro=28.000000_be=2.666700';
+    fileNameSuffix3 = '.dat';
+    RNDNStr = 'RNDN';
+    StochasticStr = 'STOCHASTIC';
+
+    delimiterIn = '\t';
+    headerlinesIn = 1;
+
+    MIN_PRECISION = 4;
+    MAX_PRECISION = 200;
+
+    % k = 2;
+    k = MIN_PRECISION; % override
+    shouldContinue = 1;
+    MAX_NB_STOCH_FILES = 163;  % I have ran it 163 times
+    NB_STOCH_FILES_TAKEN = 5;
+
+    referenceFileName = 'lorenzRef_pre=200_rm=RNDN.dat';
+    refArray = importdata(strcat(RNDNFolder,'/',referenceFileName),delimiterIn,headerlinesIn);
+
+    RNDNDiff = zeros(MAX_PRECISION-MIN_PRECISION+1,2);
+    StochasticDiff = zeros(MAX_PRECISION-MIN_PRECISION+1,2,NB_STOCH_FILES_TAKEN);
+
+    % loop over precisions
+    while ( shouldContinue )
+        precisionStr = int2str(k);
+        % file name construction
+        fileNameRNDN = strcat(RNDNFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,RNDNStr,fileNameSuffix2, fileNameSuffix3);
+
+        % opening the file to check that it exists
+        fileIDRNDN = fopen(fileNameRNDN, 'r');
+
+        if (fileIDRNDN == -1)
+            % if not, we're running out of files ==> exit
+            shouldContinue = 0; % exit loop
+            disp('End RNDN');
+            %disp(precisionStr);
+        else
+            index = k-MIN_PRECISION+1;
+            fclose(fileIDRNDN); % do not need it anymore
+
+            % importing array
+            RNDNArray = importdata(fileNameRNDN,delimiterIn,headerlinesIn);
+            %disp(fileNameRNDN);
+            % computing the diff with the reference file
+            relDiff = computeRelativeDiffAt(refArray,RNDNArray, NB_ITERATIONS);
+            tmp1 = [k relDiff];
+            % saving the result in RNDN Diff
+            %RNDNDiff = [RNDNDiff;tmp1];
+            RNDNDiff(index,:) = tmp1;
+
+            isStochFilesLeft = 1;
+            RANDOM_SEGMENT = 10; % can generate it (and assert RANDOM_SEGMENT+NB_STOCH_FILES_TAKEN < MAX_NB_STOCH_FILES)
+            l = RANDOM_SEGMENT;
+            while ( isStochFilesLeft && l < RANDOM_SEGMENT + NB_STOCH_FILES_TAKEN)
+                itStr = int2str(l-1);
+                fileNameStochastic = strcat(stochasticFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,StochasticStr,fileNameSuffix2,'(',itStr,')',fileNameSuffix3);
+                fileIDStochastic = fopen(fileNameStochastic, 'r');
+                if (fileIDStochastic == -1)
+                    isStochFilesLeft = 0;
+                    disp(['End Stochastic : pre=',precisionStr,', it max=',itStr]);
+                else
+                    fclose(fileIDStochastic);
+
+                    StochasticArray = importdata(fileNameStochastic,delimiterIn,headerlinesIn);
+                    relDiff = computeRelativeDiffAt(refArray,StochasticArray,NB_ITERATIONS);
+                    tmp2 = [k relDiff];
+                    StochasticDiff(index,:,l-RANDOM_SEGMENT+1) = tmp2;
+                    % StochasticDiff(:,1,:) = k:200;
+
+                    l = l + 1;
+
+                    %clear StochasticArray
+                end
+            end
+
+            disp(strcat('[',precisionStr,'] : RNDN       = ',num2str(tmp1(:,2))));
+            disp(strcat('[',precisionStr,'] : Stochastic = ',num2str(mean(StochasticDiff(index,2,:),3)))); % k*(l-1):((k+1)*l-1),2:3)))));
+            disp('-');
+
+            k = k + 1;
+        end
+    end
+
+    outputFolder = 'data/';
+    dlmwrite(strcat(outputFolder,'RNDN_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDNDiff,'\t');
+    dlmwrite(strcat(outputFolder,'STOCHASTIC_dif_at_it_',int2str(NB_ITERATIONS),'(correctMean).dat'), ...
+        [ StochasticDiff(:,1), 	... precision
+        mean(					...
+            StochasticDiff(  	...
+                :, 	... all lines
+                2, 	... only the second column (the diff value)
+                :) 	... all stochastic runs
+            , 3 ) 	... group the third dimension
+        ]	...
+    );
+
+    disp('Exiting program normally...');
+
+    clear fileNamePrefix fileNameSuffix1 fileNameSuffix2 fileNameSuffix3 ...
+        delimiterIn headerlinesIn k l shouldContinue fileNameStochastic ...
+        fileNameRNDN stochasticFolder RNDNFolder isStochFilesLeft itStr ...
+        INIT index precisionStr fileIDRNDN fileIDStochastic A tmp1 tmp2 ...
+        refArray referenceFileName RNDNArray RNDNStr StochasticArray ...
+        StochasticStr tmp relDiff;
+    % clear RNDNDiff StochasticDiff
+
+    % fileNameFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/stochFiles/output';
+    % filename = 'output/lorenz_prec=131_mp=200_ni=100000_rm=RNDN_si=10.000000_ro=28.000000_be=2.666700.dat';
+
+end

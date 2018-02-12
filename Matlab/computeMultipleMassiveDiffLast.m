@@ -13,7 +13,7 @@ StochasticStr = 'STOCHASTIC';
 delimiterIn = '\t';
 headerlinesIn = 1;
 
-INIT = 2;
+INIT = 4;
 
 % k = 2;
 k = INIT; % override
@@ -44,15 +44,16 @@ while ( shouldContinue )
         
         % importing array
         RNDNArray = importdata(fileNameRNDN,delimiterIn,headerlinesIn);
+        %disp(fileNameRNDN);
         % computing the diff with the reference file
-        tmp1 = [k computeRelativeDiff(refArray,RNDNArray)];
+        tmp1 = [k computeRelativeDiffLast(refArray,RNDNArray)];
         % saving the result in RNDN Diff
         %RNDNDiff = [RNDNDiff;tmp1];
         RNDNDiff(index,:) = tmp1;
         
         isStochFilesLeft = 1;
-        l = 1;
-        while ( isStochFilesLeft && l < 20)
+        l = 10;
+        while ( isStochFilesLeft && l < 13)
             itStr = int2str(l-1);
             fileNameStochastic = strcat(stochasticFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,StochasticStr,fileNameSuffix2,'(',itStr,')',fileNameSuffix3);
             fileIDStochastic = fopen(fileNameStochastic, 'r');
@@ -63,7 +64,7 @@ while ( shouldContinue )
                 fclose(fileIDStochastic);
                 
                 StochasticArray = importdata(fileNameStochastic,delimiterIn,headerlinesIn);
-                tmp2 = [k computeRelativeDiff(refArray,StochasticArray)];
+                tmp2 = [k computeRelativeDiffLast(refArray,StochasticArray)];
                 StochasticDiff(k-1,:,l) = tmp2;
                 
                 l = l + 1;
@@ -89,9 +90,8 @@ end
 % disp(mean(RNDNDiff,'omitnan'));
 % disp(mean(StochasticDiff,'omitnan'));
 
-outputFolder = 'data/';
-dlmwrite(strcat(outputFolder,'RNDN_dif_2.dat'),RNDNDiff,'\t');
-dlmwrite(strcat(outputFolder,'STOCHASTIC_dif_correct_mean_2.dat'), ...
+dlmwrite('RNDN_dif_4.dat',RNDNDiff,'\t');
+dlmwrite('STOCHASTIC_dif_correct_mean_4.dat', ...
 	[ StochasticDiff(:,1), 	... precision
 	mean(					...
 		StochasticDiff(  	...
