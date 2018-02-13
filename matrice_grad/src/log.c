@@ -23,7 +23,7 @@
 #define LOG_SUFFIX ".log"
 
 #ifndef DEBUG
-#define DEBUG 0
+ #define DEBUG 0
 #endif /* DEBUG */
 
 FILE ** logFiles = NULL;
@@ -162,13 +162,13 @@ void m_log_err(const long int currentPrecision, const char * str) {
 	if (logFiles[index] != NULL) {
 		fprintf(logFiles[index], "[ERROR] - %s\n", str);
 	}
-	if ( DEBUG > 0) {
+#if (DEBUG>0)
 		char logMsg[1000];
 		sprintf(logMsg, "(%ld)[ERROR] - %s", currentPrecision, str);
 		printErrorMessage(logMsg);
 		printf("\n4- log msg\n");
 		cfree(logMsg);
-	}
+#endif
 }
 
 // TODO : fermer le fichier à chaque fin de boucle!

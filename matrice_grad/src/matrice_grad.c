@@ -340,8 +340,8 @@ int lorenzAttractor(const mpfr_prec_t precision, const long int nbIterations,
 			mpfr_sub_si(tmpVal, tmpVal, irk, MPFR_RNDN);
 			m_div(alp, one, tmpVal, rme);
 
-			// tmpVal = dt**2*xnu
-			mpfr_pow_si(tmpVal, dt, 2L, MPFR_RNDN);
+			// tmpVal = dt**2
+			m_mul(tmpVal, dt, dt, rme);
 
 			//      xtt=(x1-2*x0+xm1)/dt**2*xnu
 			m_mul_si(tmpVal2, x0, 2L, rme);

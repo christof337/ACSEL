@@ -6,7 +6,7 @@
 #include "utils.h"
 
 #ifndef DEBUG
-#define DEBUG 0
+ #define DEBUG 0
 #endif
 
 #ifndef max
@@ -184,7 +184,6 @@ int m_sub(mpfr_t difference, const mpfr_t minuend, const mpfr_t substrahend,
 	}
 }
 
-
 int m_pow(mpfr_t pow, const mpfr_t val, const mpfr_t exp, const enum roundingModeEnum roundingMode) {
 	if (roundingMode == STOCHASTIC) {
 		int res = 0;
@@ -276,7 +275,8 @@ int m_setPrecision(mpfr_t * value, const mpfr_prec_t pre) {
  * 						(0 if rounded exactly, > 0 if globally rounded upwards the exact
  *       				value, < 0 if globally rounded downwards the exact value)
  */
-int m_setPrecisionWithRoundingMode(mpfr_t * value, const mpfr_prec_t pre, const mpfr_rnd_t roundingMode) {
+int m_setPrecisionWithRoundingMode(mpfr_t * value, const mpfr_prec_t pre,
+		const mpfr_rnd_t roundingMode) {
 	int roundingDirection = 0;
 	mpfr_t result;
 	m_init2(result, pre);
@@ -297,32 +297,37 @@ int m_setPrecisionWithRoundingMode(mpfr_t * value, const mpfr_prec_t pre, const 
  *             		value, < 0 if globally rounded downward the exact value
  */
 int stochasticRounding(mpfr_t * value, const mpfr_prec_t pre) {
-	if (DEBUG) m_print_wm((*value), "\t\tRounding  `v`=");
-	if (DEBUG) printf(" at precision %ld", pre);
 	// recording the rounding direction
 	int roundingDirection = 0;
 
 	// recording the current precision
 	const mpfr_prec_t currentPrecision = mpfr_get_prec(*value);
-	if (DEBUG) printf("\t Current precision is %ld", currentPrecision);
+#if (DEBUG>0)
+	m_print_wm((*value), "\t\tRounding  `v`=");
+	printf(" at precision %ld", pre);
+	printf("\t Current precision is %ld", currentPrecision);
+#endif
 
 	// value is a number of `currentPrecision` bits.
 	// value must be set with the value of `v` with precision `pre` ; rounded with stochastic rounding
 	if (currentPrecision <= pre) {
 		// value is already shorter than the expected precision : no rounding, simply adding zeros at the end
-		if (DEBUG) printf(
-				"\n\tCurrent precision (%ld) is lower than asked precision (%ld) ; exiting without rouding...",
-				currentPrecision, pre);
 		// `mpfr_prec_round` seems to fail to increase the precision : using a custom function, m_setPrecision
 		roundingDirection = m_setPrecision(value, pre);
-		if (DEBUG) m_print_wm(*value, "\n\tResult is :");
-		if (DEBUG) printf("\n");
+#if (DEBUG>0)
+		printf(
+				"\n\tCurrent precision (%ld) is lower than asked precision (%ld) ; exiting without rouding...",
+				currentPrecision, pre);
+		m_print_wm(*value, "\n\tResult is :");
+		printf("\n");
+#endif
 	} else {
 		// value is longer than the asked precision
 		// retrieving the exceeding digits
 		const long int lastDigitPrecision = max((currentPrecision - pre), MPFR_PREC_MIN);
 		mpfr_t lastDigits;
 		getLastDigits(&lastDigits, *value, currentPrecision, pre);
+		mpfr_abs(lastDigits, lastDigits, MPFR_RNDN);
 
 		// generate a random value between -0.5 and 0.5
 		// add this value to lastDigits
@@ -338,16 +343,20 @@ int stochasticRounding(mpfr_t * value, const mpfr_prec_t pre) {
 		// if it is, round down, if it is not, round up
 		if (mpfr_greater_p(lastDigits, randomValue)) {
 			// rounding up
-			if (DEBUG) printf("\tROUND UP");
+#if (DEBUG>0)
+			printf("\tROUND UP");
+#endif
 			// roundingDirection = mpfr_prec_round(*value, pre, MPFR_RNDU);
 //			roundingDirection = 1;
-			roundingDirection = m_setPrecisionWithRoundingMode(value,pre,MPFR_RNDU);
+			roundingDirection = m_setPrecisionWithRoundingMode(value, pre, MPFR_RNDU);
 		} else if (mpfr_less_p(lastDigits, randomValue)) {
 			// rounding down
-			if (DEBUG) printf("\tROUND DOWN");
+#if (DEBUG>0)
+			printf("\tROUND DOWN");
+#endif
 			// roundingDirection = mpfr_prec_round(*value, pre, MPFR_RNDD);
 //			roundingDirection = -1;
-			roundingDirection = m_setPrecisionWithRoundingMode(value,pre,MPFR_RNDD);
+			roundingDirection = m_setPrecisionWithRoundingMode(value, pre, MPFR_RNDD);
 		}
 
 //		++NB_STOCH_ROUND;
@@ -379,12 +388,14 @@ mpfr_rnd_t m_getRoundingMode() {
  */
 int getLastDigits(mpfr_t * lastDigits, const mpfr_t valToRound, const long int initialPrecision,
 		const long int precisionToRoundTo) {
-	m_init2(*lastDigits, max((initialPrecision - precisionToRoundTo), MPFR_PREC_MIN));
 	mpfr_t tempRound;
 	m_init2(tempRound, precisionToRoundTo);
-	mpfr_set(tempRound, valToRound, MPFR_RNDZ); // tempRound = <0.03>
+
+	m_init2(*lastDigits, max((initialPrecision - precisionToRoundTo), MPFR_PREC_MIN));
+
+	mpfr_set(tempRound, valToRound, MPFR_RNDZ); // round toward zero // tempRound = <0.03>
 	/* /!\ Important : need to round toward zero in order to have an exact rounded value close to zero for last digits */
-	m_sub(*lastDigits, valToRound, tempRound, MPFR_RNDN); // lastDigits = <0.0345> - <0.03> = <0.0045>
+	m_sub(*lastDigits, valToRound, tempRound, RNDN); // lastDigits = <0.0345> - <0.03> = <0.0045>
 	// last digit is the part we won't keep in the resulting rounded value
 	// so it will be our base for testing the expected rounding direction
 	mpfr_set_exp(*lastDigits, 0); // lastDigits = 0.45
@@ -474,7 +485,9 @@ mpfr_rnd_t roundingModeEnumToMpfrRndT(enum roundingModeEnum e) {
  * @param[in] valueToPrint	The value to print to the standard output
  */
 void m_print(const mpfr_t valueToPrint) {
-	if (DEBUG) mpfr_out_str(stdout, 2, 0, valueToPrint, MPFR_RNDN);
+#if (DEBUG>0)
+	mpfr_out_str(stdout, 2, 0, valueToPrint, MPFR_RNDN);
+#endif
 }
 
 /**
@@ -483,25 +496,25 @@ void m_print(const mpfr_t valueToPrint) {
  * @param[in] msg			The message to introduce the given value (useful for debugging)
  */
 void m_print_wm(const mpfr_t valueToPrint, const char * msg) {
-	if (DEBUG) {
-		printf("\n%s ", msg);
-		m_print(valueToPrint);
-	}
+#if (DEBUG>0)
+	printf("\n%s ", msg);
+	m_print(valueToPrint);
+#endif
 }
 
 /**
  * Simple test of the stochastic rounding.
  */
 void quickTestStochasticRounding() {
-	// test
+// test
 	mpfr_t number;
 	mpfr_prec_t numberPrecision = 8;
 	double value = 1.234375;
-	//		double desiredValue1 = 1.234;
-	//		double desiredValue2 = 1.235;
+//		double desiredValue1 = 1.234;
+//		double desiredValue2 = 1.235;
 	mpfr_prec_t desiredPrecision = 5;
 	m_init2(number, numberPrecision);
-	//m_init2(*test,numberPrecision);
+//m_init2(*test,numberPrecision);
 	mpfr_set_d(number, value, MPFR_RNDN);
 	printf("\nAffichage du nombre avant opération :\n\t");
 	m_print(number);
