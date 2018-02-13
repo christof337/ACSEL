@@ -38,7 +38,7 @@ function plot_distance_at_it(nbIterations)
     % xaxis name
     h = xlabel('Significand precision');
     % yaxis name
-    g = ylabel('Distance  compared to optimal Lorenz Attractor run (prec=200)');
+    g = ylabel({'Distance compared to optimal';'Lorenz Attractor run (prec=200)'});
     %legend
     legend({'Stochastic rounding mode','Round to Nearest'...
        ... % ,'Not a number threshold' ... % unused now

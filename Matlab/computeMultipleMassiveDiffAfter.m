@@ -20,15 +20,17 @@ function computeMultipleMassiveDiffAfter(NB_ITERATIONS)
     % k = 2;
     k = MIN_PRECISION; % override
     shouldContinue = 1;
-    MAX_NB_STOCH_FILES = 163;  % I have ran it 163 times
-    NB_STOCH_FILES_TAKEN = 5;
+    MAX_NB_STOCH_FILES = 161;  % I have ran it 161 times
+    NB_STOCH_FILES_TAKEN = 10;
 
     referenceFileName = 'lorenzRef_pre=200_rm=RNDN.dat';
     refArray = importdata(strcat(RNDNFolder,'/',referenceFileName),delimiterIn,headerlinesIn);
 
     RNDNDiff = zeros(MAX_PRECISION-MIN_PRECISION+1,2);
     StochasticDiff = zeros(MAX_PRECISION-MIN_PRECISION+1,2,NB_STOCH_FILES_TAKEN);
-
+  
+    permutations = randperm(MAX_NB_STOCH_FILES);%,NB_STOCH_FILES_TAKEN); % taking NB_STOCH_FILES_TAKEN files randomly
+           
     % loop over precisions
     while ( shouldContinue )
         precisionStr = int2str(k);
@@ -58,10 +60,10 @@ function computeMultipleMassiveDiffAfter(NB_ITERATIONS)
             RNDNDiff(index,:) = tmp1;
 
             isStochFilesLeft = 1;
-            RANDOM_SEGMENT = 10; % can generate it (and assert RANDOM_SEGMENT+NB_STOCH_FILES_TAKEN < MAX_NB_STOCH_FILES)
-            l = RANDOM_SEGMENT;
-            while ( isStochFilesLeft && l < RANDOM_SEGMENT + NB_STOCH_FILES_TAKEN)
-                itStr = int2str(l-1);
+           % RANDOM_SEGMENT = 10; % can generate it (and assert RANDOM_SEGMENT+NB_STOCH_FILES_TAKEN < MAX_NB_STOCH_FILES)
+            l = 1;
+            while ( isStochFilesLeft && l < NB_STOCH_FILES_TAKEN)
+                itStr = int2str(permutations(l));
                 fileNameStochastic = strcat(stochasticFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,StochasticStr,fileNameSuffix2,'(',itStr,')',fileNameSuffix3);
                 fileIDStochastic = fopen(fileNameStochastic, 'r');
                 if (fileIDStochastic == -1)
@@ -73,7 +75,7 @@ function computeMultipleMassiveDiffAfter(NB_ITERATIONS)
                     StochasticArray = importdata(fileNameStochastic,delimiterIn,headerlinesIn);
                     relDiff = computeRelativeDiffAt(refArray,StochasticArray,NB_ITERATIONS);
                     tmp2 = [k relDiff];
-                    StochasticDiff(index,:,l-RANDOM_SEGMENT+1) = tmp2;
+                    StochasticDiff(index,:,l) = tmp2;
                     % StochasticDiff(:,1,:) = k:200;
 
                     l = l + 1;
