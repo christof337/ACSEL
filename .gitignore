@@ -64,3 +64,11 @@ simple-gkgk2_ms=5000_ni=60_pre=99_rm=RNDN_mt=EXPONENTIAL.dat
 simple-gkgk2_ms=5000_ni=60_pre=99_rm=STOCHASTIC_mt=EXPONENTIAL.dat
 simple-gkgk2_ms=5000_ni=60_pre=99_SUBSTRACTED_mt=EXPONENTIAL.dat
 test.dat
+computeMultipleMassiveDiffAfter100.m~
+computeMultipleMassiveDiff.m~
+computeRelativeDiff.m~
+plots.m~
+*.cproject
+*.project
+*.settings/*
+.settings/
