@@ -20,8 +20,10 @@ function computeMultipleMassiveDiffAfter(NB_ITERATIONS)
     % k = 2;
     k = MIN_PRECISION; % override
     shouldContinue = 1;
-    MAX_NB_STOCH_FILES = 161;  % I have ran it 161 times
-    NB_STOCH_FILES_TAKEN = 10;
+    MAX_NB_STOCH_FILES = 50;  % I have ran it 161 times
+    NB_STOCH_FILES_TAKEN = 50;
+    
+    NB_BENCH_ZEROS = 10; % stop reading files as soon as for 10 precisions in a row the computed relDiff is 0
 
     referenceFileName = 'lorenzRef_pre=200_rm=RNDN.dat';
     refArray = importdata(strcat(RNDNFolder,'/',referenceFileName),delimiterIn,headerlinesIn);
@@ -31,8 +33,11 @@ function computeMultipleMassiveDiffAfter(NB_ITERATIONS)
   
     permutations = randperm(MAX_NB_STOCH_FILES);%,NB_STOCH_FILES_TAKEN); % taking NB_STOCH_FILES_TAKEN files randomly
            
+    nbZeros = 0;
     % loop over precisions
     while ( shouldContinue )
+        index = k-MIN_PRECISION+1;
+        
         precisionStr = int2str(k);
         % file name construction
         fileNameRNDN = strcat(RNDNFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,RNDNStr,fileNameSuffix2, fileNameSuffix3);
@@ -45,8 +50,15 @@ function computeMultipleMassiveDiffAfter(NB_ITERATIONS)
             shouldContinue = 0; % exit loop
             disp('End RNDN');
             %disp(precisionStr);
+        elseif (nbZeros >= NB_BENCH_ZEROS)
+            disp('filling with zeros...')
+            shouldContinue = 0; % exit loop
+            % filling with zeros
+            RNDNDiff(index:size(RNDNDiff,1),:) = horzcat(permute(k:MAX_PRECISION,[2 1]),zeros(size(RNDNDiff,1)-index+1,1));
+            for cpt = 1:NB_STOCH_FILES_TAKEN
+                StochasticDiff(index:size(StochasticDiff,1),:,cpt) = horzcat(permute(k:MAX_PRECISION,[2 1]),zeros(size(StochasticDiff,1)-index+1,1));
+            end
         else
-            index = k-MIN_PRECISION+1;
             fclose(fileIDRNDN); % do not need it anymore
 
             % importing array
@@ -59,6 +71,12 @@ function computeMultipleMassiveDiffAfter(NB_ITERATIONS)
             %RNDNDiff = [RNDNDiff;tmp1];
             RNDNDiff(index,:) = tmp1;
 
+            if (relDiff == 0)
+                nbZeros = nbZeros + 1;
+            else
+                nbZeros = 0;
+            end
+            
             isStochFilesLeft = 1;
            % RANDOM_SEGMENT = 10; % can generate it (and assert RANDOM_SEGMENT+NB_STOCH_FILES_TAKEN < MAX_NB_STOCH_FILES)
             l = 1;
