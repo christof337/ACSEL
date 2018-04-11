@@ -2,8 +2,8 @@ function computeMultipleMassiveDiffAfter(NB_ITERATIONS)
 
 disp('début programme');
 
-%stochasticFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/stochFiles/output';
-stochasticFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/output';
+stochasticFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/stochFiles/output';
+%stochasticFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/output';
 RNDNFolder = '/home/kito/Dev/Sources/ACSEL/Matlab/output';
 fileNamePrefix = 'lorenz_prec=';
 fileNameSuffix1 = '_mp=200_ni=100000_rm=';
@@ -11,7 +11,7 @@ fileNameSuffix2 = '_si=10.000000_ro=28.000000_be=2.666700';
 fileNameSuffix3 = '.dat';
 RNDNStr = 'RNDN';
 %StochasticStr = 'STOCHASTIC';
-StochasticStr = 'STOCHASTIC_CADNA';
+StochasticStr = 'STOCHASTIC';
 
 delimiterIn = '\t';
 headerlinesIn = 1;
@@ -19,11 +19,10 @@ headerlinesIn = 1;
 MIN_PRECISION = 4;
 MAX_PRECISION = 200;
 
-% k = 2;
-k = MIN_PRECISION; % override
+k = MIN_PRECISION; 
 shouldContinue = 1;
-MAX_NB_STOCH_FILES = 50;  % I have ran it 161 timescomputeMultipleMassiveDiffAfter(10000)
-NB_STOCH_FILES_TAKEN = 10;
+MAX_NB_STOCH_FILES = 50;  % I have ran it 161 timescomputeMultipleMassiveDiffAfter(10000), but only 50 are "correct"
+NB_STOCH_FILES_TAKEN = 20;
 
 NB_BENCH_ZEROS = 10; % stop reading files as soon as for 10 precisions in a row the computed relDiff is 0
 
@@ -53,6 +52,7 @@ while ( shouldContinue )
         disp('End RNDN');
         %disp(precisionStr);
     elseif (nbZeros >= NB_BENCH_ZEROS)
+        fclose(fileIDRNDN);
         disp('filling with zeros...')
         shouldContinue = 0; % exit loop
         % filling with zeros
@@ -61,6 +61,7 @@ while ( shouldContinue )
             StochasticDiff(index:size(StochasticDiff,1),:,cpt) = horzcat(permute(k:MAX_PRECISION,[2 1]),zeros(size(StochasticDiff,1)-index+1,1));
         end
     else
+        % compute the file
         fclose(fileIDRNDN); % do not need it anymore
         
         % importing array

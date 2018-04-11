@@ -1,17 +1,23 @@
-function computeMultipleMassiveDiffAfter(NB_ITERATIONS)
+function computeRelDiffAfter(NB_ITERATIONS, isCadna)
 
 disp('début programme');
 
-%stochasticFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/stochFiles/output';
-stochasticFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/output';
+if(isCadna)
+    stochasticFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/output';
+else
+    stochasticFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/stochFiles/output';
+end
 RNDNFolder = '/home/kito/Dev/Sources/ACSEL/Matlab/output';
 fileNamePrefix = 'lorenz_prec=';
 fileNameSuffix1 = '_mp=200_ni=100000_rm=';
 fileNameSuffix2 = '_si=10.000000_ro=28.000000_be=2.666700';
 fileNameSuffix3 = '.dat';
 RNDNStr = 'RNDN';
-%StochasticStr = 'STOCHASTIC';
-StochasticStr = 'STOCHASTIC_CADNA';
+if(isCadna)
+    StochasticStr = 'STOCHASTIC_CADNA';
+else
+    StochasticStr = 'STOCHASTIC';
+end
 
 delimiterIn = '\t';
 headerlinesIn = 1;
@@ -19,11 +25,14 @@ headerlinesIn = 1;
 MIN_PRECISION = 4;
 MAX_PRECISION = 200;
 
-% k = 2;
-k = MIN_PRECISION; % override
+k = MIN_PRECISION; 
 shouldContinue = 1;
-MAX_NB_STOCH_FILES = 50;  % I have ran it 161 timescomputeMultipleMassiveDiffAfter(10000)
-NB_STOCH_FILES_TAKEN = 10;
+MAX_NB_STOCH_FILES = 50;  % I have ran it 161 timescomputeMultipleMassiveDiffAfter(10000), but only 50 are "correct"
+if(isCadna)
+    NB_STOCH_FILES_TAKEN = 2;
+else
+    NB_STOCH_FILES_TAKEN = 20;
+end
 
 NB_BENCH_ZEROS = 10; % stop reading files as soon as for 10 precisions in a row the computed relDiff is 0
 
@@ -31,12 +40,12 @@ referenceFileName = 'lorenzRef_pre=200_rm=RNDN.dat';
 refArray = importdata(strcat(RNDNFolder,'/',referenceFileName),delimiterIn,headerlinesIn);
 
 RNDNDiff = zeros(MAX_PRECISION-MIN_PRECISION+1,2);
-StochasticDiff = zeros(MAX_PRECISION-MIN_PRECISION+1,2,NB_STOCH_FILES_TAKEN);
+StochasticDiff = zeros(MAX_PRECISION-MIN_PRECISION+1,2,NB_STOCH_FILES_TAKEN-1);
 
 permutations = randperm(MAX_NB_STOCH_FILES);%,NB_STOCH_FILES_TAKEN); % taking NB_STOCH_FILES_TAKEN files randomly
 
 nbZeros = 0;
-% loop over precisions
+% loop over precisions (k)
 while ( shouldContinue )
     index = k-MIN_PRECISION+1;
     
@@ -53,6 +62,7 @@ while ( shouldContinue )
         disp('End RNDN');
         %disp(precisionStr);
     elseif (nbZeros >= NB_BENCH_ZEROS)
+        fclose(fileIDRNDN);
         disp('filling with zeros...')
         shouldContinue = 0; % exit loop
         % filling with zeros
@@ -61,6 +71,7 @@ while ( shouldContinue )
             StochasticDiff(index:size(StochasticDiff,1),:,cpt) = horzcat(permute(k:MAX_PRECISION,[2 1]),zeros(size(StochasticDiff,1)-index+1,1));
         end
     else
+        % compute the file
         fclose(fileIDRNDN); % do not need it anymore
         
         % importing array
@@ -83,12 +94,15 @@ while ( shouldContinue )
         l = 1;
         while ( isStochFilesLeft && l < NB_STOCH_FILES_TAKEN)
             itStr = int2str(permutations(l));
-            %fileNameStochastic = strcat(stochasticFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,StochasticStr,fileNameSuffix2,'(',itStr,')',fileNameSuffix3);
-            fileNameStochastic = strcat(stochasticFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,StochasticStr,fileNameSuffix2,fileNameSuffix3);
+            if(isCadna)
+                fileNameStochastic = strcat(stochasticFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,StochasticStr,fileNameSuffix2,fileNameSuffix3);
+            else
+                 fileNameStochastic = strcat(stochasticFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,StochasticStr,fileNameSuffix2,'(',itStr,')',fileNameSuffix3);
+            end
             fileIDStochastic = fopen(fileNameStochastic, 'r');
             if (fileIDStochastic == -1)
                 isStochFilesLeft = 0;
-                disp(['End Stochastic : pre=',precisionStr,', it max=',itStr]);
+                disp(['End Stochastic : pre=',precisionStr,', nb taken=',int2str(NB_STOCH_FILES_TAKEN),', it max=',itStr]);
             else
                 fclose(fileIDStochastic);
                 
@@ -104,8 +118,12 @@ while ( shouldContinue )
             end
         end
         
-        disp(strcat('[',precisionStr,'] : RNDN       = ',num2str(tmp1(:,2))));
-        disp(strcat('[',precisionStr,'] : Stochastic = ',num2str(mean(StochasticDiff(index,2,:),3)))); % k*(l-1):((k+1)*l-1),2:3)))));
+        disp(strcat('[',precisionStr,'] : RNDN       = ',num2str(tmp1(:,2)))); 
+        if(isCadna)     
+            disp(strcat('[',precisionStr,'] : Stochastic CADNA = ',num2str(mean(StochasticDiff(index,2,:),3)))); % k*(l-1):((k+1)*l-1),2:3)))));
+        else
+            disp(strcat('[',precisionStr,'] : Stochastic(',int2str(NB_STOCH_FILES_TAKEN),') = ',num2str(mean(StochasticDiff(index,2,:),3)))); % k*(l-1):((k+1)*l-1),2:3)))));
+        end
         disp('-');
         
         k = k + 1;
@@ -115,40 +133,52 @@ end
 outputFolder = 'data/';
 dlmwrite(strcat(outputFolder,'RNDN_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDNDiff,'\t');
 
-meanValue = mean(					...
+
+if(isCadna)
+    dlmwrite(strcat(outputFolder,'STOCHASTIC_CADNA_rel_dif_at_it_',int2str(NB_ITERATIONS),'(correctMean).dat'), ...
+    [ StochasticDiff(:,1), 	... precision
+    StochasticDiff(  	...
+        :, 	... all lines
+        2, 	... only the second column (the diff value)
+        1) 	... all stochastic runs
+       %  ... 	% group the third dimension ...
+    ]	...
+    );
+else
+    meanValue = mean(					...
     StochasticDiff(  	...
     :, 	... all lines
     2, 	... only the second column (the diff value)
     :) 	... all stochastic runs
     , 3 ); 	% group the third dimension
-dlmwrite(strcat(outputFolder,'STOCHASTIC_CADNA_dif_at_it_',int2str(NB_ITERATIONS),'(correctMean).dat'), ...
-    [ StochasticDiff(:,1), 	... precision
-    meanValue ...
-    ]	...
-    );
+    dlmwrite(strcat(outputFolder,'STOCHASTIC_rel_dif_at_it_',int2str(NB_ITERATIONS),'(correctMean).dat'), ...
+        [ StochasticDiff(:,1), 	... precision
+        meanValue ...
+        ]	...
+        );
+    
+    stdValue = std(					...
+        StochasticDiff(  	...
+        :, 	... all lines
+        2, 	... only the second column (the diff value)
+        :) 	... all stochastic runs
+        , 0, ...
+        3 ); 	% group the third dimension
+    stdUp = meanValue + stdValue;
+    stdDown = meanValue - stdValue;
 
-stdValue = std(					...
-    StochasticDiff(  	...
-    :, 	... all lines
-    2, 	... only the second column (the diff value)
-    :) 	... all stochastic runs
-    , 0, ...
-    3 ); 	% group the third dimension
-stdUp = meanValue + stdValue;
-stdDown = meanValue - stdValue;
+    dlmwrite(strcat(outputFolder,'STOCHASTIC_rel_dif_at_it_',int2str(NB_ITERATIONS),'(deviationUp).dat'), ...
+        [ StochasticDiff(:,1), 	... precision
+        stdUp	...
+        ]	...
+        );
 
-dlmwrite(strcat(outputFolder,'STOCHASTIC_CADNA_dif_at_it_',int2str(NB_ITERATIONS),'(deviationUp).dat'), ...
-    [ StochasticDiff(:,1), 	... precision
-    stdUp	...
-    ]	...
-    );
-
-dlmwrite(strcat(outputFolder,'STOCHASTIC_CADNA_dif_at_it_',int2str(NB_ITERATIONS),'(deviationDown).dat'), ...
-    [ StochasticDiff(:,1), 	... precision
-    stdDown	...
-    ]	...
-    );
-
+    dlmwrite(strcat(outputFolder,'STOCHASTIC_rel_dif_at_it_',int2str(NB_ITERATIONS),'(deviationDown).dat'), ...
+        [ StochasticDiff(:,1), 	... precision
+        stdDown	...
+        ]	...
+        );
+end
 disp('Exiting program normally...');
 
 clear fileNamePrefix fileNameSuffix1 fileNameSuffix2 fileNameSuffix3 ...
