@@ -18,7 +18,7 @@
 #define PRECISION_MIN MPFR_PREC_MIN // 2 TODO : enable the user to choose the minimum precision
 
 #ifndef DEBUG
-	#define DEBUG 0
+#	define DEBUG 0
 #endif
 
 #if defined (Linux)
@@ -27,7 +27,7 @@
 #endif
 
 // comment when you want a normal usage
-// #define NB_STOCH_RUNS 200
+// #define NB_STOCH_RUNS 50
 
 // compilation : ../make
 // ce code est inspiré du programme "matrice_grad".

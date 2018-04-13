@@ -10,7 +10,8 @@
  */
 enum roundingModeEnum {
 	RNDN, // round to nearest (roundTiesToEven in IEEE 754-2008),
-	STOCHASTIC, // custom ;)
+	STOCHASTIC, // [custom] : randomly round up or down, depending on the distance of the number (see MCA round_random_nearness)
+	STOCHASTIC_CADNA,
 	RNDZ, // round toward zero (roundTowardZero in IEEE 754-2008),
 	RNDU, // round toward plus infinity (roundTowardPositive in IEEE 754-2008),
 	RNDD, // round toward minus infinity (roundTowardNegative in IEEE 754-2008),
@@ -40,7 +41,10 @@ void m_init2(mpfr_t value, const mpfr_prec_t precision);
 void m_clear(mpfr_t value);
 
 int m_setPrecision(mpfr_t * value, const mpfr_prec_t pre);
+
 int m_setPrecisionWithRoundingMode(mpfr_t * value, const mpfr_prec_t pre, const mpfr_rnd_t roundingMode);
+
+int stochasticRoundingCadna(mpfr_t * value, const mpfr_prec_t pre) ;
 
 int stochasticRounding(mpfr_t * v, const mpfr_prec_t pre);
 

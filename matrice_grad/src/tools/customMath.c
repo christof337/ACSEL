@@ -6,7 +6,7 @@
 #include "utils.h"
 
 #ifndef DEBUG
- #define DEBUG 0
+#define DEBUG 0
 #endif
 
 #ifndef max
@@ -37,7 +37,7 @@ void m_init2(mpfr_t value, const mpfr_prec_t precision) {
  */
 int m_mul(mpfr_t product, const mpfr_t factor1, const mpfr_t factor2,
 		const enum roundingModeEnum roundingMode) {
-	if (roundingMode == STOCHASTIC) {
+	if (roundingMode == STOCHASTIC || roundingMode == STOCHASTIC_CADNA) {
 		int res = 0;
 		mpfr_t longFactor1, longFactor2, longProduct;
 		mpfr_prec_t targetPrecision = mpfr_get_prec(product);
@@ -45,8 +45,11 @@ int m_mul(mpfr_t product, const mpfr_t factor1, const mpfr_t factor2,
 		handleExtendedRounding(longFactor1, longFactor2, longProduct, factor1, factor2);
 		mpfr_mul(longProduct, longFactor1, longFactor2, MPFR_RNDN);
 
-		res = stochasticRounding(&longProduct, targetPrecision);
-
+		if (roundingMode == STOCHASTIC) {
+			res = stochasticRounding(&longProduct, targetPrecision);
+		} else if (roundingMode == STOCHASTIC_CADNA) {
+			res = stochasticRoundingCadna(&longProduct, targetPrecision);
+		}
 		mpfr_set(product, longProduct, MPFR_RNDN);
 
 		m_clear(longFactor1);
@@ -85,7 +88,7 @@ int m_mul_si(mpfr_t product, const mpfr_t factor1, long int factor2,
  */
 int m_div(mpfr_t quotient, const mpfr_t dividend, const mpfr_t divisor,
 		const enum roundingModeEnum roundingMode) {
-	if (roundingMode == STOCHASTIC) {
+	if (roundingMode == STOCHASTIC || roundingMode == STOCHASTIC_CADNA) {
 		int res = 0;
 		mpfr_t longDividend, longDivisor, longQuotient;
 
@@ -95,7 +98,11 @@ int m_div(mpfr_t quotient, const mpfr_t dividend, const mpfr_t divisor,
 
 		mpfr_div(longQuotient, longDividend, longDivisor, MPFR_RNDN);
 
-		res = stochasticRounding(&longQuotient, targetPrecision);
+		if (roundingMode == STOCHASTIC) {
+			res = stochasticRounding(&longQuotient, targetPrecision);
+		} else if (roundingMode == STOCHASTIC_CADNA) {
+			res = stochasticRoundingCadna(&longQuotient, targetPrecision);
+		}
 
 		mpfr_set(quotient, longQuotient, MPFR_RNDN);
 
@@ -122,7 +129,7 @@ int m_div(mpfr_t quotient, const mpfr_t dividend, const mpfr_t divisor,
  */
 int m_add(mpfr_t summation, const mpfr_t addend1, const mpfr_t addend2,
 		const enum roundingModeEnum roundingMode) {
-	if (roundingMode == STOCHASTIC) {
+	if (roundingMode == STOCHASTIC || roundingMode == STOCHASTIC_CADNA) {
 		int res = 0;
 		mpfr_t longAddend1, longAddend2, longSummation;
 
@@ -132,7 +139,11 @@ int m_add(mpfr_t summation, const mpfr_t addend1, const mpfr_t addend2,
 
 		mpfr_add(longSummation, longAddend1, longAddend2, MPFR_RNDN);
 
-		res = stochasticRounding(&longSummation, targetPrecision);
+		if (roundingMode == STOCHASTIC) {
+			res = stochasticRounding(&longSummation, targetPrecision);
+		} else if (roundingMode == STOCHASTIC_CADNA) {
+			res = stochasticRoundingCadna(&longSummation, targetPrecision);
+		}
 
 		mpfr_set(summation, longSummation, MPFR_RNDN);
 
@@ -159,7 +170,7 @@ int m_add(mpfr_t summation, const mpfr_t addend1, const mpfr_t addend2,
  */
 int m_sub(mpfr_t difference, const mpfr_t minuend, const mpfr_t substrahend,
 		const enum roundingModeEnum roundingMode) {
-	if (roundingMode == STOCHASTIC) {
+	if (roundingMode == STOCHASTIC || roundingMode == STOCHASTIC_CADNA) {
 		int res = 0;
 		mpfr_t longMinuend, longSubstrahend, longDifference;
 
@@ -169,8 +180,11 @@ int m_sub(mpfr_t difference, const mpfr_t minuend, const mpfr_t substrahend,
 
 		mpfr_sub(longDifference, longMinuend, longSubstrahend, MPFR_RNDN);
 
-		res = stochasticRounding(&longDifference, targetPrecision);
-
+		if (roundingMode == STOCHASTIC) {
+			res = stochasticRounding(&longDifference, targetPrecision);
+		} else if (roundingMode == STOCHASTIC_CADNA) {
+			res = stochasticRoundingCadna(&longDifference, targetPrecision);
+		}
 		mpfr_set(difference, longDifference, MPFR_RNDN);
 
 		m_clear(longMinuend);
@@ -185,7 +199,7 @@ int m_sub(mpfr_t difference, const mpfr_t minuend, const mpfr_t substrahend,
 }
 
 int m_pow(mpfr_t pow, const mpfr_t val, const mpfr_t exp, const enum roundingModeEnum roundingMode) {
-	if (roundingMode == STOCHASTIC) {
+	if (roundingMode == STOCHASTIC || roundingMode == STOCHASTIC_CADNA) {
 		int res = 0;
 		mpfr_t longVal, longExp, longPow;
 
@@ -196,8 +210,11 @@ int m_pow(mpfr_t pow, const mpfr_t val, const mpfr_t exp, const enum roundingMod
 
 		mpfr_pow(longPow, longVal, longExp, MPFR_RNDN);
 
-		res = stochasticRounding(&longPow, targetPrecision);
-
+		if (roundingMode == STOCHASTIC) {
+			res = stochasticRounding(&longPow, targetPrecision);
+		} else if (roundingMode == STOCHASTIC_CADNA) {
+			res = stochasticRoundingCadna(&longPow, targetPrecision);
+		}
 		mpfr_set(pow, longPow, MPFR_RNDN);
 
 		m_clear(longVal);
@@ -288,6 +305,38 @@ int m_setPrecisionWithRoundingMode(mpfr_t * value, const mpfr_prec_t pre,
 	return roundingDirection;
 }
 
+const int NB_CADNA_ROUND = 3;
+
+/**
+ * Perform three stochastic roundings and return the mean.
+ * @param value the value to round
+ * @param pre the precision to round to
+ * @return 0 if rounded exactly, > 0 if globally rounded upward the exact
+ *         value, < 0 if globally rounded downward the exact value
+ */
+int stochasticRoundingCadna(mpfr_t * value, const mpfr_prec_t pre) {
+	int res = 0;
+	mpfr_t avg;
+	m_init2(avg, pre * 2);
+	mpfr_set_str(avg, "0", 10, MPFR_RNDN);
+	mpfr_t tmpVal;
+	m_init2(tmpVal, mpfr_get_prec(*value));
+
+	for (int i = 0 ; i < NB_CADNA_ROUND ; ++i) {
+		mpfr_set(tmpVal, *value, MPFR_RNDN);
+		stochasticRounding(&tmpVal, pre);
+		m_add(avg, avg, tmpVal, MPFR_RNDN);
+	}
+
+	mpfr_div_si(avg, avg, NB_CADNA_ROUND, MPFR_RNDN);
+	res = mpfr_set(*value, avg, MPFR_RNDN);
+
+	m_clear(tmpVal);
+	m_clear(avg);
+
+	return res;
+}
+
 /**
  * @brief			Apply a randomized stochastic rounding to the value `v` at the precision `pre`.
  * 					The chances for `value` to be rounded in a direction depend on its distance to the next (resp) previous floating point value at the precision `pre`.
@@ -332,7 +381,7 @@ int stochasticRounding(mpfr_t * value, const mpfr_prec_t pre) {
 		// generate a random value between -0.5 and 0.5
 		// add this value to lastDigits
 		// round to nearest lastDigits
-		// --- OR ---
+		// --- OR --- ,
 		// equivalent to generate a random value between 0 and 1
 		mpfr_t randomValue;
 		//m_init2(randomValue,lastDigitPrecision);
@@ -368,6 +417,31 @@ int stochasticRounding(mpfr_t * value, const mpfr_prec_t pre) {
 	}
 
 	return roundingDirection;
+}
+
+/**
+ * Depending on the given rounding mode, computes the sum of the inverse of the factorial of the X first integers with MPFR, and print them.
+ */
+int computeSumInverseFact(mpfr_rnd_t roundingMode) {
+	// declarations
+	mpfr_t s, t, u;
+	// initializations
+	mpfr_inits2(PRECISION, t, s, u, (mpfr_ptr) NULL);
+	mpfr_set_d(t, 1.0, roundingMode);
+	mpfr_set_d(s, 1.0, roundingMode);
+
+	for (unsigned int i = 1 ; i <= 200 ; ++i) {
+		mpfr_mul_ui(t, t, i, roundingMode);
+		mpfr_set_d(u, 1.0, roundingMode);
+		mpfr_div(u, u, t, roundingMode);
+		mpfr_add(s, s, u, roundingMode);
+	}
+
+	mpfr_out_str(stdout, 10, 0, s, roundingMode);
+	putchar('\n');
+	mpfr_clears(s, t, u, (mpfr_ptr) NULL);
+
+	return EXIT_SUCCESS;
 }
 
 /**
@@ -456,7 +530,8 @@ mpfr_rnd_t roundingModeEnumToMpfrRndT(enum roundingModeEnum e) {
 		mpfr_rnd = MPFR_RNDN; // round to nearest (roundTiesToEven in IEEE 754-2008)
 		break;
 	case STOCHASTIC:
-		mpfr_rnd = -1; // not implemented in mpfr yet. Call customMath/m_<operation>.
+	case STOCHASTIC_CADNA:
+		mpfr_rnd = -1;	// not implemented in mpfr yet. Call customMath/m_<operation>.
 		// round randomly to toward plus infinity or toward minus infinity,
 		// the more close it is from the rounded value, the more probability
 		// to round to this value.

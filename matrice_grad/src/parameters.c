@@ -397,6 +397,8 @@ enum roundingModeEnum stringToRoundingModeEnum(char * string, const size_t size)
 		res = RNDN;
 	} else if (strcmp(str, "STOCHASTIC") == 0) {
 		res = STOCHASTIC;
+	} else if (strcmp(str,"STOCHASTIC_CADNA") == 0 ) {
+		res = STOCHASTIC_CADNA;
 	} else if (strcmp(str, "RNDZ") == 0) {
 		res = RNDZ;
 	} else if (strcmp(str, "RNDU") == 0) {
@@ -487,13 +489,16 @@ char * getStringFromMatrixTypeEnum(const enum matrixTypeEnum mte) {
 }
 
 char * getStringFromRoundingModeEnum(const enum roundingModeEnum rme) {
-	char * res = malloc(sizeof(char) * strlen("STOCHASTIC"));
+	char * res = malloc(sizeof(char) * strlen("STOCHASTIC_CADNA"));
 	switch (rme) {
 	case RNDN:
 		strcpy(res, "RNDN");
 		break;
 	case STOCHASTIC:
 		strcpy(res, "STOCHASTIC");
+		break;
+	case STOCHASTIC_CADNA:
+		strcpy(res, "STOCHASTIC_CADNA");
 		break;
 	case RNDZ:
 		strcpy(res, "RNDZ");
@@ -634,6 +639,9 @@ void printDefaultValue(enum type dvtype, union defaultValueUnion dv) {
 			break;
 		case STOCHASTIC:
 			printf("STOCHASTIC");
+			break;
+		case STOCHASTIC_CADNA:
+			printf("STOCHASTIC_CADNA");
 			break;
 		case RNDZ:
 			printf("RNDN");

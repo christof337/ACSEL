@@ -73,6 +73,7 @@ int printNeededHelp(const char * helpForParam) {
 
 	return err;
 }
+
 void printParamHelp(enum ParamEnum param) {
 	printf("Parameter help:");
 	printParamEnum(param);
