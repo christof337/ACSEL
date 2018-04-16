@@ -12,6 +12,7 @@ fileNamePrefix = 'lorenz_prec=';
 fileNameSuffix1 = '_mp=200_ni=100000_rm=';
 fileNameSuffix2 = '_si=10.000000_ro=28.000000_be=2.666700';
 fileNameSuffix3 = '.dat';
+roundingModeStrings = ['RNDA';'RNDD';'RNDZ';'RNDU'];
 RNDNStr = 'RNDN';
 if(isCadna)
     StochasticStr = 'STOCHASTIC_CADNA';
@@ -40,6 +41,10 @@ referenceFileName = 'lorenzRef_pre=200_rm=RNDN.dat';
 refArray = importdata(strcat(RNDNFolder,'/',referenceFileName),delimiterIn,headerlinesIn);
 
 RNDNDiff = zeros(MAX_PRECISION-MIN_PRECISION+1,2);
+RNDADiff = zeros(MAX_PRECISION-MIN_PRECISION+1,2);
+RNDDDiff = zeros(MAX_PRECISION-MIN_PRECISION+1,2);
+RNDZDiff = zeros(MAX_PRECISION-MIN_PRECISION+1,2);
+RNDUDiff = zeros(MAX_PRECISION-MIN_PRECISION+1,2);
 StochasticDiff = zeros(MAX_PRECISION-MIN_PRECISION+1,2,NB_STOCH_FILES_TAKEN-1);
 
 permutations = randperm(MAX_NB_STOCH_FILES);%,NB_STOCH_FILES_TAKEN); % taking NB_STOCH_FILES_TAKEN files randomly
@@ -67,6 +72,10 @@ while ( shouldContinue )
         shouldContinue = 0; % exit loop
         % filling with zeros
         RNDNDiff(index:size(RNDNDiff,1),:) = horzcat(permute(k:MAX_PRECISION,[2 1]),zeros(size(RNDNDiff,1)-index+1,1));
+        RNDADiff(index:size(RNDADiff,1),:) = horzcat(permute(k:MAX_PRECISION,[2 1]),zeros(size(RNDADiff,1)-index+1,1));
+        RNDDDiff(index:size(RNDDDiff,1),:) = horzcat(permute(k:MAX_PRECISION,[2 1]),zeros(size(RNDDDiff,1)-index+1,1));
+        RNDZDiff(index:size(RNDZDiff,1),:) = horzcat(permute(k:MAX_PRECISION,[2 1]),zeros(size(RNDZDiff,1)-index+1,1));
+        RNDUDiff(index:size(RNDUDiff,1),:) = horzcat(permute(k:MAX_PRECISION,[2 1]),zeros(size(RNDUDiff,1)-index+1,1));
         for cpt = 1:NB_STOCH_FILES_TAKEN
             StochasticDiff(index:size(StochasticDiff,1),:,cpt) = horzcat(permute(k:MAX_PRECISION,[2 1]),zeros(size(StochasticDiff,1)-index+1,1));
         end
@@ -74,17 +83,33 @@ while ( shouldContinue )
         % compute the file
         fclose(fileIDRNDN); % do not need it anymore
         
-        % importing array
+        fileNameRNDA = strcat(stochasticFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,roundingModeStrings(1,:),fileNameSuffix2, fileNameSuffix3);
+        fileNameRNDD = strcat(stochasticFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,roundingModeStrings(2,:),fileNameSuffix2, fileNameSuffix3);
+        fileNameRNDZ = strcat(stochasticFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,roundingModeStrings(3,:),fileNameSuffix2, fileNameSuffix3);
+        fileNameRNDU = strcat(stochasticFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,roundingModeStrings(4,:),fileNameSuffix2, fileNameSuffix3);
+        % importing arrays
         RNDNArray = importdata(fileNameRNDN,delimiterIn,headerlinesIn);
+        RNDAArray = importdata(fileNameRNDA,delimiterIn,headerlinesIn);
+        RNDDArray = importdata(fileNameRNDD,delimiterIn,headerlinesIn);
+        RNDZArray = importdata(fileNameRNDZ,delimiterIn,headerlinesIn);
+        RNDUArray = importdata(fileNameRNDU,delimiterIn,headerlinesIn);
         %disp(fileNameRNDN);
         % computing the diff with the reference file
-        relDiff = computeRelativeDiffAt(refArray,RNDNArray, NB_ITERATIONS);
-        tmp1 = [k relDiff];
+        relDiffN = computeRelativeDiffAt(refArray,RNDNArray, NB_ITERATIONS);
+        relDiffA = computeRelativeDiffAt(refArray,RNDAArray, NB_ITERATIONS);
+        relDiffD = computeRelativeDiffAt(refArray,RNDDArray, NB_ITERATIONS);
+        relDiffZ = computeRelativeDiffAt(refArray,RNDZArray, NB_ITERATIONS);
+        relDiffU = computeRelativeDiffAt(refArray,RNDUArray, NB_ITERATIONS);
+        tmp1 = [k relDiffN];
         % saving the result in RNDN Diff
         %RNDNDiff = [RNDNDiff;tmp1];
-        RNDNDiff(index,:) = tmp1;
+        RNDNDiff(index,:) = [k relDiffN];
+        RNDADiff(index,:) = [k relDiffA];
+        RNDDDiff(index,:) = [k relDiffD];
+        RNDZDiff(index,:) = [k relDiffZ];
+        RNDUDiff(index,:) = [k relDiffU];
         
-        if (relDiff == 0)
+        if (relDiffN == 0)
             nbZeros = nbZeros + 1;
         else
             nbZeros = 0;
@@ -132,6 +157,10 @@ end
 
 outputFolder = 'data/';
 dlmwrite(strcat(outputFolder,'RNDN_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDNDiff,'\t');
+dlmwrite(strcat(outputFolder,'RNDA_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDADiff,'\t');
+dlmwrite(strcat(outputFolder,'RNDD_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDDDiff,'\t');
+dlmwrite(strcat(outputFolder,'RNDZ_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDZDiff,'\t');
+dlmwrite(strcat(outputFolder,'RNDU_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDUDiff,'\t');
 
 
 if(isCadna)
@@ -186,7 +215,10 @@ clear fileNamePrefix fileNameSuffix1 fileNameSuffix2 fileNameSuffix3 ...
     fileNameRNDN stochasticFolder RNDNFolder isStochFilesLeft itStr ...
     INIT index precisionStr fileIDRNDN fileIDStochastic A tmp1 tmp2 ...
     refArray referenceFileName RNDNArray RNDNStr StochasticArray ...
-    StochasticStr tmp relDiff meanValue stdValue stdUp stdDown;
+    StochasticStr tmp relDiff meanValue stdValue stdUp stdDown ...
+    roundingModeStrings RNDNDiff RNDADiff RNDDDiff RNDZDiff RNDUDiff ...
+    RNDAArray RNDDArray RNDZArray RNDUArray relDiffA relDiffZ relDiffD ...
+    relDiffN relDiffU;
 % clear RNDNDiff StochasticDiff
 
 % fileNameFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/stochFiles/output';
