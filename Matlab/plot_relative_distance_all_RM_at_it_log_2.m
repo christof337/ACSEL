@@ -25,48 +25,24 @@ STOCHASTICCadnaArray(:,2) = log2(STOCHASTICCadnaArray(:,2));
 % plotting
 %plot_with_std(nbIterations,STOCHASTICArray,RNDNArray, StochStdUpArray,StochStdDownArray,1)
 %plot_without_std(nbIterations,STOCHASTICCadnaArray,RNDNArray,1);
+C = 1;
+S = 2;
+N = 3;
+ARM = 4:7;
+Sstd = 8:9;
+
 p = plot(STOCHASTICCadnaArray(:,1),STOCHASTICCadnaArray(:,2), ...
     STOCHASTICArray(:,1),STOCHASTICArray(:,2), ...
     RNDNArray(:,1),RNDNArray(:,2), ...  % [0 200],[10^7 10^7],...
-    StochStdUpArray(:,1),StochStdUpArray(:,2), ...
-    StochStdDownArray(:,1),StochStdDownArray(:,2), ...
     RNDZArray(:,1),RNDZArray(:,2), ...  % [0 200],[10^7 10^7],...
     RNDUArray(:,1),RNDUArray(:,2), ...  % [0 200],[10^7 10^7],...
     RNDDArray(:,1),RNDDArray(:,2), ...  % [0 200],[10^7 10^7],...
     RNDAArray(:,1),RNDAArray(:,2), ...  % [0 200],[10^7 10^7],...
+    StochStdUpArray(:,1),StochStdUpArray(:,2), ...
+    StochStdDownArray(:,1),StochStdDownArray(:,2), ...
     'LineWidth',2,...
     'LineStyle','-',...
     'Marker','o');
-% -----------------------------------
-% changing plot labels
-% title
-plotTitle = {'Deviation of RNDN rounding and mean Stochastic rounding compared to optimal'; ...
-    strcat('Lorenz Attractor run after ',int2str(nbIterations),' iterations for various floating point precisions')};
-t = title(plotTitle);
-% xaxis name
-h = xlabel('Significand precision');
-% yaxis name
-g = ylabel({'Distance compared to optimal';'Lorenz Attractor run (prec=200)'});
-%legend
-leg = legend({'Stochastic rounding mode (mean)','Round to Nearest',...
-    'Stochastic rounding mode standard deviation', ...
-    'Round toward zero', 'Round toward plus infinity', ...
-    'Round toward minus infinity', 'Round away from zero'
-    });
-set(leg,'FontSize',15);
-
-% -----------------------------------
-% changing plot font and size
-font = 'Helvetica';
-set(0,'defaultAxesFontName',font);
-set(0,'defaultTextFontName',font);
-set(h,'FontName',font);
-set(h,'FontSize',30);
-set(g,'FontName',font);
-set(g,'FontSize',30);
-set(gca,'FontSize',25);
-set(gca,'FontName',font);
-set(t,'FontSize',30);
 
 % scriptWindow(gca)
 
@@ -94,6 +70,8 @@ end
     lastNonInfValue = getIndexOfLastNonInfValue(STOCHASTICArray(:,2));
     MARGIN = 10;
     xlim([3 (lastNonInfValue + MARGIN)]);
+    % overwrite
+    %xlim([3 (30)]);
     yticks = get(gca,'YTick');
     for j = 1:length(yticks)
         ytl{j} = ['2^' num2str(yticks(j))];
@@ -101,35 +79,55 @@ end
     set(gca, 'YTickLabel', ytl)
 
 
-set(p(1),'Color','r');
-set(p(1),'Marker','d');
-set(p(1),'LineWidth',4);
+set(p(C),'Color','r');
+set(p(C),'Marker','d');
+set(p(C),'LineWidth',4);
 %set(p(1),'LineStyle','-.');
-set(p(2),'Color','b');
-set(p(2),'LineWidth',2);
-set(p(3),'Color','g');
-set(p(3),'LineWidth',2);
-set(p(3),'Marker','+');
-set(p(3),'LineStyle','-');
-set(p(4),'Color','b');
-set(p(4),'LineStyle','--');
-set(p(4),'LineWidth',1.9);
-set(p(4),'Marker','none');
-set(p(5),'Color','b');
-set(p(5),'LineStyle','--');
-set(p(5),'LineWidth',1.9);
-set(p(5),'Marker','none');
+set(p(S),'Color','b');
+set(p(S),'LineWidth',2);
+set(p(N),'Color','g');
+set(p(N),'LineWidth',2);
+set(p(N),'Marker','x');
+set(p(N),'LineStyle','-');
+set(p(Sstd),'Color','b');
+set(p(Sstd),'LineStyle','--');
+set(p(Sstd),'LineWidth',1.9);
+set(p(Sstd),'Marker','none');
+set(p(ARM),'Marker','d');
+set(p(ARM),'LineWidth',2);
+set(p(ARM(1)),'Marker','s');
+set(p(ARM(1)),'MarkerSize',9);
+set(p(ARM(3)),'Marker','^');
+set(p(ARM(4)),'Marker','*');
 
+% -----------------------------------
+% changing plot labels
 % title
-plotTitle = {' distance of RNDN rounding and CADNA Stochastic rounding compared to optimal'; ...
+plotTitle = {'Distance of verious rounding modes compared to optimal'; ...
     strcat('Lorenz Attractor run after ',int2str(nbIterations),' iterations for various floating point precisions')};
 t = title(plotTitle);
+% xaxis name
+h = xlabel('Significand precision');
 % yaxis name
-g = ylabel({' distance compared to optimal';'Lorenz Attractor run (prec=200)'});
+g = ylabel({'Distance compared to optimal';'Lorenz Attractor run (prec=200)'});
 %legend
-leg = legend({'CADNA Stochastic rounding mode (mean)', ...
-    'Stochastic rounding', 'Round to Nearest', ...
-    'Stochastic rounding mode standard deviation'
-    ... % ,'Not a number threshold' ... % unused now
+leg = legend({'Round to Nearest','Stochastic rounding mode (mean)',...
+    'CADNA rounding', 'Round toward zero', 'Round toward plus infinity', ...
+    'Round toward minus infinity', 'Round away from zero', ...
+    'Stochastic rounding mode standard deviation', ...
     });
+
+% -----------------------------------
+% changing plot font and size
+font = 'Helvetica';
+set(0,'defaultAxesFontName',font);
+set(0,'defaultTextFontName',font);
+set(h,'FontName',font);
+set(h,'FontSize',30);
+set(g,'FontName',font);
+set(g,'FontSize',30);
+set(gca,'FontSize',25);
+set(gca,'FontName',font);
+set(t,'FontSize',30);
+set(leg,'FontSize',15);
 end
