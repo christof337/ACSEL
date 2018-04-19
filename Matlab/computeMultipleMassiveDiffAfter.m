@@ -13,7 +13,7 @@ RNDNStr = 'RNDN';
 %StochasticStr = 'STOCHASTIC';
 StochasticStr = 'STOCHASTIC_CADNA';
 
-delimiterIn = '\t';
+delimiterIn = '/t';
 headerlinesIn = 1;
 
 MIN_PRECISION = 4;
@@ -113,7 +113,7 @@ while ( shouldContinue )
 end
 
 outputFolder = 'data/';
-dlmwrite(strcat(outputFolder,'RNDN_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDNDiff,'\t');
+dlmwrite(strcat(outputFolder,'RNDN_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDNDiff,'/t');
 
 meanValue = mean(					...
     StochasticDiff(  	...

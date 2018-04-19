@@ -1,28 +1,30 @@
-function [STOCHASTICArray, RNDNArray, StochStdUpArray, StochStdDownArray, RNDAArray, RNDDArray, RNDZArray, RNDUArray] = getRelArraysFromAllRMFiles(nbIterations)
+function [STOCHASTICArray, RNDNArray, StochStdUpArray, StochStdDownArray, RNDAArray, RNDDArray, ...
+	RNDZArray, RNDUArray, CADNAArray] = getRelArraysFromAllRMFiles(val, suffix)
 % -----------------------------------
 % VARIABLES
-% fileNameNumVal = 3;
+
 
 % -----------------------------------
 % getting the wanted arrays from the files
 fileExtension = '.dat';
 dataFolder = 'data';
 
-StochasticFileName = strcat('STOCHASTIC_rel_dif_at_it_', ...
-    int2str(nbIterations),'(correctMean)',fileExtension);
-StochStdUpFileName = strcat('STOCHASTIC_rel_dif_at_it_', ...
-    int2str(nbIterations),'(deviationUp)',fileExtension);
-StochStdDownFileName = strcat('STOCHASTIC_rel_dif_at_it_', ...
-    int2str(nbIterations),'(deviationDown)',fileExtension);
-strSuffix = '_rel_dif_at_it_';
-RNDNFileName = strcat('RNDN',strSuffix,int2str(nbIterations),fileExtension);
-RNDAFileName = strcat('RNDA',strSuffix,int2str(nbIterations),fileExtension);
-RNDDFileName = strcat('RNDD',strSuffix,int2str(nbIterations),fileExtension);
-RNDZFileName = strcat('RNDZ',strSuffix,int2str(nbIterations),fileExtension);
-RNDUFileName = strcat('RNDZ',strSuffix,int2str(nbIterations),fileExtension);
+strSuffix = strcat('_rel_dif_',suffix,'_');
+StochasticFileName = strcat('STOCHASTIC',strSuffix, ...
+    int2str(val),'(mean)',fileExtension);
+StochStdUpFileName = strcat('STOCHASTIC',strSuffix, ...
+    int2str(val),'(deviationUp)',fileExtension);
+StochStdDownFileName = strcat('STOCHASTIC',strSuffix, ...
+    int2str(val),'(deviationDown)',fileExtension);
+RNDNFileName = strcat('RNDN',strSuffix,int2str(val),fileExtension);
+RNDAFileName = strcat('RNDA',strSuffix,int2str(val),fileExtension);
+RNDDFileName = strcat('RNDD',strSuffix,int2str(val),fileExtension);
+RNDZFileName = strcat('RNDZ',strSuffix,int2str(val),fileExtension);
+RNDUFileName = strcat('RNDZ',strSuffix,int2str(val),fileExtension);
+CadnaFileName = strcat('CADNA',strSuffix,int2str(val),fileExtension);
 
 delimiterInS = ',';
-delimiterInR = '\t';
+delimiterInR = '/t';
 headerlinesIn = 0;
 
 STOCHASTICArray = importdata(strcat(dataFolder,'/',StochasticFileName), ...
@@ -40,6 +42,8 @@ RNDDArray = importdata(strcat(dataFolder,'/',RNDDFileName), ...
 RNDZArray = importdata(strcat(dataFolder,'/',RNDZFileName), ...
     delimiterInR,headerlinesIn);
 RNDUArray = importdata(strcat(dataFolder,'/',RNDUFileName), ...
+    delimiterInR,headerlinesIn);
+CADNAArray = importdata(strcat(dataFolder,'/',CadnaFileName), ...
     delimiterInR,headerlinesIn);
 
 clear dataFolder delimiterInR delimiterInS fileExtension ... % fileNameNumVal ...

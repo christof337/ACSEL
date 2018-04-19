@@ -3,11 +3,11 @@ function computeRelDiffAfter(NB_ITERATIONS, isCadna)
 disp('début programme');
 
 if(isCadna)
-    stochasticFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/output';
+    stochasticFolder = '../matrice_grad/output';
 else
-    stochasticFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/stochFiles/output';
+    stochasticFolder = '../matrice_grad/stochFiles/output';
 end
-RNDNFolder = '/home/kito/Dev/Sources/ACSEL/Matlab/output';
+RNDNFolder = './output';
 fileNamePrefix = 'lorenz_prec=';
 fileNameSuffix1 = '_mp=200_ni=100000_rm=';
 fileNameSuffix2 = '_si=10.000000_ro=28.000000_be=2.666700';
@@ -20,7 +20,7 @@ else
     StochasticStr = 'STOCHASTIC';
 end
 
-delimiterIn = '\t';
+delimiterIn = '/t';
 headerlinesIn = 1;
 
 MIN_PRECISION = 4;
@@ -156,11 +156,11 @@ while ( shouldContinue )
 end
 
 outputFolder = 'data/';
-dlmwrite(strcat(outputFolder,'RNDN_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDNDiff,'\t');
-dlmwrite(strcat(outputFolder,'RNDA_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDADiff,'\t');
-dlmwrite(strcat(outputFolder,'RNDD_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDDDiff,'\t');
-dlmwrite(strcat(outputFolder,'RNDZ_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDZDiff,'\t');
-dlmwrite(strcat(outputFolder,'RNDU_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDUDiff,'\t');
+dlmwrite(strcat(outputFolder,'RNDN_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDNDiff,'/t');
+dlmwrite(strcat(outputFolder,'RNDA_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDADiff,'/t');
+dlmwrite(strcat(outputFolder,'RNDD_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDDDiff,'/t');
+dlmwrite(strcat(outputFolder,'RNDZ_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDZDiff,'/t');
+dlmwrite(strcat(outputFolder,'RNDU_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDUDiff,'/t');
 
 
 if(isCadna)

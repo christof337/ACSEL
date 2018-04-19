@@ -1,10 +1,10 @@
-function computeMultipleMassiveDiffAfter(NB_ITERATIONS)
+function computeMassRelDiffAfter(NB_ITERATIONS)
 
-disp('dÃ©but programme');
+disp('début programme');
 
-stochasticFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/stochFiles/output';
+stochasticFolder = '../matrice_grad/stochFiles/output';
 %stochasticFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/output';
-RNDNFolder = '/home/kito/Dev/Sources/ACSEL/Matlab/output';
+RNDNFolder = './output';
 fileNamePrefix = 'lorenz_prec=';
 fileNameSuffix1 = '_mp=200_ni=100000_rm=';
 fileNameSuffix2 = '_si=10.000000_ro=28.000000_be=2.666700';
@@ -13,7 +13,7 @@ RNDNStr = 'RNDN';
 %StochasticStr = 'STOCHASTIC';
 StochasticStr = 'STOCHASTIC';
 
-delimiterIn = '\t';
+delimiterIn = '/t';
 headerlinesIn = 1;
 
 MIN_PRECISION = 4;
@@ -114,7 +114,7 @@ while ( shouldContinue )
 end
 
 outputFolder = 'data/';
-dlmwrite(strcat(outputFolder,'RNDN_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDNDiff,'\t');
+dlmwrite(strcat(outputFolder,'RNDN_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDNDiff,'/t');
 
 meanValue = mean(					...
     StochasticDiff(  	...

@@ -1,12 +1,12 @@
 
-fileNameFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/stochFiles/output';
+fileNameFolder = '../matrice_grad/stochFiles/output';
 fileNamePrefix = 'lorenz_prec=';
 fileNameSuffix1 = '_mp=200_ni=100000_rm=';
 fileNameSuffix2 = '_si=10.000000_ro=28.000000_be=2.666700.dat';
 RNDNStr = 'RNDN';
 StochasticStr = 'STOCHASTIC';
 
-delimiterIn = '\t';
+delimiterIn = '/t';
 headerlinesIn = 1;
 
 i = 2;
@@ -63,8 +63,8 @@ disp(StochasticDiff);
 disp(mean(RNDNDiff,'omitnan'));
 disp(mean(StochasticDiff,'omitnan'));
 
-dlmwrite('RNDN_dif_1.dat',RNDNDiff,'\t');
-dlmwrite('STOCHASTIC_dif_1.dat',StochasticDiff,'\t');
+dlmwrite('RNDN_dif_1.dat',RNDNDiff,'/t');
+dlmwrite('STOCHASTIC_dif_1.dat',StochasticDiff,'/t');
 
 clear fileNameFolder fileNamePrefix fileNameSuffix1 fileNameSuffix2 delimiterIn headerlinesIn i shouldContinue fileNameStochastic fileNameRNDN
 clear precisionStr fileIDRNDN fileIDStochastic A tmp1 tmp2 refArray referenceFileName RNDNArray RNDNStr StochasticArray StochasticStr tmp

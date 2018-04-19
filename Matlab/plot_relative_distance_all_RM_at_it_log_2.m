@@ -3,7 +3,8 @@ function plot_relative_distance_all_RM_at_it_log_2(nbIterations)
 % Loading data from files
 [STOCHASTICCadnaArray, RNDNArray] = getRelCadnaArraysFromFiles(nbIterations);
 
-[STOCHASTICArray, RNDNArray, StochStdUpArray, StochStdDownArray, RNDAArray, RNDDArray, RNDZArray, RNDUArray] = getRelArraysFromAllRMFiles(nbIterations);
+[STOCHASTICArray, RNDNArray, StochStdUpArray, StochStdDownArray, RNDAArray, RNDDArray, RNDZArray, RNDUArray] = ...
+	getRelArraysFromAllRMFilesAtIt(nbIterations);
 
 % changing to log2
 STOCHASTICArray(:,2) = log2(STOCHASTICArray(:,2));
