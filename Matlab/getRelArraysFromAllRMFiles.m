@@ -24,7 +24,7 @@ RNDUFileName = strcat('RNDZ',strSuffix,int2str(val),fileExtension);
 CadnaFileName = strcat('CADNA',strSuffix,int2str(val),fileExtension);
 
 delimiterInS = ',';
-delimiterInR = '/t';
+delimiterInR = '\t';
 headerlinesIn = 0;
 
 STOCHASTICArray = importdata(strcat(dataFolder,'/',StochasticFileName), ...

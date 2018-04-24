@@ -4,9 +4,9 @@ function compute_at_precision(precision, stepIt)
     %%% relative distance at some precise iterations points. To know which, it will be the 1st point, then the
     %%% stepIt th point, then the (2*stepIt)th point, and so on.
 	%%% This function has to be called before plotting with the same parameters
-	disp('Début programme');
-	disp(strcat('On traite tous les fichiers de précision ',int2str(precision), ...
-		' puis on met dans les fichiers de "data" correspondant les distances calculées aux itérations données'));
+	disp('DÃ©but programme');
+	disp(strcat('On traite tous les fichiers de precision ',int2str(precision), ...
+		' puis on met dans les fichiers de "data" correspondant les distances calculees aux itÃ©rations donnees'));
 	
 	refFolder = './output';
     dataFolder = '../matrice_grad/output';
@@ -22,7 +22,7 @@ function compute_at_precision(precision, stepIt)
 	RNDNStr = 'RNDN';
 	StochasticStr = 'STOCHASTIC';
 	
-	delimiterIn = '/t';
+	delimiterIn = '\t';
 	headerlinesIn = 1;
 	
 	MAX_NB_STOCH_FILES = 50;  % I have ran it 161 timescomputeMultipleMassiveDiffAfter(10000), but only 50 are "correct"
@@ -88,8 +88,10 @@ function compute_at_precision(precision, stepIt)
 		end
 
 		j = 1;
-		while j <= NUMBER_OF_ITERATIONS/stepIt
-			currentIt = (j-1)*stepIt+1;
+		while j <= log(NUMBER_OF_ITERATIONS)/log(stepIt)
+			%currentIt = (j-1)*stepIt+1;
+			% exponential progress
+            currentIt = stepIt^(j-1);
 			
 			% computing the diff with the reference file
 			relDiffN = computeRelativeDiffAt(refArray,RNDNArray, currentIt);
@@ -123,12 +125,12 @@ function compute_at_precision(precision, stepIt)
 	end
 	
 	outputFolder = 'data/';
-	dlmwrite(strcat(outputFolder,'RNDN_rel_dif_at_pre_',precisionStr,'.dat'),RNDNDiff,'/t');
-	dlmwrite(strcat(outputFolder,'RNDA_rel_dif_at_pre_',precisionStr,'.dat'),RNDADiff,'/t');
-	dlmwrite(strcat(outputFolder,'RNDD_rel_dif_at_pre_',precisionStr,'.dat'),RNDDDiff,'/t');
-	dlmwrite(strcat(outputFolder,'RNDZ_rel_dif_at_pre_',precisionStr,'.dat'),RNDZDiff,'/t');
-	dlmwrite(strcat(outputFolder,'RNDU_rel_dif_at_pre_',precisionStr,'.dat'),RNDUDiff,'/t');
-	dlmwrite(strcat(outputFolder,'CADNA_rel_dif_at_pre_',precisionStr,'.dat'),StochasticCadnaDiff,'/t');
+	dlmwrite(strcat(outputFolder,'RNDN_rel_dif_at_pre_',precisionStr,'.dat'),RNDNDiff,'\t');
+	dlmwrite(strcat(outputFolder,'RNDA_rel_dif_at_pre_',precisionStr,'.dat'),RNDADiff,'\t');
+	dlmwrite(strcat(outputFolder,'RNDD_rel_dif_at_pre_',precisionStr,'.dat'),RNDDDiff,'\t');
+	dlmwrite(strcat(outputFolder,'RNDZ_rel_dif_at_pre_',precisionStr,'.dat'),RNDZDiff,'\t');
+	dlmwrite(strcat(outputFolder,'RNDU_rel_dif_at_pre_',precisionStr,'.dat'),RNDUDiff,'\t');
+	dlmwrite(strcat(outputFolder,'CADNA_rel_dif_at_pre_',precisionStr,'.dat'),StochasticCadnaDiff,'\t');
 	
 	meanValue = mean(					...
 		StochasticDiff(  	...

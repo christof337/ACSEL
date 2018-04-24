@@ -4,15 +4,15 @@ function plotDistAtPre(precision)
 		RNDUArray, CADNAArray] = getRelArraysFromAllRMFilesAtPre(precision);
 
 	% changing to log2
-	STOCHASTICArray(:,2) = log2(STOCHASTICArray(:,2));
-	RNDNArray(:,2) = log2(RNDNArray(:,2));
-	RNDAArray(:,2) = log2(RNDAArray(:,2));
-	RNDDArray(:,2) = log2(RNDDArray(:,2));
-	RNDZArray(:,2) = log2(RNDZArray(:,2));
-	RNDUArray(:,2) = log2(RNDUArray(:,2));
-	CADNAArray(:,2) = log2(CADNAArray(:,2));
-	StochStdUpArray(:,2) = log2(StochStdUpArray(:,2));
-	StochStdDownArray(:,2) = log2(StochStdDownArray(:,2));
+	STOCHASTICArray = log2(STOCHASTICArray);
+	RNDNArray = log2(RNDNArray);
+	RNDAArray = log2(RNDAArray);
+	RNDDArray = log2(RNDDArray);
+	RNDZArray = log2(RNDZArray);
+	RNDUArray = log2(RNDUArray);
+	CADNAArray = log2(CADNAArray);
+	StochStdUpArray = log2(StochStdUpArray);
+	StochStdDownArray = log2(StochStdDownArray);
 
 	% -----------------------------------
 	% plotting
@@ -42,11 +42,17 @@ function plotDistAtPre(precision)
 	%lastNonInfValue = size(STOCHASTICArray(:,2));
 	% lastNonInfValue = getIndexOfLastNonInfValue(STOCHASTICArray(:,2));
 	%MARGIN = 10;
-	if (precision < 80)
-		xlim([3 (lastNonInfValue + MARGIN)]);
-	end
-	% overwrite
-	%xlim([30 60000]);
+% 	if (precision < 80)
+% 		xlim([3 (lastNonInfValue + MARGIN)]);
+%         xlim([0 60000]);
+% 	end
+    % X log2 tick labels
+%     xticks = get(gca,'XTick');
+% 	for j = 1:length(xticks)
+% 		xtl{j} = ['2^' num2str(xticks(j))];
+% 	end
+% 	set(gca, 'XTickLabel', xtl)
+    % Y log2 tick labels
 	yticks = get(gca,'YTick');
 	for j = 1:length(yticks)
 		ytl{j} = ['2^' num2str(yticks(j))];
