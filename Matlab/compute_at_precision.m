@@ -31,13 +31,13 @@ function compute_at_precision(precision, stepIt)
 	referenceFileName = 'lorenzRef_pre=200_rm=RNDN.dat';
 	refArray = importdata(strcat(refFolder,'/',referenceFileName),delimiterIn,headerlinesIn);
 	
-	RNDNDiff = zeros(NUMBER_OF_ITERATIONS/stepIt+1,2);
-	RNDADiff = zeros(NUMBER_OF_ITERATIONS/stepIt+1,2);
-	RNDDDiff = zeros(NUMBER_OF_ITERATIONS/stepIt+1,2);
-	RNDZDiff = zeros(NUMBER_OF_ITERATIONS/stepIt+1,2);
-	RNDUDiff = zeros(NUMBER_OF_ITERATIONS/stepIt+1,2);
-	StochasticCadnaDiff = zeros(NUMBER_OF_ITERATIONS/stepIt+1,2);
-	StochasticDiff = zeros(NUMBER_OF_ITERATIONS/stepIt+1,2,NB_STOCH_FILES_TAKEN-1);
+	RNDNDiff = zeros(int16(log(NUMBER_OF_ITERATIONS)/log(stepIt)),2);
+	RNDADiff = zeros(int16(log(NUMBER_OF_ITERATIONS)/log(stepIt)),2);
+	RNDDDiff = zeros(int16(log(NUMBER_OF_ITERATIONS)/log(stepIt)),2);
+	RNDZDiff = zeros(int16(log(NUMBER_OF_ITERATIONS)/log(stepIt)),2);
+	RNDUDiff = zeros(int16(log(NUMBER_OF_ITERATIONS)/log(stepIt)),2);
+	StochasticCadnaDiff = zeros(int16(log(NUMBER_OF_ITERATIONS)/log(stepIt)),2);
+	StochasticDiff = zeros(int16(log(NUMBER_OF_ITERATIONS)/log(stepIt)),2,NB_STOCH_FILES_TAKEN-1);
 
 	permutations = randperm(MAX_NB_STOCH_FILES); % taking NB_STOCH_FILES_TAKEN files randomly from the MAX_NB_STOCH_FILES		
 	precisionStr = int2str(precision);
@@ -87,32 +87,36 @@ function compute_at_precision(precision, stepIt)
 			end
 		end
 
-		j = 1;
+		j = 0;
 		while j <= log(NUMBER_OF_ITERATIONS)/log(stepIt)
 			%currentIt = (j-1)*stepIt+1;
 			% exponential progress
-            currentIt = stepIt^(j-1);
+			if ( j == 0 )
+				currentIt = 0;
+			else
+				currentIt = stepIt^(j-1);
+			end
 			
 			% computing the diff with the reference file
-			relDiffN = computeRelativeDiffAt(refArray,RNDNArray, currentIt);
-			relDiffA = computeRelativeDiffAt(refArray,RNDAArray, currentIt);
-			relDiffD = computeRelativeDiffAt(refArray,RNDDArray, currentIt);
-			relDiffZ = computeRelativeDiffAt(refArray,RNDZArray, currentIt);
-			relDiffU = computeRelativeDiffAt(refArray,RNDUArray, currentIt);
-			relDiffC = computeRelativeDiffAt(refArray,CADNAArray, currentIt);
+			relDiffN = computeRelativeDiffAt(refArray,RNDNArray, currentIt+1);
+			relDiffA = computeRelativeDiffAt(refArray,RNDAArray, currentIt+1);
+			relDiffD = computeRelativeDiffAt(refArray,RNDDArray, currentIt+1);
+			relDiffZ = computeRelativeDiffAt(refArray,RNDZArray, currentIt+1);
+			relDiffU = computeRelativeDiffAt(refArray,RNDUArray, currentIt+1);
+			relDiffC = computeRelativeDiffAt(refArray,CADNAArray, currentIt+1);
 			tmp1 = [currentIt relDiffN];
 			% saving the result in RNDN Diff
 			%RNDNDiff = [RNDNDiff;tmp1];
-			RNDNDiff(j,:) = [currentIt relDiffN];
-			RNDADiff(j,:) = [currentIt relDiffA];
-			RNDDDiff(j,:) = [currentIt relDiffD];
-			RNDZDiff(j,:) = [currentIt relDiffZ];
-			RNDUDiff(j,:) = [currentIt relDiffU];
-			StochasticCadnaDiff(j,:) = [currentIt relDiffC];
+			RNDNDiff(j+1,:) = [currentIt relDiffN];
+			RNDADiff(j+1,:) = [currentIt relDiffA];
+			RNDDDiff(j+1,:) = [currentIt relDiffD];
+			RNDZDiff(j+1,:) = [currentIt relDiffZ];
+			RNDUDiff(j+1,:) = [currentIt relDiffU];
+			StochasticCadnaDiff(j+1,:) = [currentIt relDiffC];
 			for stochIndex = 1:NB_STOCH_FILES_TAKEN
-				relDiff = computeRelativeDiffAtNonStruct(refArray,StochasticArray(:,:,stochIndex),currentIt);
+				relDiff = computeRelativeDiffAtNonStruct(refArray,StochasticArray(:,:,stochIndex),currentIt+1);
 				tmp2 = [currentIt relDiff];
-				StochasticDiff(j,:,stochIndex) = tmp2;
+				StochasticDiff(j+1,:,stochIndex) = tmp2;
 			end	
 			j=j+1;
 		end
