@@ -4,9 +4,9 @@ function compute_at_precision(precision, stepIt)
     %%% relative distance at some precise iterations points. To know which, it will be the 1st point, then the
     %%% stepIt th point, then the (2*stepIt)th point, and so on.
 	%%% This function has to be called before plotting with the same parameters
-	disp('Début programme');
+	disp('Debut programme');
 	disp(strcat('On traite tous les fichiers de precision ',int2str(precision), ...
-		' puis on met dans les fichiers de "data" correspondant les distances calculees aux itérations donnees'));
+		' puis on met dans les fichiers de "data" correspondant les distances calculees aux iterations donnees'));
 	
 	refFolder = './output';
     dataFolder = '../matrice_grad/output';
