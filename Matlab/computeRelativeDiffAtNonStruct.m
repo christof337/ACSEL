@@ -9,7 +9,7 @@ function res = computeRelativeDiffAtNonStruct(refArray, testedArray, iterationNu
         nCol = min(size(refArray.data,2),size(testedArray,2));
 
         for l = 1:nCol
-            res = res + abs((testedArray(iterationNumber,l) - refArray.data(iterationNumber,l))/refArray.data(iterationNumber,1))^2;
+            res = res + abs((testedArray(iterationNumber,l) - refArray.data(iterationNumber,l))/refArray.data(iterationNumber,l))^2;
         end
         res = sqrt(res);
 

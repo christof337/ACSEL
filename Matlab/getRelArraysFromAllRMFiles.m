@@ -27,6 +27,7 @@ delimiterInS = ',';
 delimiterInR = '\t';
 headerlinesIn = 0;
 
+disp(strcat(dataFolder,'/',StochasticFileName));
 STOCHASTICArray = importdata(strcat(dataFolder,'/',StochasticFileName), ...
     delimiterInS,headerlinesIn);
 StochStdUpArray = importdata(strcat(dataFolder,'/',StochStdUpFileName), ...

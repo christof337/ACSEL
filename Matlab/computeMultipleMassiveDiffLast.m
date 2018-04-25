@@ -1,5 +1,5 @@
 
-disp('début programme');
+disp('debut programme');
 
 stochasticFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/stochFiles/output';
 RNDNFolder = '/home/kito/Dev/Sources/ACSEL/Matlab/output';

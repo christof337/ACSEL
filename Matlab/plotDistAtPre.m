@@ -1,19 +1,29 @@
 function plotDistAtPre(precision)
+    precision = 53;
+
 	% Loading data from files
 	[STOCHASTICArray, RNDNArray, StochStdUpArray, StochStdDownArray, RNDAArray, RNDDArray, RNDZArray, ...
 		RNDUArray, CADNAArray] = getRelArraysFromAllRMFilesAtPre(precision);
 
 	% changing to log2
-	STOCHASTICArray = log2(STOCHASTICArray);
-	RNDNArray = log2(RNDNArray);
-	RNDAArray = log2(RNDAArray);
-	RNDDArray = log2(RNDDArray);
-	RNDZArray = log2(RNDZArray);
-	RNDUArray = log2(RNDUArray);
-	CADNAArray = log2(CADNAArray);
-	StochStdUpArray = log2(StochStdUpArray);
-	StochStdDownArray = log2(StochStdDownArray);
-
+	STOCHASTICArray(:,2) = log2(STOCHASTICArray(:,2));
+	RNDNArray(:,2) = log2(RNDNArray(:,2));
+	RNDAArray(:,2) = log2(RNDAArray(:,2));
+	RNDDArray(:,2) = log2(RNDDArray(:,2));
+	RNDZArray(:,2) = log2(RNDZArray(:,2));
+	RNDUArray(:,2) = log2(RNDUArray(:,2));
+	CADNAArray(:,2) = log2(CADNAArray(:,2));
+	StochStdUpArray(:,2) = log2(StochStdUpArray(:,2));
+	StochStdDownArray(:,2) = log2(StochStdDownArray(:,2));
+% 	STOCHASTICArray = log2(STOCHASTICArray);
+% 	RNDNArray = log2(RNDNArray);
+% 	RNDAArray = log2(RNDAArray);
+% 	RNDDArray = log2(RNDDArray);
+% 	RNDZArray = log2(RNDZArray);
+% 	RNDUArray = log2(RNDUArray);
+% 	CADNAArray = log2(CADNAArray);
+% 	StochStdUpArray = log2(StochStdUpArray);
+% 	StochStdDownArray = log2(StochStdDownArray);
 	% -----------------------------------
 	% plotting
 	%plot_with_std(nbIterations,STOCHASTICArray,RNDNArray, StochStdUpArray,StochStdDownArray,1)
@@ -24,15 +34,15 @@ function plotDistAtPre(precision)
 	ARM = 4:7;
 	Sstd = 8:9;
 
-	p = plot(CADNAArray(:,1),CADNAArray(:,2), ...
-		STOCHASTICArray(:,1),STOCHASTICArray(:,2), ...
-		RNDNArray(:,1),RNDNArray(:,2), ...  % [0 200],[10^7 10^7],...
-		RNDZArray(:,1),RNDZArray(:,2), ...  % [0 200],[10^7 10^7],...
-		RNDUArray(:,1),RNDUArray(:,2), ...  % [0 200],[10^7 10^7],...
-		RNDDArray(:,1),RNDDArray(:,2), ...  % [0 200],[10^7 10^7],...
-		RNDAArray(:,1),RNDAArray(:,2), ...  % [0 200],[10^7 10^7],...
-		StochStdUpArray(:,1),StochStdUpArray(:,2), ...
-		StochStdDownArray(:,1),StochStdDownArray(:,2), ...
+	p = plot(cat(0,CADNAArray(:,1)),cat(0,CADNAArray(:,2)), ...
+		cat(0,STOCHASTICArray(:,1)),cat(0,STOCHASTICArray(:,2)), ...
+		cat(0,RNDNArray(:,1)),cat(0,RNDNArray(:,2)), ...  % [0 200],[10^7 10^7],...
+		cat(0,RNDZArray(:,1)),cat(0,RNDZArray(:,2)), ...  % [0 200],[10^7 10^7],...
+		cat(0,RNDUArray(:,1)),cat(0,RNDUArray(:,2)), ...  % [0 200],[10^7 10^7],...
+		cat(0,RNDDArray(:,1)),cat(0,RNDDArray(:,2)), ...  % [0 200],[10^7 10^7],...
+		cat(0,RNDAArray(:,1)),cat(0,RNDAArray(:,2)), ...  % [0 200],[10^7 10^7],...
+		cat(0,StochStdUpArray(:,1)),cat(0,StochStdUpArray(:,2)), ...
+		cat(0,StochStdDownArray(:,1)),cat(0,StochStdDownArray(:,2)), ...
 		'LineWidth',2,...
 		'LineStyle','-',...
 		'Marker','o');
@@ -46,19 +56,42 @@ function plotDistAtPre(precision)
 % 		xlim([3 (lastNonInfValue + MARGIN)]);
 %         xlim([0 60000]);
 % 	end
+	
+% 	size(RNDNArray(:,1),1)
+% 	RNDNArray()
+    ticks(1) = 0;
+	for j = 1:size(RNDNArray(:,1),1)
+		ticks(j+1) = 2^(j-1);
+	end
+	set(gca,'XTick',ticks)
     % X log2 tick labels
-%     xticks = get(gca,'XTick');
-% 	for j = 1:length(xticks)
-% 		xtl{j} = ['2^' num2str(xticks(j))];
-% 	end
-% 	set(gca, 'XTickLabel', xtl)
+    xticks = get(gca,'XTick');
+	xtl{1} = '0';
+	xtl{2} = ['2^' num2str(xticks(2)-1)];
+	for j = 3:length(xticks)
+		xtl{j} = ['2^' num2str(xticks(j))];
+	end
+	set(gca, 'XTickLabel', xtl)
+	%xticks(ticks)
+ 	%set(gca, 'XTickLabel', num2str(ticks))
+% 	set(gca, 'XTickLabel', ticks)
+	
     % Y log2 tick labels
 	yticks = get(gca,'YTick');
 	for j = 1:length(yticks)
 		ytl{j} = ['2^' num2str(yticks(j))];
 	end
 	set(gca, 'YTickLabel', ytl)
-
+	
+% 	set(gca, 'XTickLabel',[])                      %# suppress current x-labels
+% 	xt = get(gca, 'XTick');
+% 	yl = get(gca, 'YLim');
+% 	str = cellstr( num2str(2^xt(:),'%d') );      %# format x-ticks as 2^{xx}
+% 	hTxt = text(xt, yl(ones(size(xt))), str, ...   %# create text at same locations
+%     'Interpreter','tex', ...                   %# specify tex interpreter
+%     'VerticalAlignment','top', ...             %# v-align to be underneath
+%     'HorizontalAlignment','center');           %# h-aligh to be centered
+	set(gca,'XScale','log')
 
 	set(p(C),'Color','r');
 	set(p(C),'Marker','d');
@@ -108,7 +141,7 @@ function plotDistAtPre(precision)
 	set(h,'FontSize',30);
 	set(g,'FontName',font);
 	set(g,'FontSize',30);
-	set(gca,'FontSize',25);
+	set(gca,'FontSize',20);
 	set(gca,'FontName',font);
 	set(t,'FontSize',30);
 	set(leg,'FontSize',15);

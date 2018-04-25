@@ -1,6 +1,6 @@
 function computeMultipleMassiveDiffAfter(NB_ITERATIONS)
 
-disp('début programme');
+disp('debut programme');
 
 %stochasticFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/stochFiles/output';
 stochasticFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/output';
