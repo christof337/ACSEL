@@ -1,15 +1,19 @@
 function [STOCHASTICArray, RNDNArray, StochStdUpArray, StochStdDownArray, RNDAArray, RNDDArray, ...
-	RNDZArray, RNDUArray, CADNAArray] = getRelArraysFromAllRMFiles(val, suffix)
+	RNDZArray, RNDUArray, CADNAArray] = getRelArraysFromAllRMFiles(val, suffix, isRelDiff)
 % -----------------------------------
 % VARIABLES
-
+if ( isRelDiff )
+    comparatorStr = 'relDist';
+else
+    comparatorStr = 'Kullback';
+end
 
 % -----------------------------------
 % getting the wanted arrays from the files
 fileExtension = '.dat';
 dataFolder = 'data';
 
-strSuffix = strcat('_rel_dif_',suffix,'_');
+strSuffix = strcat('_',comparatorStr,'_',suffix,'_');
 StochasticFileName = strcat('STOCHASTIC',strSuffix, ...
     int2str(val),'(mean)',fileExtension);
 StochStdUpFileName = strcat('STOCHASTIC',strSuffix, ...

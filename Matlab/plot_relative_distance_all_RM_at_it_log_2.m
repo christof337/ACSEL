@@ -1,25 +1,28 @@
-function plot_relative_distance_all_RM_at_it_log_2(nbIterations)
+function plot_relative_distance_all_RM_at_it_log_2(nbIterations, isRelDiff)
 
 % Loading data from files
-[STOCHASTICCadnaArray, RNDNArray] = getRelCadnaArraysFromFiles(nbIterations);
+%[STOCHASTICCadnaArray, RNDNArray] = getRelCadnaArraysFromFiles(nbIterations, isRelDiff);
 
-[STOCHASTICArray, RNDNArray, StochStdUpArray, StochStdDownArray, RNDAArray, RNDDArray, RNDZArray, RNDUArray] = ...
-	getRelArraysFromAllRMFilesAtIt(nbIterations);
-
-% changing to log2
-STOCHASTICArray(:,2) = log2(STOCHASTICArray(:,2));
-RNDNArray(:,2) = log2(RNDNArray(:,2));
-RNDAArray(:,2) = log2(RNDAArray(:,2));
-RNDDArray(:,2) = log2(RNDDArray(:,2));
-RNDZArray(:,2) = log2(RNDZArray(:,2));
-RNDUArray(:,2) = log2(RNDUArray(:,2));
-StochStdUpArray(:,2) = log2(StochStdUpArray(:,2));
-StochStdDownArray(:,2) = log2(StochStdDownArray(:,2));
-
- %= 10000;
+[STOCHASTICArray, RNDNArray, StochStdUpArray, StochStdDownArray, ...
+    RNDAArray, RNDDArray, RNDZArray, RNDUArray,STOCHASTICCadnaArray] = ...
+	getRelArraysFromAllRMFilesAtIt(nbIterations, isRelDiff);
 
 % changing to log2
-STOCHASTICCadnaArray(:,2) = log2(STOCHASTICCadnaArray(:,2));
+if(isRelDiff)
+    STOCHASTICArray(:,2) = log2(STOCHASTICArray(:,2));
+    RNDNArray(:,2) = log2(RNDNArray(:,2));
+    RNDAArray(:,2) = log2(RNDAArray(:,2));
+    RNDDArray(:,2) = log2(RNDDArray(:,2));
+    RNDZArray(:,2) = log2(RNDZArray(:,2));
+    RNDUArray(:,2) = log2(RNDUArray(:,2));
+    StochStdUpArray(:,2) = log2(StochStdUpArray(:,2));
+    StochStdDownArray(:,2) = log2(StochStdDownArray(:,2));
+
+     %= 10000;
+
+    % changing to log2
+    STOCHASTICCadnaArray(:,2) = log2(STOCHASTICCadnaArray(:,2));
+end
 %RNDNArray(:,2) = log2(RNDNArray(:,2));
 
 % -----------------------------------
@@ -79,6 +82,7 @@ end
     end
     set(gca, 'YTickLabel', ytl)
 
+    
 
 set(p(C),'Color','r');
 set(p(C),'Marker','d');
@@ -104,13 +108,19 @@ set(p(ARM(4)),'Marker','*');
 % -----------------------------------
 % changing plot labels
 % title
-plotTitle = {'Distance of verious rounding modes compared to optimal'; ...
+if(isRelDiff)
+    metrique = 'Relative distance ';
+else
+    metrique = 'Kullback-Liebler divergence ';
+end
+
+plotTitle = {strcat(metrique, ' of various rounding modes compared to optimal'); ...
     strcat('Lorenz Attractor run after ',int2str(nbIterations),' iterations for various floating point precisions')};
 t = title(plotTitle);
 % xaxis name
 h = xlabel('Significand precision');
 % yaxis name
-g = ylabel({'Distance compared to optimal';'Lorenz Attractor run (prec=200)'});
+g = ylabel({strcat(metrique, ' compared to optimal');'Lorenz Attractor run (prec=200)'});
 %legend
 leg = legend({'Round to Nearest','Stochastic rounding mode (mean)',...
     'CADNA rounding', 'Round toward zero', 'Round toward plus infinity', ...

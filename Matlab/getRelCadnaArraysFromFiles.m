@@ -1,4 +1,4 @@
-function [STOCHASTICArray, RNDNArray] = getRelCadnaArraysFromFiles(nbIterations)
+function [CADNAArray, RNDNArray] = getRelCadnaArraysFromFiles(nbIterations, isRelDiff)
 % -----------------------------------
 % VARIABLES
 % fileNameNumVal = 3;
@@ -8,20 +8,26 @@ function [STOCHASTICArray, RNDNArray] = getRelCadnaArraysFromFiles(nbIterations)
 fileExtension = '.dat';
 dataFolder = 'data';
 
-StochasticFileName = strcat('STOCHASTIC_CADNA_rel_dif_at_it_', ...
-    int2str(nbIterations),'(correctMean)',fileExtension);
-RNDNFileName = strcat('RNDN_rel_dif_at_it_',int2str(nbIterations),fileExtension);
+if (isRelDiff)
+    comparatorStr = 'relDist';
+else
+    comparatorStr = 'Kullback';
+end
+    
+CadnaFileName = strcat('CADNA_',comparatorStr,'_at_it_', ...
+    int2str(nbIterations),fileExtension);
+RNDNFileName = strcat('RNDN_',comparatorStr,'_at_it_',int2str(nbIterations),fileExtension);
 
 delimiterInS = ',';
 delimiterInR = '\t';
 headerlinesIn = 0;
 
-STOCHASTICArray = importdata(strcat(dataFolder,'/',StochasticFileName), ...
+CADNAArray = importdata(strcat(dataFolder,'/',CadnaFileName), ...
     delimiterInS,headerlinesIn);
 RNDNArray = importdata(strcat(dataFolder,'/',RNDNFileName), ...
     delimiterInR,headerlinesIn);
 
 clear dataFolder delimiterInR delimiterInS fileExtension ... % fileNameNumVal ...
-    headerlinesIn;
+    headerlinesIn CadnaFileName RNDNFileName comparatorStr;
 
 end

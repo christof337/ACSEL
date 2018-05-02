@@ -181,7 +181,7 @@ function compute_at_precision(precision, stepIt, isRelDiff)
 		]	...
 		);
 	
-	disp('Successfully wrote in files');
+	disp(['Successfully wrote in files "' outputFolder 'XXXX_' comparatorStr '_at_pre_' precisionStr '.dat"']);
 	disp('Exiting program normally...');
 	
 	

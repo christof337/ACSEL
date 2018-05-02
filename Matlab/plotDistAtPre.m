@@ -1,9 +1,9 @@
-function plotDistAtPre(precision)
-    precision = 53;
+function plotDistAtPre(precision, isRelDiff)
+    %precision = 53;
 
 	% Loading data from files
 	[STOCHASTICArray, RNDNArray, StochStdUpArray, StochStdDownArray, RNDAArray, RNDDArray, RNDZArray, ...
-		RNDUArray, CADNAArray] = getRelArraysFromAllRMFilesAtPre(precision);
+		RNDUArray, CADNAArray] = getRelArraysFromAllRMFilesAtPre(precision, isRelDiff);
 
 	% changing to log2
 	STOCHASTICArray(:,2) = log2(STOCHASTICArray(:,2));
@@ -95,12 +95,12 @@ function plotDistAtPre(precision)
 
 	set(p(C),'Color','r');
 	set(p(C),'Marker','d');
-	set(p(C),'LineWidth',4);
+	set(p(C),'LineWidth',7);
 	%set(p(1),'LineStyle','-.');
 	set(p(S),'Color','b');
-	set(p(S),'LineWidth',2);
+	set(p(S),'LineWidth',3);
 	set(p(N),'Color','g');
-	set(p(N),'LineWidth',2);
+	set(p(N),'LineWidth',3);
 	set(p(N),'Marker','x');
 	set(p(N),'LineStyle','-');
 	set(p(Sstd),'Color','b');
@@ -108,7 +108,7 @@ function plotDistAtPre(precision)
 	set(p(Sstd),'LineWidth',1.9);
 	set(p(Sstd),'Marker','none');
 	set(p(ARM),'Marker','d');
-	set(p(ARM),'LineWidth',2);
+	set(p(ARM),'LineWidth',3);
 	set(p(ARM(1)),'Marker','s');
 	set(p(ARM(1)),'MarkerSize',9);
 	set(p(ARM(3)),'Marker','^');
@@ -118,13 +118,18 @@ function plotDistAtPre(precision)
 	% -----------------------------------
 	% changing plot labels
 	% title
-	plotTitle = {'Distance of various rounding modes compared to optimal'; ...
+    if(isRelDiff)
+        metrique = 'Relative distance ';
+    else
+        metrique = 'Kullback-Liebler divergence ';
+    end
+	plotTitle = {strcat(metrique, ' of various rounding modes compared to optimal'); ...
 		strcat('Lorenz Attractor run for a precision of ',int2str(precision),' bits over time')};
 	t = title(plotTitle);
 	% xaxis name
 	h = xlabel('Iterations');
 	% yaxis name
-	g = ylabel({'Distance compared to optimal';'Lorenz Attractor run (prec=200)'});
+	g = ylabel({strcat(metrique, ' compared to optimal');'Lorenz Attractor run (prec=200)'});
 	%legend
 	leg = legend({'Round to Nearest','Stochastic rounding mode (mean)',...
 		'CADNA rounding', 'Round toward zero', 'Round toward plus infinity', ...
