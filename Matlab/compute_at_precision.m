@@ -1,5 +1,11 @@
-function compute_at_precision(precision, stepIt)
-    
+function compute_at_precision(precision, stepIt, isRelDiff)
+    if ( isRelDiff ) 
+		comparator = @computeRelativeDiffAt;
+		comparatorNS = @computeRelativeDiffAtNonStruct;
+	else
+		comparator = @Kullback;
+		comparatorNS = @KullbackNonStruct;
+	end
     %%% This function takes each file of a given precision, for each rounding mode. It then computes the
     %%% relative distance at some precise iterations points. To know which, it will be the 1st point, then the
     %%% stepIt th point, then the (2*stepIt)th point, and so on.
@@ -98,12 +104,12 @@ function compute_at_precision(precision, stepIt)
 			end
 			
 			% computing the diff with the reference file
-			relDiffN = computeRelativeDiffAt(refArray,RNDNArray, currentIt+1);
-			relDiffA = computeRelativeDiffAt(refArray,RNDAArray, currentIt+1);
-			relDiffD = computeRelativeDiffAt(refArray,RNDDArray, currentIt+1);
-			relDiffZ = computeRelativeDiffAt(refArray,RNDZArray, currentIt+1);
-			relDiffU = computeRelativeDiffAt(refArray,RNDUArray, currentIt+1);
-			relDiffC = computeRelativeDiffAt(refArray,CADNAArray, currentIt+1);
+			relDiffN = comparator(refArray,RNDNArray, currentIt+1);
+			relDiffA = comparator(refArray,RNDAArray, currentIt+1);
+			relDiffD = comparator(refArray,RNDDArray, currentIt+1);
+			relDiffZ = comparator(refArray,RNDZArray, currentIt+1);
+			relDiffU = comparator(refArray,RNDUArray, currentIt+1);
+			relDiffC = comparator(refArray,CADNAArray, currentIt+1);
 			tmp1 = [currentIt relDiffN];
 			% saving the result in RNDN Diff
 			%RNDNDiff = [RNDNDiff;tmp1];
@@ -114,7 +120,7 @@ function compute_at_precision(precision, stepIt)
 			RNDUDiff(j+1,:) = [currentIt relDiffU];
 			StochasticCadnaDiff(j+1,:) = [currentIt relDiffC];
 			for stochIndex = 1:NB_STOCH_FILES_TAKEN
-				relDiff = computeRelativeDiffAtNonStruct(refArray,StochasticArray(:,:,stochIndex),currentIt+1);
+				relDiff = comparatorNS(refArray,StochasticArray(:,:,stochIndex),currentIt+1);
 				tmp2 = [currentIt relDiff];
 				StochasticDiff(j+1,:,stochIndex) = tmp2;
 			end	
@@ -128,13 +134,18 @@ function compute_at_precision(precision, stepIt)
 % 		disp('-');
 	end
 	
-	outputFolder = 'data/';
-	dlmwrite(strcat(outputFolder,'RNDN_rel_dif_at_pre_',precisionStr,'.dat'),RNDNDiff,'\t');
-	dlmwrite(strcat(outputFolder,'RNDA_rel_dif_at_pre_',precisionStr,'.dat'),RNDADiff,'\t');
-	dlmwrite(strcat(outputFolder,'RNDD_rel_dif_at_pre_',precisionStr,'.dat'),RNDDDiff,'\t');
-	dlmwrite(strcat(outputFolder,'RNDZ_rel_dif_at_pre_',precisionStr,'.dat'),RNDZDiff,'\t');
-	dlmwrite(strcat(outputFolder,'RNDU_rel_dif_at_pre_',precisionStr,'.dat'),RNDUDiff,'\t');
-	dlmwrite(strcat(outputFolder,'CADNA_rel_dif_at_pre_',precisionStr,'.dat'),StochasticCadnaDiff,'\t');
+	outputFolder = 'data/';	
+	if (isRelDiff )
+		comparatorStr = 'relDist';
+	else
+		comparatorStr = 'Kullback';
+	end
+	dlmwrite(strcat(outputFolder,'RNDN_',comparatorStr,'_at_pre_',precisionStr,'.dat'),RNDNDiff,'\t');
+	dlmwrite(strcat(outputFolder,'RNDA_',comparatorStr,'_at_pre_',precisionStr,'.dat'),RNDADiff,'\t');
+	dlmwrite(strcat(outputFolder,'RNDD_',comparatorStr,'_at_pre_',precisionStr,'.dat'),RNDDDiff,'\t');
+	dlmwrite(strcat(outputFolder,'RNDZ_',comparatorStr,'_at_pre_',precisionStr,'.dat'),RNDZDiff,'\t');
+	dlmwrite(strcat(outputFolder,'RNDU_',comparatorStr,'_at_pre_',precisionStr,'.dat'),RNDUDiff,'\t');
+	dlmwrite(strcat(outputFolder,'CADNA_',comparatorStr,'_at_pre_',precisionStr,'.dat'),StochasticCadnaDiff,'\t');
 	
 	meanValue = mean(					...
 		StochasticDiff(  	...
@@ -142,7 +153,7 @@ function compute_at_precision(precision, stepIt)
 		2, 	... only the second column (the diff value)
 		:) 	... all stochastic runs
 		, 3 ); 	% group the third dimension (the stochastic runs)
-	dlmwrite(strcat(outputFolder,'STOCHASTIC_rel_dif_at_pre_',precisionStr,'(mean).dat'), ...
+	dlmwrite(strcat(outputFolder,'STOCHASTIC_',comparatorStr,'_at_pre_',precisionStr,'(mean).dat'), ...
 		[ StochasticDiff(:,1), 	... the iteration number
 		meanValue ...
 		]	...
@@ -158,13 +169,13 @@ function compute_at_precision(precision, stepIt)
 	stdUp = meanValue + stdValue;
 	stdDown = meanValue - stdValue;
 	
-	dlmwrite(strcat(outputFolder,'STOCHASTIC_rel_dif_at_pre_',precisionStr,'(deviationUp).dat'), ...
+	dlmwrite(strcat(outputFolder,'STOCHASTIC_',comparatorStr,'_at_pre_',precisionStr,'(deviationUp).dat'), ...
 		[ StochasticDiff(:,1), 	... the iteration number
 		stdUp	...
 		]	...
 		);
 		
-	dlmwrite(strcat(outputFolder,'STOCHASTIC_rel_dif_at_pre_',precisionStr,'(deviationDown).dat'), ...
+	dlmwrite(strcat(outputFolder,'STOCHASTIC_',comparatorStr,'_at_pre_',precisionStr,'(deviationDown).dat'), ...
 		[ StochasticDiff(:,1), 	... precision
 		stdDown	...
 		]	...

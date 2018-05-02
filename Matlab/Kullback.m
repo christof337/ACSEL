@@ -1,5 +1,5 @@
-function res = computeRelativeDiffAt(refArray, testedArray, iterationNumber) 
-    %disp('Rel diff');
+function res = Kullback(refArray, testedArray, iterationNumber)
+    %disp('Kullback');
 	res = 0;
 	nElements = min(size(refArray.data,1),size(testedArray.data,1));
     if iterationNumber > nElements
@@ -11,9 +11,10 @@ function res = computeRelativeDiffAt(refArray, testedArray, iterationNumber)
         for l = 1:nCol
 % 			disp([num2str(res) '=' num2str(res) '+ abs(' num2str(testedArray.data(iterationNumber,l)) '-' num2str(refArray.data(iterationNumber,l)) '/' num2str(refArray.data(iterationNumber,1)) ')^2']);
 % 			disp(['res = ' num2str(abs((testedArray.data(iterationNumber,l) - refArray.data(iterationNumber,l))/refArray.data(iterationNumber,1))^2)]);
-            res = res + abs((testedArray.data(iterationNumber,l) - refArray.data(iterationNumber,l))/refArray.data(iterationNumber,l))^2;
-        end
-        res = sqrt(res);
+            %res = res + abs((testedArray.data(iterationNumber,l) - refArray.data(iterationNumber,l))/refArray.data(iterationNumber,l))^2;
+			res = res + abs(testedArray.data(iterationNumber,l) * log2(abs(testedArray.data(iterationNumber,l)/refArray.data(iterationNumber,l))));
+		end
+        %res = sqrt(res);
 
         clear nCol;
     end

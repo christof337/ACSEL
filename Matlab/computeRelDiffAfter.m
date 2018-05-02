@@ -1,5 +1,12 @@
-function computeRelDiffAfter(NB_ITERATIONS)
-
+function computeRelDiffAfter(NB_ITERATIONS, isRelDiff)
+    %%% if isRelDiff is true, then the program will be computed with "computeRelativeDiffAt"
+	%%% if not, it will use "Kullback" comparison function
+	if ( isRelDiff ) 
+		comparator = @computeRelativeDiffAt;
+	else
+		comparator = @Kullback;
+	end
+	
 	disp('debut programme');
 
 	RNDXFolder = '../matrice_grad/output';
@@ -91,12 +98,12 @@ function computeRelDiffAfter(NB_ITERATIONS)
 			CADNAArray = importdata(fileNameCADNA,delimiterIn,headerlinesIn);
 			%disp(fileNameRNDN);
 			% computing the diff with the reference file
-			relDiffN = computeRelativeDiffAt(refArray,RNDNArray, NB_ITERATIONS);
-			relDiffA = computeRelativeDiffAt(refArray,RNDAArray, NB_ITERATIONS);
-			relDiffD = computeRelativeDiffAt(refArray,RNDDArray, NB_ITERATIONS);
-			relDiffZ = computeRelativeDiffAt(refArray,RNDZArray, NB_ITERATIONS);
-			relDiffU = computeRelativeDiffAt(refArray,RNDUArray, NB_ITERATIONS);
-			relDiffC = computeRelativeDiffAt(refArray,CADNAArray, NB_ITERATIONS);
+			relDiffN = comparator(refArray,RNDNArray, NB_ITERATIONS);
+			relDiffA = comparator(refArray,RNDAArray, NB_ITERATIONS);
+			relDiffD = comparator(refArray,RNDDArray, NB_ITERATIONS);
+			relDiffZ = comparator(refArray,RNDZArray, NB_ITERATIONS);
+			relDiffU = comparator(refArray,RNDUArray, NB_ITERATIONS);
+			relDiffC = comparator(refArray,CADNAArray, NB_ITERATIONS);
 			tmp1 = [k relDiffN];
 			% saving the result in RNDN Diff
 			%RNDNDiff = [RNDNDiff;tmp1];
@@ -128,7 +135,9 @@ function computeRelDiffAfter(NB_ITERATIONS)
 					fclose(fileIDStochastic);
 
 					StochasticArray = importdata(fileNameStochastic,delimiterIn,headerlinesIn);
-					relDiff = computeRelativeDiffAt(refArray,StochasticArray,NB_ITERATIONS);
+
+					relDiff = comparator(refArray,StochasticArray,NB_ITERATIONS);
+
 					tmp2 = [k relDiff];
 					StochasticDiff(index,:,l) = tmp2;
 					% StochasticDiff(:,1,:) = k:200;
@@ -148,12 +157,17 @@ function computeRelDiffAfter(NB_ITERATIONS)
 	end
 
 	outputFolder = 'data/';
-	dlmwrite(strcat(outputFolder,'RNDN_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDNDiff,'\t');
-	dlmwrite(strcat(outputFolder,'RNDA_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDADiff,'\t');
-	dlmwrite(strcat(outputFolder,'RNDD_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDDDiff,'\t');
-	dlmwrite(strcat(outputFolder,'RNDZ_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDZDiff,'\t');
-	dlmwrite(strcat(outputFolder,'RNDU_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDUDiff,'\t');
-	dlmwrite(strcat(outputFolder,'CADNA_rel_dif_at_it_',int2str(NB_ITERATIONS),'.dat'),CADNADiff,'\t');
+	if (isRelDiff )
+		comparatorStr = 'relDist';
+	else
+		comparatorStr = 'Kullback';
+	end
+	dlmwrite(strcat(outputFolder,'RNDN_',comparatorStr,'_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDNDiff,'\t');
+	dlmwrite(strcat(outputFolder,'RNDA_',comparatorStr,'_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDADiff,'\t');
+	dlmwrite(strcat(outputFolder,'RNDD_',comparatorStr,'_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDDDiff,'\t');
+	dlmwrite(strcat(outputFolder,'RNDZ_',comparatorStr,'_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDZDiff,'\t');
+	dlmwrite(strcat(outputFolder,'RNDU_',comparatorStr,'_at_it_',int2str(NB_ITERATIONS),'.dat'),RNDUDiff,'\t');
+	dlmwrite(strcat(outputFolder,'CADNA_',comparatorStr,'_at_it_',int2str(NB_ITERATIONS),'.dat'),CADNADiff,'\t');
 
 	meanValue = mean(					...
 		StochasticDiff(  	...
@@ -161,7 +175,7 @@ function computeRelDiffAfter(NB_ITERATIONS)
 		2, 	... only the second column (the diff value)
 		:) 	... all stochastic runs
 		, 3 ); 	% group the third dimension
-	dlmwrite(strcat(outputFolder,'STOCHASTIC_rel_dif_at_it_',int2str(NB_ITERATIONS),'(mean).dat'), ...
+	dlmwrite(strcat(outputFolder,'STOCHASTIC_',comparatorStr,'_at_it_',int2str(NB_ITERATIONS),'(mean).dat'), ...
 		[ StochasticDiff(:,1), 	... precision
 		meanValue ...
 		]	...
@@ -177,13 +191,13 @@ function computeRelDiffAfter(NB_ITERATIONS)
 	stdUp = meanValue + stdValue;
 	stdDown = meanValue - stdValue;
 
-	dlmwrite(strcat(outputFolder,'STOCHASTIC_rel_dif_at_it_',int2str(NB_ITERATIONS),'(deviationUp).dat'), ...
+	dlmwrite(strcat(outputFolder,'STOCHASTIC_',comparatorStr,'_at_it_',int2str(NB_ITERATIONS),'(deviationUp).dat'), ...
 		[ StochasticDiff(:,1), 	... precision
 		stdUp	...
 		]	...
 		);
 
-	dlmwrite(strcat(outputFolder,'STOCHASTIC_rel_dif_at_it_',int2str(NB_ITERATIONS),'(deviationDown).dat'), ...
+	dlmwrite(strcat(outputFolder,'STOCHASTIC_',comparatorStr,'_at_it_',int2str(NB_ITERATIONS),'(deviationDown).dat'), ...
 		[ StochasticDiff(:,1), 	... precision
 		stdDown	...
 		]	...
