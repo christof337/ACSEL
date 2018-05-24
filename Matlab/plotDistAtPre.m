@@ -69,7 +69,7 @@ function plotDistAtPre(precision, isRelDiff)
 	xtl{1} = '0';
 	xtl{2} = ['2^' num2str(xticks(2)-1)];
 	for j = 3:length(xticks)
-		xtl{j} = ['2^' num2str(xticks(j))];
+		xtl{j} = ['2^' num2str(log2(xticks(j)))];
 	end
 	set(gca, 'XTickLabel', xtl)
 	%xticks(ticks)
@@ -93,16 +93,16 @@ function plotDistAtPre(precision, isRelDiff)
 %     'HorizontalAlignment','center');           %# h-aligh to be centered
 	set(gca,'XScale','log')
 
-	set(p(C),'Color','r');
-	set(p(C),'Marker','d');
-	set(p(C),'LineWidth',7);
+	set(p(N),'Color','r');
+	set(p(N),'Marker','d');
+	set(p(N),'LineWidth',7);
 	%set(p(1),'LineStyle','-.');
 	set(p(S),'Color','b');
 	set(p(S),'LineWidth',3);
-	set(p(N),'Color','g');
-	set(p(N),'LineWidth',3);
-	set(p(N),'Marker','x');
-	set(p(N),'LineStyle','-');
+	set(p(C),'Color','g');
+	set(p(C),'LineWidth',3);
+	set(p(C),'Marker','x');
+	set(p(C),'LineStyle','-');
 	set(p(Sstd),'Color','b');
 	set(p(Sstd),'LineStyle','--');
 	set(p(Sstd),'LineWidth',1.9);
@@ -131,8 +131,8 @@ function plotDistAtPre(precision, isRelDiff)
 	% yaxis name
 	g = ylabel({strcat(metrique, ' compared to optimal');'Lorenz Attractor run (prec=200)'});
 	%legend
-	leg = legend({'Round to Nearest','Stochastic rounding mode (mean)',...
-		'CADNA rounding', 'Round toward zero', 'Round toward plus infinity', ...
+	leg = legend({'CADNA rounding','Stochastic rounding mode (mean)',...
+		 'Round to Nearest','Round toward zero', 'Round toward plus infinity', ...
 		'Round toward minus infinity', 'Round away from zero', ...
 		'Stochastic rounding mode standard deviation', ...
 		});

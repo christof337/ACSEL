@@ -16,6 +16,7 @@ function compute_at_precision(precision, stepIt, isRelDiff)
 	
 	refFolder = './output';
     dataFolder = '../matrice_grad/output';
+    cadnaFolder = '../matrice_grad_CADNA/output';
     stochasticFolder = '../matrice_grad/stochFiles/output';
 	
 	NUMBER_OF_ITERATIONS = 100000;
@@ -66,7 +67,7 @@ function compute_at_precision(precision, stepIt, isRelDiff)
 		fileNameRNDD = strcat(dataFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,'RNDD',fileNameSuffix2, fileNameSuffix3);
 		fileNameRNDZ = strcat(dataFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,'RNDZ',fileNameSuffix2, fileNameSuffix3);
 		fileNameRNDU = strcat(dataFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,'RNDU',fileNameSuffix2, fileNameSuffix3);
-		fileNameCADNA = strcat(dataFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,'STOCHASTIC_CADNA',fileNameSuffix2, fileNameSuffix3);
+		fileNameCADNA = strcat(cadnaFolder,'/',fileNamePrefix,precisionStr,fileNameSuffix1,'CADNA',fileNameSuffix2, fileNameSuffix3);
 
 		disp('importing arrays...');
 		% importing arrays		
@@ -192,7 +193,7 @@ function compute_at_precision(precision, stepIt, isRelDiff)
 		precisionStr fileNameRNDN fileIDRNDN fileNameRNDA fileNameRNDD fileNameRNDZ fileNameRNDU ...
 		fileNameCADNA RNDNArray RNDAArray RNDDArray  RNDDArray RNDZArray RNDUArray CADNAArray ...
 		StochasticArray itStr fileNameStochastic fileIDStochastic currentIt relDiffN relDiffA relDiffD ...
-		relDiffZ relDiffU relDiffC tmp1 relDiff tmp2 j outputFolder meanValue stdValue;
+		relDiffZ relDiffU relDiffC tmp1 relDiff tmp2 j outputFolder meanValue stdValue cadnaFolder;
 	
 	% fileNameFolder = '/home/kito/Dev/Sources/ACSEL/matrice_grad/stochFiles/output';
 	% filename = 'output/lorenz_prec=131_mp=200_ni=100000_rm=RNDN_si=10.000000_ro=28.000000_be=2.666700.dat';
