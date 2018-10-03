@@ -422,7 +422,7 @@ int stochasticRounding(mpfr_t * value, const mpfr_prec_t pre) {
 /**
  * Depending on the given rounding mode, computes the sum of the inverse of the factorial of the X first integers with MPFR, and print them.
  */
-int computeSumInverseFact(mpfr_rnd_t roundingMode) {
+/*int computeSumInverseFact(mpfr_rnd_t roundingMode) {
 	// declarations
 	mpfr_t s, t, u;
 	// initializations
@@ -442,7 +442,7 @@ int computeSumInverseFact(mpfr_rnd_t roundingMode) {
 	mpfr_clears(s, t, u, (mpfr_ptr) NULL);
 
 	return EXIT_SUCCESS;
-}
+}*/
 
 /**
  * @deprecated
